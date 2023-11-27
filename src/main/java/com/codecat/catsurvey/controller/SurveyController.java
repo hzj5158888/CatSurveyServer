@@ -1,7 +1,9 @@
 package com.codecat.catsurvey.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.stp.StpUtil;
 import com.alibaba.fastjson2.JSONObject;
+import com.codecat.catsurvey.commcon.Enum.survey.SurveyStatusEnum;
 import com.codecat.catsurvey.commcon.exception.ValidationException;
 import com.codecat.catsurvey.commcon.models.Question;
 import com.codecat.catsurvey.commcon.models.Survey;
@@ -179,13 +181,15 @@ public class SurveyController {
         return modify(surveyId, newSurvey);
     }
 
-    @SaCheckLogin
     @GetMapping("/{surveyId}")
     public Result get(@PathVariable Integer surveyId) {
         Survey survey = surveyRepository.findById(surveyId).orElseThrow(() ->
                 new ValidationException("问卷不存在")
         );
-        if (!userService.isLoginId(survey.getUserId()) && !userService.containsPermissionName("SurveyManage"))
+
+        if (!userService.isLoginId(survey.getUserId()) &&
+                (!survey.getStatus().equals(SurveyStatusEnum.CARRYOUT.getName()) &&
+                        !userService.containsPermissionName("SurveyManage")))
             return Result.unauthorized("无法访问，权限不足");
 
         return Result.successData(survey);
