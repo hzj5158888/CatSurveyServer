@@ -45,9 +45,6 @@ public class OptionTemplateController {
 
         if (questionTemplate.getType().equals(QuestionTypeEnum.TEXT.getName()))
             return Result.validatedFailed("无法添加选项，该问题非选择题");
-        if (questionTemplate.getType().equals(QuestionTypeEnum.RADIO.getName()))
-            if (!questionTemplate.getOptionTemplateList().isEmpty())
-                return Result.validatedFailed("无法添加选项，该问题为单选但选项已存在");
 
         if (optionTemplate.getIOrder() == null)
             optionTemplate.setIOrder(Integer.MAX_VALUE);
@@ -82,9 +79,6 @@ public class OptionTemplateController {
 
         if (questionTemplate.getType().equals(QuestionTypeEnum.TEXT.getName()))
             return Result.validatedFailed("无法设置选项，该问题非选择题");
-        if (optionTemplates.size() > 1)
-            if (questionTemplate.getType().equals(QuestionTypeEnum.RADIO.getName()))
-                return Result.validatedFailed("无法设置选项，该问题为单选但需设置的选项数量大于1");
 
         for (int i = 0; i < optionTemplates.size(); i++) {
             OptionTemplate optionTemplate = optionTemplates.get(i);

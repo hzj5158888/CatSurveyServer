@@ -71,9 +71,6 @@ public class OptionController {
 
         if (question.getType().equals(QuestionTypeEnum.TEXT.getName()))
             return Result.validatedFailed("无法添加选项，该问题非选择题");
-        if (question.getType().equals(QuestionTypeEnum.RADIO.getName()))
-            if (!question.getOptionList().isEmpty())
-                return Result.validatedFailed("无法添加选项，该问题为单选且选项已存在");
 
         if (option.getIOrder() == null)
             option.setIOrder(Integer.MAX_VALUE);
@@ -125,9 +122,6 @@ public class OptionController {
         Integer userId = question.getSurvey().getUserId();
         if (!userService.isLoginId(userId) && !userService.containsPermissionName("SurveyManage"))
             return Result.unauthorized("无法删除，权限不足");
-        if (question.getType().equals(QuestionTypeEnum.RADIO.getName()))
-            if (!question.getOptionList().isEmpty())
-                return Result.validatedFailed("无法添加选项，该问题为单选但需设置的选项数量大于1");
 
         for (int i = 0; i < options.size(); i++) {
             Option option = options.get(i);
