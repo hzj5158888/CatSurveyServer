@@ -36,6 +36,9 @@ public class AnswerDetailService {
     private UserService userService;
 
     public Integer add(AnswerDetail answerDetail) {
+        if (answerDetail == null)
+            throw new ValidationException("无效请求，数据为空");
+        
         Response response = responseRepository.findById(answerDetail.getResponseId()).orElseThrow(() ->
                 new ValidationException("答卷不存在")
         );
