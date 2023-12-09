@@ -37,22 +37,7 @@ public class OptionController {
     @SaCheckLogin
     @PostMapping("")
     public Result add(@RequestBody @Validated({validationTime.FullAdd.class}) Option option) {
-        Question question = questionRepository.findById(option.getQuestionId()).orElseThrow(() ->
-                new ValidationException("问题不存在")
-        );
-
-        Integer userId = question.getSurvey().getUserId();
-        if (!userService.isLoginId(userId) && !userService.containsPermissionName("SurveyManage"))
-            return Result.unauthorized("无法添加，权限不足");
-        if (question.getType().equals(QuestionTypeEnum.TEXT.getName()))
-            return Result.validatedFailed("无法添加选项，该问题非选择题");
-
-        if (option.getIOrder() == null)
-            option.setIOrder(Integer.MAX_VALUE);
-
-        optionRepository.saveAndFlush(option);
-        optionService.setIOrder(option.getId(), option.getIOrder());
-
+        optionService.add(option);
         return Result.successData(option.getId());
     }
 
@@ -61,24 +46,11 @@ public class OptionController {
     public Result addByQuestion(@PathVariable Integer questionId,
                                 @RequestBody @Validated({validationTime.Add.class}) Option option)
     {
-        Question question = questionRepository.findById(questionId).orElseThrow(() ->
-                new ValidationException("问题不存在")
-        );
-
-        Integer userId = question.getSurvey().getUserId();
-        if (!userService.isLoginId(userId) && !userService.containsPermissionName("SurveyManage"))
-            return Result.unauthorized("无法添加，权限不足");
-
-        if (question.getType().equals(QuestionTypeEnum.TEXT.getName()))
-            return Result.validatedFailed("无法添加选项，该问题非选择题");
-
-        if (option.getIOrder() == null)
-            option.setIOrder(Integer.MAX_VALUE);
+        if (!questionRepository.existsById(questionId))
+            return Result.validatedFailed("问题不存在");
 
         option.setQuestionId(questionId);
-        optionRepository.saveAndFlush(option);
-        optionService.setIOrder(option.getId(), option.getIOrder());
-
+        optionService.add(option);
         return Result.successData(option.getId());
     }
 

@@ -1,5 +1,6 @@
 package com.codecat.catsurvey.service;
 
+import com.codecat.catsurvey.commcon.Enum.question.QuestionTypeEnum;
 import com.codecat.catsurvey.commcon.exception.AuthorizedException;
 import com.codecat.catsurvey.commcon.exception.ValidationException;
 import com.codecat.catsurvey.commcon.models.Option;
@@ -37,6 +38,24 @@ public class OptionService {
 
     @Validated(value = {validationTime.FullUpdate.class})
     public void checkFullUpdate(@Valid Option option) {}
+
+    public void add(Option option) {
+        Question question = questionRepository.findById(option.getQuestionId()).orElseThrow(() ->
+                new ValidationException("问题不存在")
+        );
+
+        Integer userId = question.getSurvey().getUserId();
+        if (!userService.isLoginId(userId) && !userService.containsPermissionName("SurveyManage"))
+            throw new AuthorizedException("无法添加，权限不足");
+        if (question.getType().equals(QuestionTypeEnum.TEXT.getName()))
+            throw new ValidationException("无法添加选项，该问题非选择题");
+
+        if (option.getIOrder() == null)
+            option.setIOrder(Integer.MAX_VALUE);
+
+        optionRepository.saveAndFlush(option);
+        setIOrder(option.getId(), option.getIOrder());
+    }
 
     public void modify(Integer optionId, Option newOption) {
         if (newOption == null)
