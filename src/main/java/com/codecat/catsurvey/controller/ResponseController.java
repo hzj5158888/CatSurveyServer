@@ -42,6 +42,13 @@ public class ResponseController {
     @Transactional
     @PostMapping("")
     public Result add(@RequestBody @Validated(validationTime.FullAdd.class) Response response) {
+        Survey survey = surveyRepository.findById(response.getSurveyId()).orElseThrow(() ->
+                new ValidationException("问卷ID无效")
+        );
+
+        if (!survey.getStatus().equals("进行中") && !userService.containsPermissionName("SurveyManage"))
+            return Result.unauthorized("权限不足");
+
         List<AnswerDetail> answerDetails = new ArrayList<>(response.getAnswerDetailList());
 
         response.setUserId(userService.getLoginId());
