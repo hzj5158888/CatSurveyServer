@@ -13,6 +13,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -53,8 +54,8 @@ public class OptionService {
         }};
         Set<String> optionField = Util.getObjectFiledName(option);
         Map<String, Object> optionMap = Util.objectToMap(option);
-        Map<String, Object> newOptionTemplateMap = Util.objectToMap(newOption);
-        for (Map.Entry<String, Object> entry : newOptionTemplateMap.entrySet()) {
+        Map<String, Object> newOptionMap = Util.objectToMap(newOption);
+        for (Map.Entry<String, Object> entry : newOptionMap.entrySet()) {
             if (entry.getValue() == null)
                 continue;
             if (!optionField.contains(entry.getKey()))
@@ -71,6 +72,7 @@ public class OptionService {
         setIOrder(optionFinal.getId(), optionFinal.getIOrder());
     }
 
+    @Transactional
     public void setByQuestion(Integer questionId, List<Option> options) {
         Question question = questionRepository.findById(questionId).orElseThrow(() ->
                 new ValidationException("问题不存在")
@@ -80,16 +82,40 @@ public class OptionService {
         if (!userService.isLoginId(userId) && !userService.containsPermissionName("SurveyManage"))
             throw new AuthorizedException("无法删除，权限不足");
 
+        Set<Integer> modify_set = new HashSet<>();
         for (int i = 0; i < options.size(); i++) {
             Option option = options.get(i);
 
             option.setIOrder(i);
             option.setQuestionId(questionId);
-            checkFullAdd(option);
+
+            if (option.getId() == null)
+                checkFullAdd(option);
+            else {
+                if (!optionRepository.existsByIdAndQuestionId(option.getId(), questionId))
+                    throw new ValidationException("选项不存在或不属于此问题");
+
+                modify_set.add(option.getId());
+                option.setQuestionId(null);
+            }
         }
 
-        optionRepository.deleteAllByQuestionId(questionId);
-        optionRepository.saveAllAndFlush(options);
+        List<Option> option_all = optionRepository.findAllByQuestionId(questionId);
+        for (Option option : option_all) {
+            if (!modify_set.contains(option.getId()))
+                optionRepository.deleteById(option.getId());
+        }
+
+        for (Option option : options) {
+            if (modify_set.contains(option.getId())) {
+                Integer optionId = option.getId();
+                option.setId(null);
+                modify(optionId, option);
+                continue;
+            }
+
+            optionRepository.saveAndFlush(option);
+        }
     }
 
     public void setIOrder(Integer optionId, Integer iOrder) {
