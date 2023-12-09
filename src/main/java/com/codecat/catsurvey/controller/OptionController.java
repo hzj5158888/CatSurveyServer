@@ -122,41 +122,7 @@ public class OptionController {
     @SaCheckLogin
     @PutMapping("/{optionId}")
     public Result modify(@PathVariable Integer optionId, @RequestBody Option newOption) {
-        if (newOption == null)
-            return Result.validatedFailed("非法请求，数据为空");
-
-        Option option = optionRepository.findById(optionId).orElseThrow(() ->
-                new ValidationException("选项不存在")
-        );
-
-        Integer userId = option.getQuestion().getSurvey().getUserId();
-        if (!userService.isLoginId(userId) && !userService.containsPermissionName("SurveyManage"))
-            return Result.unauthorized("无法修改，权限不足");
-
-        Set<String> notAllow = new HashSet<>(){{
-            add("id");
-            add("questionId");
-            add("question");
-        }};
-        Set<String> optionField = Util.getObjectFiledName(option);
-        Map<String, Object> optionMap = Util.objectToMap(option);
-        Map<String, Object> newOptionTemplateMap = Util.objectToMap(newOption);
-        for (Map.Entry<String, Object> entry : newOptionTemplateMap.entrySet()) {
-            if (entry.getValue() == null)
-                continue;
-            if (!optionField.contains(entry.getKey()))
-                return Result.validatedFailed("修改失败, 非法属性: " + entry.getKey());
-            if (notAllow.contains(entry.getKey()))
-                return Result.validatedFailed("修改失败, 属性" + entry.getKey() + "为只读");
-
-            optionMap.put(entry.getKey(), entry.getValue());
-        }
-
-        Option optionFinal = Util.mapToObject(optionMap, Option.class);
-        optionService.checkFullUpdate(optionFinal);
-        optionRepository.saveAndFlush(optionFinal);
-        optionService.setIOrder(optionFinal.getId(), optionFinal.getIOrder());
-
+        optionService.modify(optionId, newOption);
         return Result.success();
     }
 

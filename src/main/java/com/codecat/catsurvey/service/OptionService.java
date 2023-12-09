@@ -7,6 +7,7 @@ import com.codecat.catsurvey.commcon.models.Question;
 import com.codecat.catsurvey.commcon.repository.OptionRepository;
 import com.codecat.catsurvey.commcon.repository.QuestionRepository;
 import com.codecat.catsurvey.commcon.utils.Result;
+import com.codecat.catsurvey.commcon.utils.Util;
 import com.codecat.catsurvey.commcon.valid.group.validationTime;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,9 +17,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 @Service
 @Validated
@@ -37,6 +36,40 @@ public class OptionService {
 
     @Validated(value = {validationTime.FullUpdate.class})
     public void checkFullUpdate(@Valid Option option) {}
+
+    public void modify(Integer optionId, Option newOption) {
+        Option option = optionRepository.findById(optionId).orElseThrow(() ->
+                new ValidationException("选项不存在")
+        );
+
+        Integer userId = option.getQuestion().getSurvey().getUserId();
+        if (!userService.isLoginId(userId) && !userService.containsPermissionName("SurveyManage"))
+            throw new AuthorizedException("无法修改，权限不足");
+
+        Set<String> notAllow = new HashSet<>(){{
+            add("id");
+            add("questionId");
+            add("question");
+        }};
+        Set<String> optionField = Util.getObjectFiledName(option);
+        Map<String, Object> optionMap = Util.objectToMap(option);
+        Map<String, Object> newOptionTemplateMap = Util.objectToMap(newOption);
+        for (Map.Entry<String, Object> entry : newOptionTemplateMap.entrySet()) {
+            if (entry.getValue() == null)
+                continue;
+            if (!optionField.contains(entry.getKey()))
+                throw new ValidationException("修改失败, 非法属性: " + entry.getKey());
+            if (notAllow.contains(entry.getKey()))
+                throw new ValidationException("修改失败, 属性" + entry.getKey() + "为只读");
+
+            optionMap.put(entry.getKey(), entry.getValue());
+        }
+
+        Option optionFinal = Util.mapToObject(optionMap, Option.class);
+        checkFullUpdate(optionFinal);
+        optionRepository.saveAndFlush(optionFinal);
+        setIOrder(optionFinal.getId(), optionFinal.getIOrder());
+    }
 
     public void setByQuestion(Integer questionId, List<Option> options) {
         Question question = questionRepository.findById(questionId).orElseThrow(() ->
