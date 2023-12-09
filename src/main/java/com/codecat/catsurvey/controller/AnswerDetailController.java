@@ -45,7 +45,7 @@ public class AnswerDetailController {
                                 @RequestBody @Validated(validationTime.Add.class) AnswerDetail answerDetail)
     {
         answerDetail.setResponseId(responseId);
-        return Result.successData(this.add(answerDetail));
+        return this.add(answerDetail);
     }
 
     @SaCheckLogin

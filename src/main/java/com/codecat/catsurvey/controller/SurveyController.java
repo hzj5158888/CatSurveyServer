@@ -79,7 +79,7 @@ public class SurveyController {
             return Result.validatedFailed("用户不存在");
 
         survey.setUserId(userId);
-        return Result.successData(this.add(survey));
+        return this.add(survey);
     }
 
     @SaCheckLogin
