@@ -2,6 +2,7 @@ package com.codecat.catsurvey.service;
 
 import com.codecat.catsurvey.commcon.exception.AuthorizedException;
 import com.codecat.catsurvey.commcon.exception.ValidationException;
+import com.codecat.catsurvey.commcon.models.Option;
 import com.codecat.catsurvey.commcon.models.Question;
 import com.codecat.catsurvey.commcon.models.Survey;
 import com.codecat.catsurvey.commcon.repository.QuestionRepository;
@@ -34,6 +35,9 @@ public class QuestionService {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private OptionService optionService;
 
     @Validated(value = validationTime.FullAdd.class)
     public void checkFullAdd(@Valid Question question) {}
@@ -118,6 +122,12 @@ public class QuestionService {
         checkFullUpdate(questionFinal);
         questionRepository.saveAndFlush(questionFinal);
         setIOrder(questionFinal.getId(), questionFinal.getIOrder());
+        if (newQuestionMap.get("optionList") != null) { // 修改optionList
+            if (!(newQuestionMap.get("optionList") instanceof List<?>))
+                throw new ValidationException("optionList必须为数组类型");
+
+            optionService.setByQuestion(questionFinal.getId(), (List<Option>) newQuestionMap.get("optionList"));
+        }
     }
 
     public void setIOrder(Integer questionId, Integer iOrder) {

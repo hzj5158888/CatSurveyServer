@@ -11,6 +11,7 @@ import com.codecat.catsurvey.commcon.repository.UserRepository;
 import com.codecat.catsurvey.commcon.utils.Result;
 import com.codecat.catsurvey.commcon.utils.Util;
 import com.codecat.catsurvey.commcon.valid.group.validationTime;
+import com.codecat.catsurvey.service.OptionService;
 import com.codecat.catsurvey.service.QuestionService;
 import com.codecat.catsurvey.service.UserService;
 import jakarta.servlet.ServletException;
@@ -45,6 +46,9 @@ public class QuestionController {
     @Autowired
     private QuestionService questionService;
 
+    @Autowired
+    private OptionService optionService;
+
     @SaCheckLogin
     @PostMapping("")
     public Result add(@RequestBody @Validated({validationTime.FullAdd.class}) Question question) {
@@ -59,6 +63,8 @@ public class QuestionController {
 
         questionRepository.saveAndFlush(question);
         questionService.setIOrder(question.getId(), question.getIOrder());
+        if (question.getOptionList() != null)
+            optionService.setByQuestion(question.getId(), question.getOptionList());
 
         return Result.successData(question.getId());
     }
@@ -80,6 +86,8 @@ public class QuestionController {
         question.setSurveyId(surveyId);
         questionRepository.saveAndFlush(question);
         questionService.setIOrder(question.getId(), question.getIOrder());
+        if (question.getOptionList() != null)
+            optionService.setByQuestion(question.getId(), question.getOptionList());
 
         return Result.successData(question.getId());
     }
