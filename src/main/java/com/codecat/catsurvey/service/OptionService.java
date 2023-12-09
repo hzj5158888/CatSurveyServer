@@ -44,6 +44,7 @@ public class OptionService {
     @Validated(value = {validationTime.FullUpdate.class})
     public void checkFullUpdate(@Valid Option option) {}
 
+    @Transactional
     public void add(Option option) {
         if (option == null)
             throw new ValidationException("无效请求，数据为空");
@@ -68,6 +69,7 @@ public class OptionService {
         setIOrder(option.getId(), option.getIOrder());
     }
 
+    @Transactional
     public void modify(Integer optionId, Option newOption) {
         if (newOption == null)
             throw new ValidationException("无效请求, 数据为空");

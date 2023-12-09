@@ -47,6 +47,7 @@ public class QuestionService {
     @Validated(value = validationTime.FullUpdate.class)
     public void checkFullUpdate(@Valid Question question) {}
 
+    @Transactional
     public void add(Question question) {
         if (question == null)
             throw new ValidationException("无效请求，数据为空");
@@ -117,6 +118,7 @@ public class QuestionService {
         return ans;
     }
 
+    @Transactional
     public void modify(Integer questionId, Question newQuestion) {
         if (newQuestion == null)
             throw new ValidationException("无效请求, 数据为空");
