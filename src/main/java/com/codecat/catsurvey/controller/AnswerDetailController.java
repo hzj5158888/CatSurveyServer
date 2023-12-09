@@ -14,6 +14,7 @@ import com.codecat.catsurvey.commcon.repository.QuestionRepository;
 import com.codecat.catsurvey.commcon.repository.ResponseRepository;
 import com.codecat.catsurvey.commcon.utils.Result;
 import com.codecat.catsurvey.commcon.valid.group.validationTime;
+import com.codecat.catsurvey.service.AnswerDetailService;
 import com.codecat.catsurvey.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -35,75 +36,22 @@ public class AnswerDetailController {
     private OptionRepository optionRepository;
 
     @Autowired
+    private AnswerDetailService answerDetailService;
+
+    @Autowired
     private UserService userService;
 
     @PostMapping("")
     public Result add(@RequestBody @Validated(validationTime.FullAdd.class) AnswerDetail answerDetail) {
-        Response response = responseRepository.findById(answerDetail.getResponseId()).orElseThrow(() ->
-                new ValidationException("答卷不存在")
-        );
-
-        Question question = questionRepository.findById(answerDetail.getQuestionId()).orElseThrow(() ->
-                new ValidationException("问题不存在")
-        );
-
-        if (!response.getSurveyId().equals(question.getSurveyId()))
-            return Result.validatedFailed("responseId与questionId不属于同一问卷survey");
-        if (!userService.getLoginId().equals(response.getUserId()) && !userService.containsPermissionName("SurveyManage"))
-            return Result.validatedFailed("无法添加，权限不足");
-        if (answerDetailRepository.existsByResponseIdAndQuestionId(response.getId(), question.getId()))
-            return Result.validatedFailed("该问题答案已存在");
-
-        if (!question.getType().equals(QuestionTypeEnum.TEXT.getName())) {
-            Option option = optionRepository.findById(answerDetail.getOptionId()).orElseThrow(() ->
-                    new ValidationException("选项不存在")
-            );
-
-            if (!option.getQuestionId().equals(question.getId()))
-                return Result.validatedFailed("option中questionId与answer中questionId不同");
-        }
-
-        JSONObject jsonAns = (JSONObject) answerDetail.getJsonAnswer();
-        answerDetail.setJsonAnswer(jsonAns.toString());
-        answerDetailRepository.saveAndFlush(answerDetail);
-
-        return Result.successData(answerDetail.getId());
+        return Result.successData(answerDetailService.add(answerDetail));
     }
 
     @PostMapping("/response/{responseId}")
     public Result addByResponse(@PathVariable Integer responseId,
                                 @RequestBody @Validated(validationTime.Add.class) AnswerDetail answerDetail)
     {
-        Response response = responseRepository.findById(responseId).orElseThrow(() ->
-                new ValidationException("答卷不存在")
-        );
-
-        Question question = questionRepository.findById(answerDetail.getQuestionId()).orElseThrow(() ->
-                new ValidationException("问题不存在")
-        );
-
-        if (!response.getSurveyId().equals(question.getSurveyId()))
-            return Result.validatedFailed("responseId与questionId不属于同一问卷survey");
-        if (!userService.getLoginId().equals(response.getUserId()) && !userService.containsPermissionName("SurveyManage"))
-            return Result.validatedFailed("无法添加，权限不足");
-        if (answerDetailRepository.existsByResponseIdAndQuestionId(response.getId(), question.getId()))
-            return Result.validatedFailed("该问题答案已存在");
-
-        if (!question.getType().equals(QuestionTypeEnum.TEXT.getName())) {
-            Option option = optionRepository.findById(answerDetail.getOptionId()).orElseThrow(() ->
-                    new ValidationException("选项不存在")
-            );
-
-            if (!option.getQuestionId().equals(question.getId()))
-                return Result.validatedFailed("option中questionId与answer中questionId不同");
-        }
-
-        JSONObject jsonAns = (JSONObject) answerDetail.getJsonAnswer();
-        answerDetail.setJsonAnswer(jsonAns.toString());
         answerDetail.setResponseId(responseId);
-        answerDetailRepository.saveAndFlush(answerDetail);
-
-        return Result.success();
+        return Result.successData(this.add(answerDetail));
     }
 
     @SaCheckLogin
