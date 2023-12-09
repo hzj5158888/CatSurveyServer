@@ -149,15 +149,12 @@ public class QuestionService {
         }
 
         Question questionFinal = Util.mapToObject(questionMap, Question.class);
+        List<Option> options = new ArrayList<>(newQuestion.getOptionList());
         checkFullUpdate(questionFinal);
         questionRepository.saveAndFlush(questionFinal);
         setIOrder(questionFinal.getId(), questionFinal.getIOrder());
-        if (newQuestionMap.get("optionList") != null) { // 修改optionList
-            if (!(newQuestionMap.get("optionList") instanceof List<?>))
-                throw new ValidationException("optionList必须为数组类型");
-
-            optionService.setByQuestion(questionFinal.getId(), (List<Option>) newQuestionMap.get("optionList"));
-        }
+        if (!options.isEmpty())
+            optionService.setByQuestion(questionFinal.getId(), options);
     }
 
     public void setIOrder(Integer questionId, Integer iOrder) {
