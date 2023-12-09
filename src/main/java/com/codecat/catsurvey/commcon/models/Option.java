@@ -9,7 +9,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Null;
 import lombok.*;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +19,6 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @Table(name = "ioption", schema = "codecat")
-@EntityListeners(AuditingEntityListener.class)
 public class Option implements Comparable<Option> {
     @Id
     @Null(message = "id为只读", groups = {validationTime.FullAdd.class, validationTime.Add.class})
