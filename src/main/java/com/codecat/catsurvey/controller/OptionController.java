@@ -115,25 +115,7 @@ public class OptionController {
     @SaCheckLogin
     @PutMapping("/question/{questionId}")
     public Result setByQuestion(@PathVariable Integer questionId, @RequestBody List<Option> options) {
-        Question question = questionRepository.findById(questionId).orElseThrow(() ->
-                new ValidationException("问题不存在")
-        );
-
-        Integer userId = question.getSurvey().getUserId();
-        if (!userService.isLoginId(userId) && !userService.containsPermissionName("SurveyManage"))
-            return Result.unauthorized("无法删除，权限不足");
-
-        for (int i = 0; i < options.size(); i++) {
-            Option option = options.get(i);
-
-            option.setIOrder(i);
-            option.setQuestionId(questionId);
-            optionService.checkFullAdd(option);
-        }
-
-        optionRepository.deleteAllByQuestionId(questionId);
-        optionRepository.saveAllAndFlush(options);
-
+        optionService.setByQuestion(questionId, options);
         return Result.success();
     }
 

@@ -1,5 +1,6 @@
 package com.codecat.catsurvey.service;
 
+import com.codecat.catsurvey.commcon.exception.AuthorizedException;
 import com.codecat.catsurvey.commcon.exception.ValidationException;
 import com.codecat.catsurvey.commcon.models.Option;
 import com.codecat.catsurvey.commcon.models.Question;
@@ -28,11 +29,35 @@ public class OptionService {
     @Autowired
     private QuestionRepository questionRepository;
 
+    @Autowired
+    private UserService userService;
+
     @Validated(value = {validationTime.FullAdd.class})
     public void checkFullAdd(@Valid Option option) {}
 
     @Validated(value = {validationTime.FullUpdate.class})
     public void checkFullUpdate(@Valid Option option) {}
+
+    public void setByQuestion(Integer questionId, List<Option> options) {
+        Question question = questionRepository.findById(questionId).orElseThrow(() ->
+                new ValidationException("问题不存在")
+        );
+
+        Integer userId = question.getSurvey().getUserId();
+        if (!userService.isLoginId(userId) && !userService.containsPermissionName("SurveyManage"))
+            throw new AuthorizedException("无法删除，权限不足");
+
+        for (int i = 0; i < options.size(); i++) {
+            Option option = options.get(i);
+
+            option.setIOrder(i);
+            option.setQuestionId(questionId);
+            checkFullAdd(option);
+        }
+
+        optionRepository.deleteAllByQuestionId(questionId);
+        optionRepository.saveAllAndFlush(options);
+    }
 
     public void setIOrder(Integer optionId, Integer iOrder) {
         Option option = optionRepository.findById(optionId).orElseThrow(() ->
