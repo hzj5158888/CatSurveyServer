@@ -41,6 +41,7 @@ public class QuestionService {
     @Validated(value = validationTime.FullUpdate.class)
     public void checkFullUpdate(@Valid Question question) {}
 
+    @Transactional
     public void setBySurvey(Integer surveyId, List<Question> questions) {
         Survey survey = surveyRepository.findById(surveyId).orElseThrow(() ->
                 new ValidationException("问卷不存在")
