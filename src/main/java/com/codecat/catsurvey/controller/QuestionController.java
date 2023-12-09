@@ -117,62 +117,14 @@ public class QuestionController {
     @SaCheckLogin
     @PutMapping("/survey/{surveyId}")
     public Result setBySurvey(@PathVariable Integer surveyId, @RequestBody List<Question> questions) {
-        Survey survey = surveyRepository.findById(surveyId).orElseThrow(() ->
-                new ValidationException("问卷不存在")
-        );
-        if (!userService.isLoginId(survey.getUserId()) && !userService.containsPermissionName("SurveyManage"))
-            return Result.unauthorized("无法访问，权限不足");
-
-        for (int i = 0; i < questions.size(); i++) {
-            Question question = questions.get(i);
-
-            question.setIOrder(i);
-            question.setSurveyId(surveyId);
-            questionService.checkFullAdd(question);
-        }
-
-        questionRepository.deleteAllBySurveyId(surveyId);
-        questionRepository.saveAllAndFlush(questions);
-
+        questionService.setBySurvey(surveyId, questions);
         return Result.success();
     }
 
     @SaCheckLogin
     @PutMapping("/{questionId}")
     public Result modify(@PathVariable Integer questionId, @RequestBody Question newQuestion) {
-        if (newQuestion == null)
-            return Result.validatedFailed("无效请求, 数据为空");
-
-        Question question = questionRepository.findById(questionId).orElseThrow(() ->
-                new ValidationException("问题不存在")
-        );
-        if (!userService.isLoginId(question.getSurvey().getUserId()) && !userService.containsPermissionName("SurveyManage"))
-            return Result.unauthorized("无法修改，权限不足");
-
-        Set<String> notAllow = new HashSet<>() {{
-            add("id");
-            add("surveyId");
-            add("survey");
-        }};
-        Set<String> continueItem = new HashSet<>() {{
-            add("optionList");
-        }};
-        Map<String, Object> questionMap = Util.objectToMap(question);
-        Map<String, Object> newQuestionMap = Util.objectToMap(newQuestion);
-        for (Map.Entry<String, Object> entry : newQuestionMap.entrySet()) {
-            if (entry.getValue() == null || continueItem.contains(entry.getKey()))
-                continue;
-            if (notAllow.contains(entry.getKey()))
-                return Result.validatedFailed("问题信息修改失败, 属性" + entry.getKey() + "为只读");
-
-            questionMap.put(entry.getKey(), entry.getValue());
-        }
-
-        Question questionFinal = Util.mapToObject(questionMap, Question.class);
-        questionService.checkFullUpdate(questionFinal);
-        questionRepository.saveAndFlush(questionFinal);
-        questionService.setIOrder(questionFinal.getId(), questionFinal.getIOrder());
-
+        questionService.modify(questionId, newQuestion);
         return Result.success();
     }
 
