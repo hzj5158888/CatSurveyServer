@@ -45,6 +45,25 @@ public class QuestionService {
     @Validated(value = validationTime.FullUpdate.class)
     public void checkFullUpdate(@Valid Question question) {}
 
+    public void add(Question question) {
+        if (question == null)
+            throw new ValidationException("无效请求，数据为空");
+        
+        Survey survey = surveyRepository.findById(question.getSurveyId()).orElseThrow(() ->
+                new ValidationException("问卷不存在")
+        );
+        if (!userService.isLoginId(survey.getUserId()) && !userService.containsPermissionName("SurveyManage"))
+            throw new AuthorizedException("无法访问，权限不足");
+
+        if (question.getIOrder() == null)
+            question.setIOrder(Integer.MAX_VALUE);
+
+        questionRepository.saveAndFlush(question);
+        setIOrder(question.getId(), question.getIOrder());
+        if (question.getOptionList() != null)
+            optionService.setByQuestion(question.getId(), question.getOptionList());
+    }
+
     @Transactional
     public void setBySurvey(Integer surveyId, List<Question> questions) {
         Survey survey = surveyRepository.findById(surveyId).orElseThrow(() ->

@@ -52,20 +52,7 @@ public class QuestionController {
     @SaCheckLogin
     @PostMapping("")
     public Result add(@RequestBody @Validated({validationTime.FullAdd.class}) Question question) {
-        Survey survey = surveyRepository.findById(question.getSurveyId()).orElseThrow(() ->
-                new ValidationException("问卷不存在")
-        );
-        if (!userService.isLoginId(survey.getUserId()) && !userService.containsPermissionName("SurveyManage"))
-            return Result.unauthorized("无法访问，权限不足");
-
-        if (question.getIOrder() == null)
-            question.setIOrder(Integer.MAX_VALUE);
-
-        questionRepository.saveAndFlush(question);
-        questionService.setIOrder(question.getId(), question.getIOrder());
-        if (question.getOptionList() != null)
-            optionService.setByQuestion(question.getId(), question.getOptionList());
-
+        questionService.add(question);
         return Result.successData(question.getId());
     }
 
@@ -74,21 +61,11 @@ public class QuestionController {
     public Result addBySurvey(@PathVariable Integer surveyId,
                               @RequestBody @Validated({validationTime.Add.class}) Question question)
     {
-        Survey survey = surveyRepository.findById(surveyId).orElseThrow(() ->
-                new ValidationException("问卷不存在")
-        );
-        if (!userService.isLoginId(survey.getUserId()) && !userService.containsPermissionName("SurveyManage"))
-            return Result.unauthorized("无法添加，权限不足");
-
-        if (question.getIOrder() == null)
-            question.setIOrder(Integer.MAX_VALUE);
+        if (!surveyRepository.existsById(surveyId))
+            return Result.validatedFailed("问卷不存在");
 
         question.setSurveyId(surveyId);
-        questionRepository.saveAndFlush(question);
-        questionService.setIOrder(question.getId(), question.getIOrder());
-        if (question.getOptionList() != null)
-            optionService.setByQuestion(question.getId(), question.getOptionList());
-
+        questionService.add(question);
         return Result.successData(question.getId());
     }
 
