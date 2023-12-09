@@ -57,6 +57,11 @@ public class GlobalExceptionHandler {
         return Result.validatedFailed(e.getMessage());
     }
 
+    @ExceptionHandler(AuthorizedException.class)
+    public Result handleAuthorizedException(AuthorizedException e) {
+        return Result.unauthorized(e.getMessage());
+    }
+
     @ExceptionHandler(NotPermissionException.class)
     public Result handleNotPermissionException(NotPermissionException e) { return Result.validatedFailed(e.getMessage()); }
 

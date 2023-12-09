@@ -5,12 +5,15 @@ import com.codecat.catsurvey.commcon.models.Option;
 import com.codecat.catsurvey.commcon.models.Question;
 import com.codecat.catsurvey.commcon.repository.OptionRepository;
 import com.codecat.catsurvey.commcon.repository.QuestionRepository;
+import com.codecat.catsurvey.commcon.utils.Result;
 import com.codecat.catsurvey.commcon.valid.group.validationTime;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,7 +33,6 @@ public class OptionService {
 
     @Validated(value = {validationTime.FullUpdate.class})
     public void checkFullUpdate(@Valid Option option) {}
-
 
     public void setIOrder(Integer optionId, Integer iOrder) {
         Option option = optionRepository.findById(optionId).orElseThrow(() ->
