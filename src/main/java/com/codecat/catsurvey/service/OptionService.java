@@ -5,8 +5,10 @@ import com.codecat.catsurvey.commcon.exception.AuthorizedException;
 import com.codecat.catsurvey.commcon.exception.ValidationException;
 import com.codecat.catsurvey.commcon.models.Option;
 import com.codecat.catsurvey.commcon.models.Question;
+import com.codecat.catsurvey.commcon.models.Survey;
 import com.codecat.catsurvey.commcon.repository.OptionRepository;
 import com.codecat.catsurvey.commcon.repository.QuestionRepository;
+import com.codecat.catsurvey.commcon.repository.SurveyRepository;
 import com.codecat.catsurvey.commcon.utils.Result;
 import com.codecat.catsurvey.commcon.utils.Util;
 import com.codecat.catsurvey.commcon.valid.group.validationTime;
@@ -31,6 +33,9 @@ public class OptionService {
     private QuestionRepository questionRepository;
 
     @Autowired
+    private SurveyRepository surveyRepository;
+
+    @Autowired
     private UserService userService;
 
     @Validated(value = {validationTime.FullAdd.class})
@@ -46,8 +51,11 @@ public class OptionService {
         Question question = questionRepository.findById(option.getQuestionId()).orElseThrow(() ->
                 new ValidationException("问题不存在")
         );
+        Survey survey = surveyRepository.findById(question.getSurveyId()).orElseThrow(() ->
+                new ValidationException("问卷不存在")
+        );
 
-        Integer userId = question.getSurvey().getUserId();
+        Integer userId = survey.getUserId();
         if (!userService.isLoginId(userId) && !userService.containsPermissionName("SurveyManage"))
             throw new AuthorizedException("无法添加，权限不足");
         if (question.getType().equals(QuestionTypeEnum.TEXT.getName()))
@@ -102,10 +110,13 @@ public class OptionService {
         Question question = questionRepository.findById(questionId).orElseThrow(() ->
                 new ValidationException("问题不存在")
         );
+        Survey survey = surveyRepository.findById(question.getSurveyId()).orElseThrow(() ->
+                new ValidationException("问卷不存在")
+        );
 
-        Integer userId = question.getSurvey().getUserId();
+        Integer userId = survey.getUserId();
         if (!userService.isLoginId(userId) && !userService.containsPermissionName("SurveyManage"))
-            throw new AuthorizedException("无法删除，权限不足");
+            throw new AuthorizedException("无法设置，权限不足");
 
         Set<Integer> modify_set = new HashSet<>();
         for (int i = 0; i < options.size(); i++) {
@@ -113,7 +124,6 @@ public class OptionService {
 
             option.setIOrder(i);
             option.setQuestionId(questionId);
-
             if (option.getId() == null)
                 checkFullAdd(option);
             else {

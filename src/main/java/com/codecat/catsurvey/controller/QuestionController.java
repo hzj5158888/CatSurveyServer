@@ -102,8 +102,7 @@ public class QuestionController {
     @SaCheckLogin
     @PutMapping("/survey/{surveyId}")
     public Result setBySurvey(@PathVariable Integer surveyId, @RequestBody List<Question> questions) {
-        questionService.setBySurvey(surveyId, questions);
-        return Result.success();
+        return Result.successData(questionService.setBySurvey(surveyId, questions));
     }
 
     @SaCheckLogin

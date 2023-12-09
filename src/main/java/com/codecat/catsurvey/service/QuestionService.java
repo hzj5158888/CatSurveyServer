@@ -1,5 +1,6 @@
 package com.codecat.catsurvey.service;
 
+import com.alibaba.fastjson2.util.BeanUtils;
 import com.codecat.catsurvey.commcon.exception.AuthorizedException;
 import com.codecat.catsurvey.commcon.exception.ValidationException;
 import com.codecat.catsurvey.commcon.models.Option;
@@ -21,6 +22,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 @Service
@@ -58,14 +60,15 @@ public class QuestionService {
         if (question.getIOrder() == null)
             question.setIOrder(Integer.MAX_VALUE);
 
+        List<Option> optionList = new ArrayList<>(question.getOptionList());
         questionRepository.saveAndFlush(question);
         setIOrder(question.getId(), question.getIOrder());
-        if (question.getOptionList() != null)
-            optionService.setByQuestion(question.getId(), question.getOptionList());
+        if (!question.getOptionList().isEmpty())
+            optionService.setByQuestion(question.getId(), optionList);
     }
 
     @Transactional
-    public void setBySurvey(Integer surveyId, List<Question> questions) {
+    public List<Integer> setBySurvey(Integer surveyId, List<Question> questions) {
         Survey survey = surveyRepository.findById(surveyId).orElseThrow(() ->
                 new ValidationException("问卷不存在")
         );
@@ -96,16 +99,22 @@ public class QuestionService {
                 questionRepository.deleteById(question.getId());
         }
 
+        List<Integer> ans = new ArrayList<>();
         for (Question question : questions) {
             if (modify_set.contains(question.getId())) {
                 Integer questionId = question.getId();
                 question.setId(null);
                 modify(questionId, question);
+
+                ans.add(question.getId());
                 continue;
             }
 
             add(question);
+            ans.add(question.getId());
         }
+
+        return ans;
     }
 
     public void modify(Integer questionId, Question newQuestion) {
