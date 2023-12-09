@@ -48,16 +48,40 @@ public class QuestionService {
         if (!userService.isLoginId(survey.getUserId()) && !userService.containsPermissionName("SurveyManage"))
             throw new AuthorizedException("无法访问，权限不足");
 
+        Set<Integer> modify_set = new HashSet<>();
         for (int i = 0; i < questions.size(); i++) {
             Question question = questions.get(i);
 
             question.setIOrder(i);
             question.setSurveyId(surveyId);
-            checkFullAdd(question);
+            if (question.getId() == null)
+                checkFullAdd(question);
+            else {
+                if (!questionRepository.existsByIdAndSurveyId(question.getId(), question.getSurveyId()))
+                    throw new ValidationException("问题不存在或不属于该问卷");
+
+                modify_set.add(question.getId());
+                question.setSurveyId(null);
+                question.setSurvey(null);
+            }
         }
 
-        questionRepository.deleteAllBySurveyId(surveyId);
-        questionRepository.saveAllAndFlush(questions);
+        List<Question> question_all = questionRepository.findAllBySurveyId(surveyId);
+        for (Question question : question_all) {
+            if (!modify_set.contains(question.getId()))
+                questionRepository.deleteById(question.getId());
+        }
+
+        for (Question question : questions) {
+            if (modify_set.contains(question.getId())) {
+                Integer questionId = question.getId();
+                question.setId(null);
+                modify(questionId, question);
+                continue;
+            }
+
+            questionRepository.saveAndFlush(question);
+        }
     }
 
     public void modify(Integer questionId, Question newQuestion) {
