@@ -64,6 +64,10 @@ public class Question implements Comparable<Question> {
     @JoinColumn(name = "question_id", referencedColumnName = "id", insertable = false, updatable = false)
     private List<Option> optionList = new ArrayList<>();
 
+    @OneToMany(targetEntity = AnswerDetail.class, fetch = FetchType.EAGER, cascade = {CascadeType.REFRESH, CascadeType.REMOVE})
+    @JoinColumn(name = "question_id", referencedColumnName = "id", insertable = false, updatable = false)
+    private List<AnswerDetail> answerDetailList = new ArrayList<>();
+
     @Override
     public int compareTo(Question other) {
         if (!surveyId.equals(other.getSurveyId()))

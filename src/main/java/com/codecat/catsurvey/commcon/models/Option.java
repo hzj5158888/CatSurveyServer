@@ -10,6 +10,9 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Null;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Data
 @EqualsAndHashCode
 @NoArgsConstructor
@@ -40,6 +43,10 @@ public class Option implements Comparable<Option> {
     @ManyToOne(targetEntity = Question.class, cascade = CascadeType.REFRESH)
     @JoinColumn(name = "question_id", referencedColumnName = "id", insertable = false, updatable = false)
     private Question question;
+
+    @OneToMany(targetEntity = AnswerDetail.class, fetch = FetchType.EAGER, cascade = {CascadeType.REFRESH, CascadeType.REMOVE})
+    @JoinColumn(name = "option_id", referencedColumnName = "id", insertable = false, updatable = false)
+    private List<AnswerDetail> answerDetailList = new ArrayList<>();
 
     @Override
     public int compareTo(Option other) {
