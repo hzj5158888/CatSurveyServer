@@ -11,12 +11,12 @@ import com.codecat.catsurvey.commcon.repository.AnswerDetailRepository;
 import com.codecat.catsurvey.commcon.repository.OptionRepository;
 import com.codecat.catsurvey.commcon.repository.QuestionRepository;
 import com.codecat.catsurvey.commcon.repository.ResponseRepository;
-import com.codecat.catsurvey.commcon.utils.Result;
-import com.codecat.catsurvey.commcon.valid.group.validationTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class AnswerDetailService {
@@ -38,7 +38,7 @@ public class AnswerDetailService {
     public Integer add(AnswerDetail answerDetail) {
         if (answerDetail == null)
             throw new ValidationException("无效请求，数据为空");
-        
+
         Response response = responseRepository.findById(answerDetail.getResponseId()).orElseThrow(() ->
                 new ValidationException("答卷不存在")
         );
@@ -68,5 +68,21 @@ public class AnswerDetailService {
         answerDetailRepository.saveAndFlush(answerDetail);
 
         return answerDetail.getId();
+    }
+
+    @Transactional
+    public List<Integer> setByResponse(Integer responseId, List<AnswerDetail> newAnswerDetailList) {
+        if (newAnswerDetailList == null || newAnswerDetailList.isEmpty())
+            return new ArrayList<>();
+
+        answerDetailRepository.deleteAllByResponseId(responseId);
+
+        List<Integer> ans = new ArrayList<>();
+        for (AnswerDetail answerDetail : newAnswerDetailList) {
+            add(answerDetail);
+            ans.add(answerDetail.getId());
+        }
+
+        return ans;
     }
 }
