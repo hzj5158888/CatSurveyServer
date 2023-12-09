@@ -5,6 +5,7 @@ import cn.dev33.satoken.stp.StpUtil;
 import com.alibaba.fastjson2.JSONObject;
 import com.codecat.catsurvey.commcon.Enum.survey.SurveyStatusEnum;
 import com.codecat.catsurvey.commcon.exception.ValidationException;
+import com.codecat.catsurvey.commcon.models.Option;
 import com.codecat.catsurvey.commcon.models.Question;
 import com.codecat.catsurvey.commcon.models.Survey;
 import com.codecat.catsurvey.commcon.repository.QuestionRepository;
@@ -14,6 +15,7 @@ import com.codecat.catsurvey.commcon.repository.UserRepository;
 import com.codecat.catsurvey.commcon.utils.Result;
 import com.codecat.catsurvey.commcon.utils.Util;
 import com.codecat.catsurvey.commcon.valid.group.validationTime;
+import com.codecat.catsurvey.service.QuestionService;
 import com.codecat.catsurvey.service.SurveyService;
 import com.codecat.catsurvey.service.UserService;
 import jakarta.servlet.ServletException;
@@ -43,10 +45,7 @@ public class SurveyController {
     private SurveyService surveyService;
 
     @Autowired
-    private SurveyTemplateRepository surveyTemplateRepository;
-
-    @Autowired
-    private QuestionRepository questionRepository;
+    private QuestionService questionService;
 
     @SaCheckLogin
     @PostMapping("")
@@ -63,7 +62,11 @@ public class SurveyController {
                 return Result.validatedFailed("开始时间不得先于截至时间");
         }
 
+        List<Question> questions = new ArrayList<>(survey.getQuestionList());
         surveyRepository.saveAndFlush(survey);
+        if (!questions.isEmpty())
+            questionService.setBySurvey(survey.getId(), questions);
+
         return Result.successData(survey.getId());
     }
 
@@ -74,20 +77,9 @@ public class SurveyController {
     {
         if (!userRepository.existsById(userId))
             return Result.validatedFailed("用户不存在");
-        if (!userService.isLoginId(userId) && !userService.containsPermissionName("SurveyManage"))
-            return Result.unauthorized("无法添加，权限不足");
-
-        if (!survey.getStatus().equals("草稿")) {
-            if (survey.getStartDate() == null || survey.getEndDate() == null)
-                return Result.validatedFailed("开始时间和截止时间不能为空");
-            if (survey.getStartDate().getTime() > survey.getEndDate().getTime())
-                return Result.validatedFailed("开始时间不得先于截至时间");
-        }
 
         survey.setUserId(userId);
-        surveyRepository.saveAndFlush(survey);
-
-        return Result.successData(survey.getId());
+        return Result.successData(this.add(survey));
     }
 
     @SaCheckLogin
@@ -163,8 +155,11 @@ public class SurveyController {
         }
 
         Survey surveyFinal = Util.mapToObject(surveyMap, Survey.class);
+        List<Question> questions = new ArrayList<>(newSurvey.getQuestionList());
         surveyService.checkFullUpdate(surveyFinal);
         surveyRepository.saveAndFlush(surveyFinal);
+        if (!questions.isEmpty()) // 设置questionList
+            questionService.setBySurvey(surveyFinal.getId(), questions);
 
         return Result.success();
     }
