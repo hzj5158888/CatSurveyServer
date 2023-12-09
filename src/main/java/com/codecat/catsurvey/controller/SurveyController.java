@@ -22,6 +22,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -109,6 +110,7 @@ public class SurveyController {
     }
 
     @SaCheckLogin
+    @Transactional
     @PutMapping("/{surveyId}")
     public Result modify(@PathVariable Integer surveyId, @RequestBody Survey newSurvey) {
         if (newSurvey == null)
@@ -165,6 +167,7 @@ public class SurveyController {
     }
 
     @SaCheckLogin
+    @Transactional
     @PutMapping("/user/{userId}/{surveyId}")
     public Result modifyByUser(@PathVariable Integer userId,
                                @PathVariable Integer surveyId,
