@@ -39,6 +39,9 @@ public class OptionService {
     public void checkFullUpdate(@Valid Option option) {}
 
     public void modify(Integer optionId, Option newOption) {
+        if (newOption == null)
+            throw new ValidationException("无效请求, 数据为空");
+        
         Option option = optionRepository.findById(optionId).orElseThrow(() ->
                 new ValidationException("选项不存在")
         );
