@@ -40,6 +40,9 @@ public class OptionService {
     public void checkFullUpdate(@Valid Option option) {}
 
     public void add(Option option) {
+        if (option == null)
+            throw new ValidationException("无效请求，数据为空");
+        
         Question question = questionRepository.findById(option.getQuestionId()).orElseThrow(() ->
                 new ValidationException("问题不存在")
         );
