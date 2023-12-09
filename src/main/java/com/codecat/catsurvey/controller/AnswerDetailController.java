@@ -30,12 +30,6 @@ public class AnswerDetailController {
     private ResponseRepository responseRepository;
 
     @Autowired
-    private QuestionRepository questionRepository;
-
-    @Autowired
-    private OptionRepository optionRepository;
-
-    @Autowired
     private AnswerDetailService answerDetailService;
 
     @Autowired

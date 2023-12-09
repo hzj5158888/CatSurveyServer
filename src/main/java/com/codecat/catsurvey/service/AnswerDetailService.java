@@ -49,8 +49,6 @@ public class AnswerDetailService {
 
         if (!response.getSurveyId().equals(question.getSurveyId()))
             throw new ValidationException("responseId与questionId不属于同一问卷survey");
-        if (!userService.getLoginId().equals(response.getUserId()) && !userService.containsPermissionName("SurveyManage"))
-            throw new ValidationException("无法添加，权限不足");
         if (answerDetailRepository.existsByResponseIdAndQuestionId(response.getId(), question.getId()))
             throw new ValidationException("该问题答案已存在");
 
@@ -79,6 +77,8 @@ public class AnswerDetailService {
 
         List<Integer> ans = new ArrayList<>();
         for (AnswerDetail answerDetail : newAnswerDetailList) {
+            answerDetail.setResponseId(responseId);
+
             add(answerDetail);
             ans.add(answerDetail.getId());
         }

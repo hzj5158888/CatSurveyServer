@@ -16,6 +16,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,6 +39,7 @@ public class ResponseController {
     @Autowired
     private UserService userService;
 
+    @Transactional
     @PostMapping("")
     public Result add(@RequestBody @Validated(validationTime.FullAdd.class) Response response) {
         List<AnswerDetail> answerDetails = new ArrayList<>(response.getAnswerDetailList());
@@ -50,6 +52,7 @@ public class ResponseController {
         return Result.successData(response.getId());
     }
 
+    @Transactional
     @PostMapping("/survey/{surveyId}")
     public Result addBySurvey(@PathVariable Integer surveyId,
                               @RequestBody @Validated(validationTime.Add.class) Response response)
@@ -58,7 +61,7 @@ public class ResponseController {
             return Result.validatedFailed("问卷不存在");
 
         response.setSurveyId(surveyId);
-        return Result.successData(this.add(response));
+        return this.add(response);
     }
 
     @SaCheckLogin
