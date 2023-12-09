@@ -3,12 +3,14 @@ package com.codecat.catsurvey.controller;
 import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.annotation.SaIgnore;
 import com.codecat.catsurvey.commcon.exception.ValidationException;
+import com.codecat.catsurvey.commcon.models.AnswerDetail;
 import com.codecat.catsurvey.commcon.models.Response;
 import com.codecat.catsurvey.commcon.models.Survey;
 import com.codecat.catsurvey.commcon.repository.ResponseRepository;
 import com.codecat.catsurvey.commcon.repository.SurveyRepository;
 import com.codecat.catsurvey.commcon.utils.Result;
 import com.codecat.catsurvey.commcon.valid.group.validationTime;
+import com.codecat.catsurvey.service.AnswerDetailService;
 import com.codecat.catsurvey.service.UserService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -31,26 +33,32 @@ public class ResponseController {
     private SurveyRepository surveyRepository;
 
     @Autowired
+    private AnswerDetailService answerDetailService;
+
+    @Autowired
     private UserService userService;
 
     @PostMapping("")
     public Result add(@RequestBody @Validated(validationTime.FullAdd.class) Response response) {
+        List<AnswerDetail> answerDetails = new ArrayList<>(response.getAnswerDetailList());
+
         response.setUserId(userService.getLoginId());
         responseRepository.saveAndFlush(response);
+        if (!answerDetails.isEmpty())
+            answerDetailService.setByResponse(response.getId(), answerDetails);
+
         return Result.successData(response.getId());
     }
 
     @PostMapping("/survey/{surveyId}")
-    public Result addBySurvey(@PathVariable Integer surveyId)
+    public Result addBySurvey(@PathVariable Integer surveyId,
+                              @RequestBody @Validated(validationTime.Add.class) Response response)
     {
         if (!surveyRepository.existsById(surveyId))
             return Result.validatedFailed("问卷不存在");
 
-        Response response = new Response();
         response.setSurveyId(surveyId);
-        response.setUserId(userService.getLoginId());
-        responseRepository.saveAndFlush(response);
-        return Result.successData(response.getId());
+        return Result.successData(this.add(response));
     }
 
     @SaCheckLogin
