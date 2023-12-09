@@ -104,7 +104,7 @@ public class QuestionService {
                 continue;
             }
 
-            questionRepository.saveAndFlush(question);
+            add(question);
         }
     }
 
