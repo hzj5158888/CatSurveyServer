@@ -2,15 +2,11 @@ package com.codecat.catsurvey.service;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.codecat.catsurvey.commcon.Enum.question.QuestionTypeEnum;
+import com.codecat.catsurvey.commcon.exception.AuthorizedException;
 import com.codecat.catsurvey.commcon.exception.ValidationException;
-import com.codecat.catsurvey.commcon.models.AnswerDetail;
-import com.codecat.catsurvey.commcon.models.Option;
-import com.codecat.catsurvey.commcon.models.Question;
-import com.codecat.catsurvey.commcon.models.Response;
-import com.codecat.catsurvey.commcon.repository.AnswerDetailRepository;
-import com.codecat.catsurvey.commcon.repository.OptionRepository;
-import com.codecat.catsurvey.commcon.repository.QuestionRepository;
-import com.codecat.catsurvey.commcon.repository.ResponseRepository;
+import com.codecat.catsurvey.commcon.models.*;
+import com.codecat.catsurvey.commcon.repository.*;
+import com.codecat.catsurvey.commcon.utils.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +29,9 @@ public class AnswerDetailService {
     private AnswerDetailRepository answerDetailRepository;
 
     @Autowired
+    private SurveyRepository surveyRepository;
+
+    @Autowired
     private UserService userService;
 
     public Integer add(AnswerDetail answerDetail) {
@@ -42,11 +41,15 @@ public class AnswerDetailService {
         Response response = responseRepository.findById(answerDetail.getResponseId()).orElseThrow(() ->
                 new ValidationException("答卷不存在")
         );
-
         Question question = questionRepository.findById(answerDetail.getQuestionId()).orElseThrow(() ->
                 new ValidationException("问题不存在")
         );
+        Survey survey = surveyRepository.findById(response.getSurveyId()).orElseThrow(() ->
+                new ValidationException("问卷不存在")
+        );
 
+        if (!survey.getStatus().equals("进行中") && !userService.containsPermissionName("SurveyManage"))
+            throw new AuthorizedException("权限不足");
         if (!response.getSurveyId().equals(question.getSurveyId()))
             throw new ValidationException("responseId与questionId不属于同一问卷survey");
         if (answerDetailRepository.existsByResponseIdAndQuestionId(response.getId(), question.getId()))
