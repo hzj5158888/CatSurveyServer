@@ -30,6 +30,7 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/question")
+@CrossOrigin()
 public class QuestionController {
     @Autowired
     private UserRepository userRepository;

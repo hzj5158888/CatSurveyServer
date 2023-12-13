@@ -21,6 +21,7 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/option")
+@CrossOrigin()
 public class OptionController {
     @Autowired
     private OptionRepository optionRepository;

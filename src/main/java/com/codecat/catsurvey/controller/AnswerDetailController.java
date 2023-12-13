@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/response/detail")
+@CrossOrigin()
 public class AnswerDetailController {
     @Autowired
     private AnswerDetailRepository answerDetailRepository;

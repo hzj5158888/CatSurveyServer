@@ -32,6 +32,7 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/survey")
+@CrossOrigin()
 public class SurveyController {
     @Autowired
     private UserRepository userRepository;
