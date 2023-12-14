@@ -118,7 +118,7 @@ public class UserController {
                 String oldPassword = (String) user.get("oldPassword");
                 if (oldPassword == null)
                     return Result.validatedFailed("原密码为空");
-                if (!SaSecureUtil.md5(userOld.getPassword()).equals(oldPassword))
+                if (!userOld.getPassword().equals(oldPassword))
                     return Result.validatedFailed("原密码错误");
             }
 
