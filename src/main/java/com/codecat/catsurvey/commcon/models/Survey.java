@@ -50,10 +50,10 @@ public class Survey {
     @Column(name = "create_date", nullable = false)
     private Date createDate;
 
-    @Column(name = "start_date", nullable = false)
+    @Column(name = "start_date")
     private Date startDate;
 
-    @Column(name = "end_date", nullable = false)
+    @Column(name = "end_date")
     private Date endDate;
 
     @NotBlank(message = "状态不能为空")
