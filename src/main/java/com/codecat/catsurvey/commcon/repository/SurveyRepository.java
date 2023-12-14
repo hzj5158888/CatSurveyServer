@@ -3,7 +3,10 @@ package com.codecat.catsurvey.commcon.repository;
 import com.codecat.catsurvey.commcon.models.Survey;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -16,4 +19,8 @@ public interface SurveyRepository extends JpaRepository<Survey, Integer> {
     Optional<Survey> findByIdAndUserId(Integer surveyId, Integer userId);
 
     boolean existsByIdAndUserId(Integer surveyId, Integer userId);
+
+    @Modifying
+    @Transactional(isolation = Isolation.SERIALIZABLE)
+    void deleteAllByUserId(Integer loginId);
 }

@@ -1,6 +1,7 @@
 package com.codecat.catsurvey.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import com.alibaba.fastjson2.JSONObject;
 import com.codecat.catsurvey.commcon.Enum.survey.SurveyStatusEnum;
 import com.codecat.catsurvey.commcon.exception.CatValidationException;
 import com.codecat.catsurvey.commcon.models.Question;
@@ -94,6 +95,34 @@ public class SurveyController {
     }
 
     @SaCheckLogin
+    @DeleteMapping("")
+    public Result del(@RequestBody JSONObject delSurvey) {
+        if (delSurvey.entrySet().isEmpty())
+            return this.del();
+
+        Object surveyIdListObj = delSurvey.get("surveyIdList");
+        if (!(surveyIdListObj instanceof List<?>))
+            return Result.validatedFailed("Survey: del: 类型错误");
+
+        List<Integer> surveyIdList = (List<Integer>) surveyIdListObj;
+        for (Integer curId : surveyIdList) {
+            if (!surveyRepository.existsByIdAndUserId(curId, userService.getLoginId()))
+                return Result.validatedFailed("无法删除，权限不足");
+
+            surveyRepository.deleteById(curId);
+        }
+
+        return Result.success();
+    }
+
+    @SaCheckLogin
+    @DeleteMapping("")
+    public Result del() {
+        surveyRepository.deleteAllByUserId(userService.getLoginId());
+        return Result.success();
+    }
+
+    @SaCheckLogin
     @DeleteMapping("/user/{userId}/{surveyId}")
     public Result delByUser(@PathVariable Integer userId, @PathVariable Integer surveyId) {
         Survey survey = surveyRepository.findByIdAndUserId(surveyId, userId).orElseThrow(() ->
@@ -110,9 +139,6 @@ public class SurveyController {
     @Transactional
     @PutMapping("/{surveyId}")
     public Result modify(@PathVariable Integer surveyId, @RequestBody Survey newSurvey) {
-        if (newSurvey == null)
-            return Result.validatedFailed("无效请求, 数据为空");
-
         Survey survey = surveyRepository.findById(surveyId).orElseThrow(() ->
                 new CatValidationException("问卷不存在")
         );
@@ -212,6 +238,15 @@ public class SurveyController {
 
         return Result.successData(
                 surveyRepository.findAllByUserId(userId, Sort.by(Sort.Direction.DESC, "createDate"))
+        );
+    }
+
+    @SaCheckLogin
+    @GetMapping("")
+    public Result getAllByLoginUser() {
+        return Result.successData(surveyRepository.findAllByUserId(
+                        userService.getLoginId(), Sort.by(Sort.Direction.DESC, "createDate")
+                )
         );
     }
 
