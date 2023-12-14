@@ -3,7 +3,7 @@ package com.codecat.catsurvey.controller;
 import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.codecat.catsurvey.commcon.Enum.question.QuestionTypeEnum;
-import com.codecat.catsurvey.commcon.exception.ValidationException;
+import com.codecat.catsurvey.commcon.exception.CatValidationException;
 import com.codecat.catsurvey.commcon.models.OptionTemplate;
 import com.codecat.catsurvey.commcon.models.QuestionTemplate;
 import com.codecat.catsurvey.commcon.repository.OptionTemplateRepository;
@@ -40,7 +40,7 @@ public class OptionTemplateController {
                                 @RequestBody @Validated({validationTime.Add.class}) OptionTemplate optionTemplate)
     {
         QuestionTemplate questionTemplate = questionTemplateRepository.findById(questionTemplateId).orElseThrow(() ->
-                new ValidationException("问题不存在")
+                new CatValidationException("问题不存在")
         );
 
         if (questionTemplate.getType().equals(QuestionTypeEnum.TEXT.getName()))
@@ -74,7 +74,7 @@ public class OptionTemplateController {
                                 @RequestBody List<OptionTemplate> optionTemplates)
     {
         QuestionTemplate questionTemplate = questionTemplateRepository.findById(questionTemplateId).orElseThrow(() ->
-                new ValidationException("问题不存在")
+                new CatValidationException("问题不存在")
         );
 
         if (questionTemplate.getType().equals(QuestionTypeEnum.TEXT.getName()))
@@ -102,7 +102,7 @@ public class OptionTemplateController {
                                    @RequestBody OptionTemplate newOptionTemplate)
     {
         OptionTemplate optionTemplate = optionTemplateRepository.findByIdAndQuestionTemplateId(optionTemplateId, questionTemplateId)
-                .orElseThrow(() -> new ValidationException("选项模板不存在或不属于此问题模板"));
+                .orElseThrow(() -> new CatValidationException("选项模板不存在或不属于此问题模板"));
 
         Set<String> notAllow = new HashSet<>(){{
             add("id");
@@ -132,7 +132,7 @@ public class OptionTemplateController {
     @GetMapping("/{optionTemplateId}")
     public Result get(@PathVariable Integer optionTemplateId) {
         OptionTemplate optionTemplate = optionTemplateRepository.findById(optionTemplateId).orElseThrow(() ->
-                new ValidationException("选项不存在")
+                new CatValidationException("选项不存在")
         );
 
         return Result.successData(optionTemplate);
@@ -142,7 +142,7 @@ public class OptionTemplateController {
     @GetMapping("/question/{questionTemplateId}/{optionTemplateId}")
     public Result getByQuestion(@PathVariable Integer questionTemplateId, @PathVariable Integer optionTemplateId) {
         OptionTemplate optionTemplate = optionTemplateRepository.findByIdAndQuestionTemplateId(optionTemplateId, questionTemplateId)
-                .orElseThrow(() -> new ValidationException("选项不存在")
+                .orElseThrow(() -> new CatValidationException("选项不存在")
         );
 
         return Result.successData(optionTemplate);

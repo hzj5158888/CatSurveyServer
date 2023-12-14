@@ -1,28 +1,22 @@
 package com.codecat.catsurvey.service;
 
-import com.alibaba.fastjson2.util.BeanUtils;
-import com.codecat.catsurvey.commcon.exception.AuthorizedException;
-import com.codecat.catsurvey.commcon.exception.ValidationException;
+import com.codecat.catsurvey.commcon.exception.CatAuthorizedException;
+import com.codecat.catsurvey.commcon.exception.CatValidationException;
 import com.codecat.catsurvey.commcon.models.Option;
 import com.codecat.catsurvey.commcon.models.Question;
 import com.codecat.catsurvey.commcon.models.Survey;
 import com.codecat.catsurvey.commcon.repository.QuestionRepository;
 import com.codecat.catsurvey.commcon.repository.SurveyRepository;
-import com.codecat.catsurvey.commcon.utils.Result;
 import com.codecat.catsurvey.commcon.utils.Util;
 import com.codecat.catsurvey.commcon.valid.group.validationTime;
 import jakarta.validation.Valid;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 @Service
@@ -50,13 +44,13 @@ public class QuestionService {
     @Transactional
     public void add(Question question) {
         if (question == null)
-            throw new ValidationException("无效请求，数据为空");
+            throw new CatValidationException("无效请求，数据为空");
         
         Survey survey = surveyRepository.findById(question.getSurveyId()).orElseThrow(() ->
-                new ValidationException("问卷不存在")
+                new CatValidationException("问卷不存在")
         );
         if (!userService.isLoginId(survey.getUserId()) && !userService.containsPermissionName("SurveyManage"))
-            throw new AuthorizedException("无法访问，权限不足");
+            throw new CatAuthorizedException("无法访问，权限不足");
 
         if (question.getIOrder() == null)
             question.setIOrder(Integer.MAX_VALUE);
@@ -71,10 +65,10 @@ public class QuestionService {
     @Transactional
     public List<Integer> setBySurvey(Integer surveyId, List<Question> questions) {
         Survey survey = surveyRepository.findById(surveyId).orElseThrow(() ->
-                new ValidationException("问卷不存在")
+                new CatValidationException("问卷不存在")
         );
         if (!userService.isLoginId(survey.getUserId()) && !userService.containsPermissionName("SurveyManage"))
-            throw new AuthorizedException("无法访问，权限不足");
+            throw new CatAuthorizedException("无法访问，权限不足");
 
         Set<Integer> modify_set = new HashSet<>();
         for (int i = 0; i < questions.size(); i++) {
@@ -86,7 +80,7 @@ public class QuestionService {
                 checkFullAdd(question);
             else {
                 if (!questionRepository.existsByIdAndSurveyId(question.getId(), question.getSurveyId()))
-                    throw new ValidationException("问题不存在或不属于该问卷");
+                    throw new CatValidationException("问题不存在或不属于该问卷");
 
                 modify_set.add(question.getId());
                 question.setSurveyId(null);
@@ -121,13 +115,13 @@ public class QuestionService {
     @Transactional
     public void modify(Integer questionId, Question newQuestion) {
         if (newQuestion == null)
-            throw new ValidationException("无效请求, 数据为空");
+            throw new CatValidationException("无效请求, 数据为空");
 
         Question question = questionRepository.findById(questionId).orElseThrow(() ->
-                new ValidationException("问题不存在")
+                new CatValidationException("问题不存在")
         );
         if (!userService.isLoginId(question.getSurvey().getUserId()) && !userService.containsPermissionName("SurveyManage"))
-            throw new AuthorizedException("无法修改，权限不足");
+            throw new CatAuthorizedException("无法修改，权限不足");
 
         Set<String> notAllow = new HashSet<>() {{
             add("id");
@@ -143,7 +137,7 @@ public class QuestionService {
             if (entry.getValue() == null || continueItem.contains(entry.getKey()))
                 continue;
             if (notAllow.contains(entry.getKey()))
-                throw new ValidationException("问题信息修改失败, 属性" + entry.getKey() + "为只读");
+                throw new CatValidationException("问题信息修改失败, 属性" + entry.getKey() + "为只读");
 
             questionMap.put(entry.getKey(), entry.getValue());
         }
@@ -159,7 +153,7 @@ public class QuestionService {
 
     public void setIOrder(Integer questionId, Integer iOrder) {
         Question question = questionRepository.findById(questionId).orElseThrow(() ->
-                new ValidationException("问题不存在")
+                new CatValidationException("问题不存在")
         );
 
         List<Question> sortedQuestion = questionRepository.findAllBySurveyId(
@@ -169,7 +163,7 @@ public class QuestionService {
         if (iOrder == null || iOrder >= sortedQuestion.size())
             iOrder = Math.max(sortedQuestion.size() - 1, 0);
         if (iOrder < 0)
-            throw new ValidationException("iOrder非法");
+            throw new CatValidationException("iOrder非法");
 
         List<Question> res = new ArrayList<>();
         for (int i = 0; i < sortedQuestion.size(); i++)

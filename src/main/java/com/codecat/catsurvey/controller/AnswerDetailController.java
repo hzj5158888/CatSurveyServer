@@ -1,16 +1,10 @@
 package com.codecat.catsurvey.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
-import com.alibaba.fastjson2.JSONObject;
-import com.codecat.catsurvey.commcon.Enum.question.QuestionTypeEnum;
-import com.codecat.catsurvey.commcon.exception.ValidationException;
+import com.codecat.catsurvey.commcon.exception.CatValidationException;
 import com.codecat.catsurvey.commcon.models.AnswerDetail;
-import com.codecat.catsurvey.commcon.models.Option;
-import com.codecat.catsurvey.commcon.models.Question;
 import com.codecat.catsurvey.commcon.models.Response;
 import com.codecat.catsurvey.commcon.repository.AnswerDetailRepository;
-import com.codecat.catsurvey.commcon.repository.OptionRepository;
-import com.codecat.catsurvey.commcon.repository.QuestionRepository;
 import com.codecat.catsurvey.commcon.repository.ResponseRepository;
 import com.codecat.catsurvey.commcon.utils.Result;
 import com.codecat.catsurvey.commcon.valid.group.validationTime;
@@ -53,7 +47,7 @@ public class AnswerDetailController {
     @DeleteMapping("/{answerDetailId}")
     public Result del(@PathVariable Integer answerDetailId) {
         AnswerDetail answerDetail = answerDetailRepository.findById(answerDetailId).orElseThrow(() ->
-                new ValidationException("答案不存在")
+                new CatValidationException("答案不存在")
         );
 
         Integer userId = answerDetail.getResponse().getSurvey().getUserId();
@@ -68,7 +62,7 @@ public class AnswerDetailController {
     @DeleteMapping("/response/{responseId}/{answerDetailId}")
     public Result delByResponse(@PathVariable Integer responseId, @PathVariable Integer answerDetailId) {
         AnswerDetail answerDetail = answerDetailRepository.findByIdAndResponseId(answerDetailId, responseId).orElseThrow(() ->
-                new ValidationException("答案不存在或不属于此答卷")
+                new CatValidationException("答案不存在或不属于此答卷")
         );
 
         Integer userId = answerDetail.getResponse().getSurvey().getUserId();
@@ -83,7 +77,7 @@ public class AnswerDetailController {
     @GetMapping("/{answerDetailId}")
     public Result get(@PathVariable Integer answerDetailId) {
         AnswerDetail answerDetail = answerDetailRepository.findById(answerDetailId).orElseThrow(() ->
-                new ValidationException("答案ID不存在")
+                new CatValidationException("答案ID不存在")
         );
 
         Integer userId = answerDetail.getResponse().getSurvey().getUserId();
@@ -99,7 +93,7 @@ public class AnswerDetailController {
                                 @PathVariable Integer answerDetailId)
     {
         AnswerDetail answerDetail = answerDetailRepository.findByIdAndResponseId(answerDetailId, responseId).orElseThrow(() ->
-                new ValidationException("答案不存在或不属于此答卷")
+                new CatValidationException("答案不存在或不属于此答卷")
         );
 
         Integer userId = answerDetail.getResponse().getSurvey().getUserId();
@@ -113,7 +107,7 @@ public class AnswerDetailController {
     @GetMapping("/response/{responseId}")
     public Result getAllByResponse(@PathVariable Integer responseId) {
         Response response = responseRepository.findById(responseId).orElseThrow(() ->
-                new ValidationException("答卷不存在")
+                new CatValidationException("答卷不存在")
         );
 
         Integer userId = response.getSurvey().getUserId();

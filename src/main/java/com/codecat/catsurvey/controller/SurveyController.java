@@ -1,16 +1,11 @@
 package com.codecat.catsurvey.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
-import cn.dev33.satoken.stp.StpUtil;
-import com.alibaba.fastjson2.JSONObject;
 import com.codecat.catsurvey.commcon.Enum.survey.SurveyStatusEnum;
-import com.codecat.catsurvey.commcon.exception.ValidationException;
-import com.codecat.catsurvey.commcon.models.Option;
+import com.codecat.catsurvey.commcon.exception.CatValidationException;
 import com.codecat.catsurvey.commcon.models.Question;
 import com.codecat.catsurvey.commcon.models.Survey;
-import com.codecat.catsurvey.commcon.repository.QuestionRepository;
 import com.codecat.catsurvey.commcon.repository.SurveyRepository;
-import com.codecat.catsurvey.commcon.repository.SurveyTemplateRepository;
 import com.codecat.catsurvey.commcon.repository.UserRepository;
 import com.codecat.catsurvey.commcon.utils.Result;
 import com.codecat.catsurvey.commcon.utils.Util;
@@ -89,7 +84,7 @@ public class SurveyController {
     @DeleteMapping("/{surveyId}")
     public Result del(@PathVariable Integer surveyId) {
         Survey survey = surveyRepository.findById(surveyId).orElseThrow(() ->
-                new ValidationException("问卷不存在")
+                new CatValidationException("问卷不存在")
         );
         if (!userService.isLoginId(survey.getUserId()) && !userService.containsPermissionName("SurveyManage"))
             return Result.unauthorized("无法删除，权限不足");
@@ -102,7 +97,7 @@ public class SurveyController {
     @DeleteMapping("/user/{userId}/{surveyId}")
     public Result delByUser(@PathVariable Integer userId, @PathVariable Integer surveyId) {
         Survey survey = surveyRepository.findByIdAndUserId(surveyId, userId).orElseThrow(() ->
-                new ValidationException("问卷不存在或不属于此用户")
+                new CatValidationException("问卷不存在或不属于此用户")
         );
         if (!userService.isLoginId(userId) && !userService.containsPermissionName("SurveyManage"))
             return Result.unauthorized("无法删除，权限不足");
@@ -119,7 +114,7 @@ public class SurveyController {
             return Result.validatedFailed("无效请求, 数据为空");
 
         Survey survey = surveyRepository.findById(surveyId).orElseThrow(() ->
-                new ValidationException("问卷不存在")
+                new CatValidationException("问卷不存在")
         );
         if (!userService.isLoginId(survey.getUserId()) && !userService.containsPermissionName("SurveyManage"))
             return Result.unauthorized("无法修改，权限不足");
@@ -184,7 +179,7 @@ public class SurveyController {
     @GetMapping("/{surveyId}")
     public Result get(@PathVariable Integer surveyId) {
         Survey survey = surveyRepository.findById(surveyId).orElseThrow(() ->
-                new ValidationException("问卷不存在")
+                new CatValidationException("问卷不存在")
         );
 
         if (!userService.isLoginId(survey.getUserId()) &&
@@ -199,7 +194,7 @@ public class SurveyController {
     @GetMapping("/user/{userId}/{surveyId}")
     public Result getByUser(@PathVariable Integer userId, @PathVariable Integer surveyId) {
         Survey survey = surveyRepository.findByIdAndUserId(surveyId, userId).orElseThrow(() ->
-                new ValidationException("问卷不存在或不属于此用户")
+                new CatValidationException("问卷不存在或不属于此用户")
         );
         if (!userService.isLoginId(survey.getUserId()) && !userService.containsPermissionName("SurveyManage"))
             return Result.unauthorized("无法访问，权限不足");
@@ -245,7 +240,7 @@ public class SurveyController {
             throws ServletException, IOException
     {
         if (!surveyRepository.existsByIdAndUserId(surveyId, userId))
-            throw new ValidationException("问卷不存在或不属于此用户");
+            throw new CatValidationException("问卷不存在或不属于此用户");
 
         List<String> pathSplit = List.of(req.getServletPath().split("/"));
         List<String> pathNeed = new ArrayList<>();
@@ -287,7 +282,7 @@ public class SurveyController {
             throws ServletException, IOException
     {
         if (!surveyRepository.existsByIdAndUserId(surveyId, userId))
-            throw new ValidationException("问卷不存在或不属于此用户");
+            throw new CatValidationException("问卷不存在或不属于此用户");
 
         List<String> pathSplit = List.of(req.getServletPath().split("/"));
         List<String> pathNeed = new ArrayList<>();

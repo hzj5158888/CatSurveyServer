@@ -6,6 +6,7 @@ import cn.dev33.satoken.exception.NotRoleException;
 import com.codecat.catsurvey.commcon.utils.Result;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.ValidationException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Service;
@@ -52,13 +53,18 @@ public class GlobalExceptionHandler {
         return Result.validatedFailed(e.getMessage());
     }
 
+    @ExceptionHandler(CatValidationException.class)
+    public Result handleValidationException(CatValidationException e) {
+        return Result.validatedFailed(e.getMessage());
+    }
+
     @ExceptionHandler(ValidationException.class)
     public Result handleValidationException(ValidationException e) {
         return Result.validatedFailed(e.getMessage());
     }
 
-    @ExceptionHandler(AuthorizedException.class)
-    public Result handleAuthorizedException(AuthorizedException e) {
+    @ExceptionHandler(CatAuthorizedException.class)
+    public Result handleAuthorizedException(CatAuthorizedException e) {
         return Result.unauthorized(e.getMessage());
     }
 

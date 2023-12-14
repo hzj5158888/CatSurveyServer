@@ -1,14 +1,11 @@
 package com.codecat.catsurvey.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
-import com.codecat.catsurvey.commcon.Enum.question.QuestionTypeEnum;
-import com.codecat.catsurvey.commcon.exception.ValidationException;
+import com.codecat.catsurvey.commcon.exception.CatValidationException;
 import com.codecat.catsurvey.commcon.models.Option;
-import com.codecat.catsurvey.commcon.models.Question;
 import com.codecat.catsurvey.commcon.repository.OptionRepository;
 import com.codecat.catsurvey.commcon.repository.QuestionRepository;
 import com.codecat.catsurvey.commcon.utils.Result;
-import com.codecat.catsurvey.commcon.utils.Util;
 import com.codecat.catsurvey.commcon.valid.group.validationTime;
 import com.codecat.catsurvey.service.OptionService;
 import com.codecat.catsurvey.service.UserService;
@@ -59,7 +56,7 @@ public class OptionController {
     @DeleteMapping("/{optionId}")
     public Result del(@PathVariable Integer optionId) {
         Option option = optionRepository.findById(optionId).orElseThrow(() ->
-                new ValidationException("选项不存在")
+                new CatValidationException("选项不存在")
         );
 
         Integer userId = option.getQuestion().getSurvey().getUserId();
@@ -74,7 +71,7 @@ public class OptionController {
     @DeleteMapping("/question/{questionId}/{optionId}")
     public Result delByQuestion(@PathVariable Integer questionId, @PathVariable Integer optionId) {
         Option option = optionRepository.findByIdAndQuestionId(optionId, questionId).orElseThrow(() ->
-                new ValidationException("选项不存在或不属于此问题")
+                new CatValidationException("选项不存在或不属于此问题")
         );
 
         Integer userId = option.getQuestion().getSurvey().getUserId();
@@ -115,7 +112,7 @@ public class OptionController {
     @GetMapping("/{optionId}")
     public Result get(@PathVariable Integer optionId) {
         Option option = optionRepository.findById(optionId).orElseThrow(() ->
-                new ValidationException("选项不存在")
+                new CatValidationException("选项不存在")
         );
 
         return Result.successData(option);
@@ -125,7 +122,7 @@ public class OptionController {
     @GetMapping("/question/{questionId}/{optionId}")
     public Result getByQuestion(@PathVariable Integer questionId, @PathVariable Integer optionId) {
         Option option = optionRepository.findByIdAndQuestionId(optionId, questionId).orElseThrow(() ->
-                new ValidationException("选项不存在或不属于此问题")
+                new CatValidationException("选项不存在或不属于此问题")
         );
 
         Integer userId = option.getQuestion().getSurvey().getUserId();

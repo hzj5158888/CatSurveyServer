@@ -2,7 +2,7 @@ package com.codecat.catsurvey.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.annotation.SaCheckPermission;
-import com.codecat.catsurvey.commcon.exception.ValidationException;
+import com.codecat.catsurvey.commcon.exception.CatValidationException;
 import com.codecat.catsurvey.commcon.models.SurveyTemplate;
 import com.codecat.catsurvey.commcon.repository.SurveyTemplateRepository;
 import com.codecat.catsurvey.commcon.utils.Result;
@@ -61,7 +61,7 @@ public class SurveyTemplateController {
             return Result.validatedFailed("无效请求, 数据为空");
 
         SurveyTemplate surveyTemplate = surveyTemplateRepository.findById(surveyTemplateId).orElseThrow(() ->
-                new ValidationException("问卷模板不存在")
+                new CatValidationException("问卷模板不存在")
         );
 
         Set<String> notAllow = new HashSet<>() {{
@@ -94,7 +94,7 @@ public class SurveyTemplateController {
     @GetMapping("/{surveyTemplateId}")
     public Result get(@PathVariable Integer surveyTemplateId) {
         SurveyTemplate surveyTemplate = surveyTemplateRepository.findById(surveyTemplateId).orElseThrow(() ->
-                new ValidationException("问卷模板不存在")
+                new CatValidationException("问卷模板不存在")
         );
 
         return Result.successData(surveyTemplate);

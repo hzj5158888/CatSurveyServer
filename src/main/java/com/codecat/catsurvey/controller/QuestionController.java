@@ -1,15 +1,13 @@
 package com.codecat.catsurvey.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
-import com.codecat.catsurvey.commcon.exception.ValidationException;
+import com.codecat.catsurvey.commcon.exception.CatValidationException;
 import com.codecat.catsurvey.commcon.models.Question;
 import com.codecat.catsurvey.commcon.models.Survey;
-import com.codecat.catsurvey.commcon.models.User;
 import com.codecat.catsurvey.commcon.repository.QuestionRepository;
 import com.codecat.catsurvey.commcon.repository.SurveyRepository;
 import com.codecat.catsurvey.commcon.repository.UserRepository;
 import com.codecat.catsurvey.commcon.utils.Result;
-import com.codecat.catsurvey.commcon.utils.Util;
 import com.codecat.catsurvey.commcon.valid.group.validationTime;
 import com.codecat.catsurvey.service.OptionService;
 import com.codecat.catsurvey.service.QuestionService;
@@ -19,13 +17,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.relational.core.sql.In;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.sql.Date;
 import java.util.*;
 
 @RestController
@@ -74,7 +69,7 @@ public class QuestionController {
     @DeleteMapping("/{questionId}")
     public Result del(@PathVariable Integer questionId) {
         Question question = questionRepository.findById(questionId).orElseThrow(() ->
-                new ValidationException("问题不存在")
+                new CatValidationException("问题不存在")
         );
 
         Integer userId = question.getSurvey().getUserId();
@@ -89,7 +84,7 @@ public class QuestionController {
     @DeleteMapping("/survey/{surveyId}/{questionId}")
     public Result delBySurvey(@PathVariable Integer surveyId, @PathVariable Integer questionId) {
         Question question = questionRepository.findByIdAndSurveyId(questionId, surveyId).orElseThrow(() ->
-                new ValidationException("问题不存在或不属于该问卷")
+                new CatValidationException("问题不存在或不属于该问卷")
         );
 
         Integer userId = question.getSurvey().getUserId();
@@ -119,7 +114,7 @@ public class QuestionController {
                                  @RequestBody Question newQuestion)
     {
         Question question = questionRepository.findByIdAndSurveyId(questionId, surveyId).orElseThrow(() ->
-                new ValidationException("问题不存在或不属于该问卷")
+                new CatValidationException("问题不存在或不属于该问卷")
         );
 
         Integer userId = question.getSurvey().getUserId();
@@ -133,7 +128,7 @@ public class QuestionController {
     @GetMapping("/{questionId}")
     public Result get(@PathVariable Integer questionId) {
         Question question = questionRepository.findById(questionId).orElseThrow(() ->
-                new ValidationException("问题不存在")
+                new CatValidationException("问题不存在")
         );
 
         Integer userId = question.getSurvey().getUserId();
@@ -147,7 +142,7 @@ public class QuestionController {
     @GetMapping("/survey/{surveyId}")
     public Result getAllBySurvey(@PathVariable Integer surveyId) {
         Survey survey = surveyRepository.findById(surveyId).orElseThrow(() ->
-                new ValidationException("问卷不存在")
+                new CatValidationException("问卷不存在")
         );
         if (!userService.isLoginId(survey.getUserId()) && !userService.containsPermissionName("SurveyManage"))
             return Result.unauthorized("无法访问，权限不足");
@@ -161,7 +156,7 @@ public class QuestionController {
     @GetMapping("/survey/{surveyId}/{questionId}")
     public Result getBySurvey(@PathVariable Integer surveyId, @PathVariable Integer questionId) {
         Question question = questionRepository.findByIdAndSurveyId(questionId, surveyId).orElseThrow(() ->
-                new ValidationException("问题不存在或不属于该问卷")
+                new CatValidationException("问题不存在或不属于该问卷")
         );
 
         Integer userId = question.getSurvey().getUserId();
@@ -198,7 +193,7 @@ public class QuestionController {
             throws ServletException, IOException
     {
         if (!questionRepository.existsByIdAndSurveyId(questionId, surveyId))
-            throw new ValidationException("问题不存在或不属于该问卷");
+            throw new CatValidationException("问题不存在或不属于该问卷");
 
         List<String> pathSplit = List.of(req.getServletPath().split("/"));
         List<String> pathNeed = new ArrayList<>();

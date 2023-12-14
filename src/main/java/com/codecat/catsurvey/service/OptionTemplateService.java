@@ -1,6 +1,6 @@
 package com.codecat.catsurvey.service;
 
-import com.codecat.catsurvey.commcon.exception.ValidationException;
+import com.codecat.catsurvey.commcon.exception.CatValidationException;
 import com.codecat.catsurvey.commcon.models.OptionTemplate;
 import com.codecat.catsurvey.commcon.repository.OptionTemplateRepository;
 import com.codecat.catsurvey.commcon.valid.group.validationTime;
@@ -21,7 +21,7 @@ public class OptionTemplateService {
 
     public void setIOrder(Integer optionTemplateId, Integer iOrder) {
         OptionTemplate optionTemplate = optionTemplateRepository.findById(optionTemplateId).orElseThrow(() ->
-                new ValidationException("选项不存在")
+                new CatValidationException("选项不存在")
         );
 
         List<OptionTemplate> sortedOptionTemplate = optionTemplateRepository.findAllByQuestionTemplateId(
@@ -31,7 +31,7 @@ public class OptionTemplateService {
         if (iOrder == null || iOrder >= sortedOptionTemplate.size())
             iOrder = Math.max(sortedOptionTemplate.size() - 1, 0);
         if (iOrder < 0)
-            throw new ValidationException("iOrder非法");
+            throw new CatValidationException("iOrder非法");
 
         List<OptionTemplate> res = new ArrayList<>();
         for (int i = 0; i < sortedOptionTemplate.size(); i++)

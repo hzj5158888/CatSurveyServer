@@ -2,11 +2,10 @@ package com.codecat.catsurvey.service;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.codecat.catsurvey.commcon.Enum.question.QuestionTypeEnum;
-import com.codecat.catsurvey.commcon.exception.AuthorizedException;
-import com.codecat.catsurvey.commcon.exception.ValidationException;
+import com.codecat.catsurvey.commcon.exception.CatAuthorizedException;
+import com.codecat.catsurvey.commcon.exception.CatValidationException;
 import com.codecat.catsurvey.commcon.models.*;
 import com.codecat.catsurvey.commcon.repository.*;
-import com.codecat.catsurvey.commcon.utils.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,32 +35,32 @@ public class AnswerDetailService {
 
     public Integer add(AnswerDetail answerDetail) {
         if (answerDetail == null)
-            throw new ValidationException("无效请求，数据为空");
+            throw new CatValidationException("无效请求，数据为空");
 
         Response response = responseRepository.findById(answerDetail.getResponseId()).orElseThrow(() ->
-                new ValidationException("答卷不存在")
+                new CatValidationException("答卷不存在")
         );
         Question question = questionRepository.findById(answerDetail.getQuestionId()).orElseThrow(() ->
-                new ValidationException("问题不存在")
+                new CatValidationException("问题不存在")
         );
         Survey survey = surveyRepository.findById(response.getSurveyId()).orElseThrow(() ->
-                new ValidationException("问卷不存在")
+                new CatValidationException("问卷不存在")
         );
 
         if (!survey.getStatus().equals("进行中") && !userService.containsPermissionName("SurveyManage"))
-            throw new AuthorizedException("权限不足");
+            throw new CatAuthorizedException("权限不足");
         if (!response.getSurveyId().equals(question.getSurveyId()))
-            throw new ValidationException("responseId与questionId不属于同一问卷survey");
+            throw new CatValidationException("responseId与questionId不属于同一问卷survey");
         if (answerDetailRepository.existsByResponseIdAndQuestionId(response.getId(), question.getId()))
-            throw new ValidationException("该问题答案已存在");
+            throw new CatValidationException("该问题答案已存在");
 
         if (!question.getType().equals(QuestionTypeEnum.TEXT.getName())) {
             Option option = optionRepository.findById(answerDetail.getOptionId()).orElseThrow(() ->
-                    new ValidationException("选项不存在")
+                    new CatValidationException("选项不存在")
             );
 
             if (!option.getQuestionId().equals(question.getId()))
-                throw new ValidationException("option中questionId与answer中questionId不同");
+                throw new CatValidationException("option中questionId与answer中questionId不同");
         }
 
         JSONObject jsonAns = (JSONObject) answerDetail.getJsonAnswer();

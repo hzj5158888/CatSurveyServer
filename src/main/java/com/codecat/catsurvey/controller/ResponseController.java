@@ -1,8 +1,7 @@
 package com.codecat.catsurvey.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
-import cn.dev33.satoken.annotation.SaIgnore;
-import com.codecat.catsurvey.commcon.exception.ValidationException;
+import com.codecat.catsurvey.commcon.exception.CatValidationException;
 import com.codecat.catsurvey.commcon.models.AnswerDetail;
 import com.codecat.catsurvey.commcon.models.Response;
 import com.codecat.catsurvey.commcon.models.Survey;
@@ -44,7 +43,7 @@ public class ResponseController {
     @PostMapping("")
     public Result add(@RequestBody @Validated(validationTime.FullAdd.class) Response response) {
         Survey survey = surveyRepository.findById(response.getSurveyId()).orElseThrow(() ->
-                new ValidationException("问卷ID无效")
+                new CatValidationException("问卷ID无效")
         );
 
         if (!survey.getStatus().equals("进行中") && !userService.containsPermissionName("SurveyManage"))
@@ -76,7 +75,7 @@ public class ResponseController {
     @DeleteMapping("/{responseId}")
     public Result del(@PathVariable Integer responseId) {
         Response response = responseRepository.findById(responseId).orElseThrow(() ->
-                new ValidationException("答卷不存在")
+                new CatValidationException("答卷不存在")
         );
 
         Integer userId = response.getUserId();
@@ -91,7 +90,7 @@ public class ResponseController {
     @DeleteMapping("/survey/{surveyId}/{responseId}")
     public Result delBySurvey(@PathVariable Integer surveyId, @PathVariable Integer responseId) {
         Response response = responseRepository.findByIdAndSurveyId(responseId, surveyId).orElseThrow(() ->
-                new ValidationException("答卷不存在或不属于该问卷")
+                new CatValidationException("答卷不存在或不属于该问卷")
         );
 
         Integer userId = response.getUserId();
@@ -106,7 +105,7 @@ public class ResponseController {
     @GetMapping("/{responseId}")
     public Result get(@PathVariable Integer responseId) {
         Response response = responseRepository.findById(responseId).orElseThrow(() ->
-                new ValidationException("答卷不存在")
+                new CatValidationException("答卷不存在")
         );
 
         Integer userId = response.getUserId();
@@ -120,7 +119,7 @@ public class ResponseController {
     @GetMapping("/survey/{surveyId}/{responseId}")
     public Result getBySurvey(@PathVariable Integer surveyId, @PathVariable Integer responseId) {
         Response response = responseRepository.findByIdAndSurveyId(responseId, surveyId).orElseThrow(() ->
-                new ValidationException("答卷不存在或不属于该问卷")
+                new CatValidationException("答卷不存在或不属于该问卷")
         );
 
         Integer userId = response.getSurvey().getUserId();
@@ -134,7 +133,7 @@ public class ResponseController {
     @GetMapping("/survey/{surveyId}")
     public Result getAllBySurvey(@PathVariable Integer surveyId) {
         Survey survey = surveyRepository.findById(surveyId).orElseThrow(() ->
-                new ValidationException("问卷不存在")
+                new CatValidationException("问卷不存在")
         );
 
         Integer userId = survey.getUserId();
@@ -169,7 +168,7 @@ public class ResponseController {
             throws ServletException, IOException
     {
         if (!responseRepository.existsByIdAndSurveyId(responseId, surveyId))
-            throw new ValidationException("答卷不存在或不属于该问卷");
+            throw new CatValidationException("答卷不存在或不属于该问卷");
 
         List<String> pathSplit = List.of(req.getServletPath().split("/"));
         List<String> pathNeed = new ArrayList<>();

@@ -2,10 +2,8 @@ package com.codecat.catsurvey.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.annotation.SaCheckPermission;
-import com.codecat.catsurvey.commcon.exception.ValidationException;
-import com.codecat.catsurvey.commcon.models.Question;
+import com.codecat.catsurvey.commcon.exception.CatValidationException;
 import com.codecat.catsurvey.commcon.models.QuestionTemplate;
-import com.codecat.catsurvey.commcon.models.Survey;
 import com.codecat.catsurvey.commcon.repository.QuestionTemplateRepository;
 import com.codecat.catsurvey.commcon.repository.SurveyTemplateRepository;
 import com.codecat.catsurvey.commcon.utils.Result;
@@ -101,7 +99,7 @@ public class QuestionTemplateController {
             return Result.validatedFailed("无效请求, 数据为空");
 
         QuestionTemplate questionTemplate = questionTemplateRepository.findByIdAndTemplateId(questionTemplateId, surveyTemplateId)
-                .orElseThrow(() -> new ValidationException("问题不存在或不属于该问卷"));
+                .orElseThrow(() -> new CatValidationException("问题不存在或不属于该问卷"));
 
         Set<String> notAllow = new HashSet<>() {{
             add("id");
@@ -134,7 +132,7 @@ public class QuestionTemplateController {
     @GetMapping("/{questionTemplateId}")
     public Result get(@PathVariable Integer questionTemplateId) {
         QuestionTemplate questionTemplate = questionTemplateRepository.findById(questionTemplateId).orElseThrow(() ->
-                new ValidationException("问题模板不存在")
+                new CatValidationException("问题模板不存在")
         );
 
         return Result.successData(questionTemplate);
@@ -146,7 +144,7 @@ public class QuestionTemplateController {
                               @PathVariable Integer questionTemplateId)
     {
         QuestionTemplate questionTemplate = questionTemplateRepository.findByIdAndTemplateId(questionTemplateId, surveyTemplateId).orElseThrow(() ->
-                new ValidationException("问题模板不存在或不属于此问卷模板")
+                new CatValidationException("问题模板不存在或不属于此问卷模板")
         );
 
         return Result.successData(questionTemplate);
@@ -187,7 +185,7 @@ public class QuestionTemplateController {
             throws ServletException, IOException
     {
         if (!questionTemplateRepository.existsByIdAndTemplateId(questionTemplateId, surveyTemplateId))
-            throw new ValidationException("问题不存在或不属于此问卷");
+            throw new CatValidationException("问题不存在或不属于此问卷");
 
         List<String> pathSplit = List.of(req.getServletPath().split("/"));
         List<String> pathNeed = new ArrayList<>();

@@ -1,6 +1,6 @@
 package com.codecat.catsurvey.service;
 
-import com.codecat.catsurvey.commcon.exception.ValidationException;
+import com.codecat.catsurvey.commcon.exception.CatValidationException;
 import com.codecat.catsurvey.commcon.models.QuestionTemplate;
 import com.codecat.catsurvey.commcon.repository.QuestionTemplateRepository;
 import com.codecat.catsurvey.commcon.valid.group.validationTime;
@@ -21,7 +21,7 @@ public class QuestionTemplateService {
 
     public void setIOrder(Integer questionTemplateId, Integer iOrder) {
         QuestionTemplate questionTemplate = questionTemplateRepository.findById(questionTemplateId).orElseThrow(() ->
-                new ValidationException("问题模板不存在")
+                new CatValidationException("问题模板不存在")
         );
 
         List<QuestionTemplate> sortedQuestionTemplate = questionTemplateRepository.findAllByTemplateId(
@@ -31,7 +31,7 @@ public class QuestionTemplateService {
         if (iOrder == null || iOrder >= sortedQuestionTemplate.size())
             iOrder = Math.max(sortedQuestionTemplate.size() - 1, 0);
         if (iOrder < 0)
-            throw new ValidationException("iOrder非法");
+            throw new CatValidationException("iOrder非法");
 
         List<QuestionTemplate> res = new ArrayList<>();
         for (int i = 0; i < sortedQuestionTemplate.size(); i++)

@@ -1,12 +1,11 @@
 package com.codecat.catsurvey.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
-import cn.dev33.satoken.annotation.SaCheckRole;
 import cn.dev33.satoken.secure.SaSecureUtil;
 import cn.dev33.satoken.stp.SaTokenInfo;
 import cn.dev33.satoken.stp.StpUtil;
 import com.alibaba.fastjson2.JSONObject;
-import com.codecat.catsurvey.commcon.exception.ValidationException;
+import com.codecat.catsurvey.commcon.exception.CatValidationException;
 import com.codecat.catsurvey.commcon.models.Role;
 import com.codecat.catsurvey.commcon.models.User;
 import com.codecat.catsurvey.commcon.repository.SurveyRepository;
@@ -93,7 +92,7 @@ public class UserController {
             return Result.validatedFailed("无效请求, 数据为空");
 
         User userOld = userRepository.findById(userId).orElseThrow(() ->
-                new ValidationException("非法userId: " + userId)
+                new CatValidationException("非法userId: " + userId)
         );
 
         if (!userService.isLoginId(userId) && !userService.containsPermissionName("UserManage"))
@@ -137,7 +136,7 @@ public class UserController {
     @GetMapping("/{userId}")
     public Result get(@PathVariable Integer userId) {
         User user = userRepository.findById(userId).orElseThrow(() ->
-                new ValidationException("非法userId: " + userId)
+                new CatValidationException("非法userId: " + userId)
         );
 
         if (!userService.isLoginId(userId) && !userService.containsPermissionName("UserManage"))
