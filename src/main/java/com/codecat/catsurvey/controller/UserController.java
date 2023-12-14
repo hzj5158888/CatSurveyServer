@@ -133,6 +133,18 @@ public class UserController {
     }
 
     @SaCheckLogin
+    @GetMapping("")
+    public Result getLoginUser() {
+        User user = userRepository.findById(userService.getLoginId()).orElseThrow(() ->
+                new CatValidationException("用户不存在")
+        );
+
+        Map<String, Object> userMap = UserService.filter(user);
+        userMap.put("role", userService.getRoleList(user.getId()));
+        return Result.successData(userMap);
+    }
+
+    @SaCheckLogin
     @GetMapping("/{userId}")
     public Result get(@PathVariable Integer userId) {
         User user = userRepository.findById(userId).orElseThrow(() ->
