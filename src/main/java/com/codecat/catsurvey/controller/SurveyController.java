@@ -22,6 +22,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -214,7 +215,9 @@ public class SurveyController {
         if (!userService.isLoginId(userId) && !userService.containsPermissionName("SurveyManage"))
             return Result.unauthorized("无法获取, 权限不足");
 
-        return Result.successData(surveyRepository.findAllByUserId(userId));
+        return Result.successData(
+                surveyRepository.findAllByUserId(userId, Sort.by(Sort.Direction.DESC, "createDate"))
+        );
     }
 
     @RequestMapping(value = {"/{surveyId}/question", "/{surveyId}/question/**"})
