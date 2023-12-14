@@ -98,7 +98,10 @@ public class SurveyController {
     @DeleteMapping("")
     public Result del(@RequestBody JSONObject delSurvey) {
         if (delSurvey.entrySet().isEmpty())
-            return this.del();
+        {
+            surveyRepository.deleteAllByUserId(userService.getLoginId());
+            return Result.success();
+        }
 
         Object surveyIdListObj = delSurvey.get("surveyIdList");
         if (!(surveyIdListObj instanceof List<?>))
