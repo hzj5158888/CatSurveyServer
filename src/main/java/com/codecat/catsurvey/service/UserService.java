@@ -62,7 +62,7 @@ public class UserService {
 
         if (!user.getUserName().equals(userName)) // 区分大小写
             return null;
-        if (!SaSecureUtil.md5(user.getPassword()).equals(password))
+        if (!user.getPassword().equals(password))
             return null;
 
         StpUtil.login(user.getId());
