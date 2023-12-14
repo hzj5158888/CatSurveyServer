@@ -98,6 +98,7 @@ public class UserController {
         if (!userService.isLoginId(userId) && !userService.containsPermissionName("UserManage"))
             return Result.unauthorized("无法修改, 权限不足");
 
+        boolean needLogout = false;
         Set<String> notAllow = new HashSet<>() {{
            add("id");
         }};
@@ -120,6 +121,8 @@ public class UserController {
                     return Result.validatedFailed("原密码为空");
                 if (!userOld.getPassword().equals(oldPassword))
                     return Result.validatedFailed("原密码错误");
+
+                needLogout = true;
             }
 
             userMap.put(entry.getKey(), entry.getValue());
@@ -128,6 +131,8 @@ public class UserController {
         User userFinal = Util.mapToObject(userMap, User.class);
         userService.checkFullUpdate(userFinal);
         userRepository.saveAndFlush(userFinal);
+        if (needLogout)
+            StpUtil.logout();
 
         return Result.success();
     }
