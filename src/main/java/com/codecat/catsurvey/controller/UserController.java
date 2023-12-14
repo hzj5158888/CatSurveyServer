@@ -133,6 +133,12 @@ public class UserController {
     }
 
     @SaCheckLogin
+    @PutMapping("")
+    public Result modifyLoginUser(@RequestBody JSONObject user) {
+        return this.modify(userService.getLoginId(), user);
+    }
+
+    @SaCheckLogin
     @GetMapping("")
     public Result getLoginUser() {
         User user = userRepository.findById(userService.getLoginId()).orElseThrow(() ->
