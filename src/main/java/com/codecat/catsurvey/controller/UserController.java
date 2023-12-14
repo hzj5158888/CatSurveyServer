@@ -76,9 +76,6 @@ public class UserController {
 
     @PostMapping("")
     public Result add(@RequestBody @Validated(validationTime.FullAdd.class) User user) {
-        if (StpUtil.isLogin() && !userService.containsPermissionName("UserManage"))
-                return Result.unauthorized("无法获取, 权限不足");
-
         userRepository.saveAndFlush(user);
         userService.addRole(user.getId(), "User");
 
