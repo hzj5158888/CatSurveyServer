@@ -116,13 +116,6 @@ public class SurveyController {
     }
 
     @SaCheckLogin
-    @DeleteMapping("")
-    public Result del() {
-        surveyRepository.deleteAllByUserId(userService.getLoginId());
-        return Result.success();
-    }
-
-    @SaCheckLogin
     @DeleteMapping("/user/{userId}/{surveyId}")
     public Result delByUser(@PathVariable Integer userId, @PathVariable Integer surveyId) {
         Survey survey = surveyRepository.findByIdAndUserId(surveyId, userId).orElseThrow(() ->
