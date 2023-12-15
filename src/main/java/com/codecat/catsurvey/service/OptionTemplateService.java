@@ -1,9 +1,9 @@
 package com.codecat.catsurvey.service;
 
-import com.codecat.catsurvey.commcon.exception.CatValidationException;
-import com.codecat.catsurvey.commcon.models.OptionTemplate;
-import com.codecat.catsurvey.commcon.repository.OptionTemplateRepository;
-import com.codecat.catsurvey.commcon.valid.group.validationTime;
+import com.codecat.catsurvey.exception.CatValidationException;
+import com.codecat.catsurvey.models.OptionTemplate;
+import com.codecat.catsurvey.repository.OptionTemplateRepository;
+import com.codecat.catsurvey.common.valid.group.validationTime;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;

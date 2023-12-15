@@ -1,18 +1,17 @@
 package com.codecat.catsurvey.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
-import cn.dev33.satoken.secure.SaSecureUtil;
 import cn.dev33.satoken.stp.SaTokenInfo;
 import cn.dev33.satoken.stp.StpUtil;
 import com.alibaba.fastjson2.JSONObject;
-import com.codecat.catsurvey.commcon.exception.CatValidationException;
-import com.codecat.catsurvey.commcon.models.Role;
-import com.codecat.catsurvey.commcon.models.User;
-import com.codecat.catsurvey.commcon.repository.SurveyRepository;
-import com.codecat.catsurvey.commcon.repository.UserRepository;
-import com.codecat.catsurvey.commcon.utils.Result;
-import com.codecat.catsurvey.commcon.utils.Util;
-import com.codecat.catsurvey.commcon.valid.group.validationTime;
+import com.codecat.catsurvey.exception.CatValidationException;
+import com.codecat.catsurvey.models.Role;
+import com.codecat.catsurvey.models.User;
+import com.codecat.catsurvey.repository.SurveyRepository;
+import com.codecat.catsurvey.repository.UserRepository;
+import com.codecat.catsurvey.utils.Result;
+import com.codecat.catsurvey.utils.Util;
+import com.codecat.catsurvey.common.valid.group.validationTime;
 import com.codecat.catsurvey.service.UserService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
