@@ -1,9 +1,9 @@
 package com.codecat.catsurvey.service;
 
-import com.codecat.catsurvey.commcon.models.Permission;
-import com.codecat.catsurvey.commcon.models.Role;
-import com.codecat.catsurvey.commcon.models.RolePermission;
-import com.codecat.catsurvey.commcon.repository.RoleRepository;
+import com.codecat.catsurvey.models.Permission;
+import com.codecat.catsurvey.models.Role;
+import com.codecat.catsurvey.models.RolePermission;
+import com.codecat.catsurvey.repository.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

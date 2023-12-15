@@ -1,14 +1,14 @@
 package com.codecat.catsurvey.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
-import com.codecat.catsurvey.commcon.exception.CatValidationException;
-import com.codecat.catsurvey.commcon.models.AnswerDetail;
-import com.codecat.catsurvey.commcon.models.Response;
-import com.codecat.catsurvey.commcon.models.Survey;
-import com.codecat.catsurvey.commcon.repository.ResponseRepository;
-import com.codecat.catsurvey.commcon.repository.SurveyRepository;
-import com.codecat.catsurvey.commcon.utils.Result;
-import com.codecat.catsurvey.commcon.valid.group.validationTime;
+import com.codecat.catsurvey.exception.CatValidationException;
+import com.codecat.catsurvey.models.AnswerDetail;
+import com.codecat.catsurvey.models.Response;
+import com.codecat.catsurvey.models.Survey;
+import com.codecat.catsurvey.repository.ResponseRepository;
+import com.codecat.catsurvey.repository.SurveyRepository;
+import com.codecat.catsurvey.utils.Result;
+import com.codecat.catsurvey.common.valid.group.validationTime;
 import com.codecat.catsurvey.service.AnswerDetailService;
 import com.codecat.catsurvey.service.UserService;
 import jakarta.servlet.ServletException;

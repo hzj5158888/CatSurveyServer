@@ -1,16 +1,16 @@
 package com.codecat.catsurvey.service;
 
-import com.codecat.catsurvey.commcon.Enum.question.QuestionTypeEnum;
-import com.codecat.catsurvey.commcon.exception.CatAuthorizedException;
-import com.codecat.catsurvey.commcon.exception.CatValidationException;
-import com.codecat.catsurvey.commcon.models.Option;
-import com.codecat.catsurvey.commcon.models.Question;
-import com.codecat.catsurvey.commcon.models.Survey;
-import com.codecat.catsurvey.commcon.repository.OptionRepository;
-import com.codecat.catsurvey.commcon.repository.QuestionRepository;
-import com.codecat.catsurvey.commcon.repository.SurveyRepository;
-import com.codecat.catsurvey.commcon.utils.Util;
-import com.codecat.catsurvey.commcon.valid.group.validationTime;
+import com.codecat.catsurvey.common.Enum.question.QuestionTypeEnum;
+import com.codecat.catsurvey.exception.CatAuthorizedException;
+import com.codecat.catsurvey.exception.CatValidationException;
+import com.codecat.catsurvey.models.Option;
+import com.codecat.catsurvey.models.Question;
+import com.codecat.catsurvey.models.Survey;
+import com.codecat.catsurvey.repository.OptionRepository;
+import com.codecat.catsurvey.repository.QuestionRepository;
+import com.codecat.catsurvey.repository.SurveyRepository;
+import com.codecat.catsurvey.utils.Util;
+import com.codecat.catsurvey.common.valid.group.validationTime;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;

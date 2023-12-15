@@ -1,11 +1,11 @@
 package com.codecat.catsurvey.service;
 
 import com.alibaba.fastjson2.JSONObject;
-import com.codecat.catsurvey.commcon.Enum.question.QuestionTypeEnum;
-import com.codecat.catsurvey.commcon.exception.CatAuthorizedException;
-import com.codecat.catsurvey.commcon.exception.CatValidationException;
-import com.codecat.catsurvey.commcon.models.*;
-import com.codecat.catsurvey.commcon.repository.*;
+import com.codecat.catsurvey.common.Enum.question.QuestionTypeEnum;
+import com.codecat.catsurvey.exception.CatAuthorizedException;
+import com.codecat.catsurvey.exception.CatValidationException;
+import com.codecat.catsurvey.models.*;
+import com.codecat.catsurvey.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
