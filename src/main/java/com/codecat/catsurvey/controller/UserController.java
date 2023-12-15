@@ -75,61 +75,14 @@ public class UserController {
 
     @PostMapping("")
     public Result add(@RequestBody @Validated(validationTime.FullAdd.class) User user) {
-        userRepository.saveAndFlush(user);
-        userService.addRole(user.getId(), "User");
-
+        userService.add(user);
         return Result.successData(user.getId());
     }
 
     @SaCheckLogin
     @PutMapping("/{userId}")
     public Result modify(@PathVariable Integer userId, @RequestBody JSONObject user) {
-        if (user == null)
-            return Result.validatedFailed("无效请求, 数据为空");
-
-        User userOld = userRepository.findById(userId).orElseThrow(() ->
-                new CatValidationException("非法userId: " + userId)
-        );
-
-        if (!userService.isLoginId(userId) && !userService.containsPermissionName("UserManage"))
-            return Result.unauthorized("无法修改, 权限不足");
-
-        boolean needLogout = false;
-        Set<String> notAllow = new HashSet<>() {{
-           add("id");
-        }};
-        Set<String> continueItem = new HashSet<>() {{
-            add("userRoleList");
-        }};
-        Set<String> userFiled = Util.getObjectFiledName(userOld);
-        Map<String, Object> userMap = Util.objectToMap(userOld);
-        for (Map.Entry<String, Object> entry : user.entrySet()) {
-            if (entry.getKey().equals("oldPassword") || continueItem.contains(entry.getKey()))
-                continue;
-            if (!userFiled.contains(entry.getKey()))
-                return Result.validatedFailed("用户信息修改失败, 非法属性: " + entry.getKey());
-            if (notAllow.contains(entry.getKey()))
-                return Result.validatedFailed("用户信息修改失败, 属性" + entry.getKey() + "为只读");
-
-            if (entry.getKey().equals("password")) {
-                String oldPassword = (String) user.get("oldPassword");
-                if (oldPassword == null)
-                    return Result.validatedFailed("原密码为空");
-                if (!userOld.getPassword().equals(oldPassword))
-                    return Result.validatedFailed("原密码错误");
-
-                needLogout = true;
-            }
-
-            userMap.put(entry.getKey(), entry.getValue());
-        }
-
-        User userFinal = Util.mapToObject(userMap, User.class);
-        userService.checkFullUpdate(userFinal);
-        userRepository.saveAndFlush(userFinal);
-        if (needLogout)
-            StpUtil.logout();
-
+        userService.modify(userId, user);
         return Result.success();
     }
 
@@ -142,27 +95,12 @@ public class UserController {
     @SaCheckLogin
     @GetMapping("")
     public Result getLoginUser() {
-        User user = userRepository.findById(userService.getLoginId()).orElseThrow(() ->
-                new CatValidationException("用户不存在")
+        User user = userService.getById(userService.getLoginId());
+        Map<String, Object> userMap = UserService.filter(user);
+        userMap.put("role",
+                userService.getRoleList(user.getId()).stream().map(Role::getName).collect(Collectors.toList())
         );
 
-        Map<String, Object> userMap = UserService.filter(user);
-        userMap.put("role", userService.getRoleList(user.getId()));
-        return Result.successData(userMap);
-    }
-
-    @SaCheckLogin
-    @GetMapping("/{userId}")
-    public Result get(@PathVariable Integer userId) {
-        User user = userRepository.findById(userId).orElseThrow(() ->
-                new CatValidationException("非法userId: " + userId)
-        );
-
-        if (!userService.isLoginId(userId) && !userService.containsPermissionName("UserManage"))
-            return Result.unauthorized("无法修改, 权限不足");
-
-        Map<String, Object> userMap = UserService.filter(user);
-        userMap.put("role", userService.getRoleList(user.getId()));
         return Result.successData(userMap);
     }
 

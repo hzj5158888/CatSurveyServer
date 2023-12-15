@@ -49,23 +49,7 @@ public class SurveyController {
     @SaCheckLogin
     @PostMapping("")
     public Result add(@RequestBody @Validated(validationTime.FullAdd.class) Survey survey) {
-        if (survey.getUserId() == null)
-            survey.setUserId(userService.getLoginId());
-        if (!userService.isLoginId(survey.getUserId()) && !userService.containsPermissionName("SurveyManage"))
-            return Result.unauthorized("无法添加，权限不足");
-
-        if (!survey.getStatus().equals("草稿")) {
-            if (survey.getStartDate() == null || survey.getEndDate() == null)
-                return Result.validatedFailed("开始时间和截止时间不能为空");
-            if (survey.getStartDate().getTime() > survey.getEndDate().getTime())
-                return Result.validatedFailed("开始时间不得先于截至时间");
-        }
-
-        List<Question> questions = new ArrayList<>(survey.getQuestionList());
-        surveyRepository.saveAndFlush(survey);
-        if (!questions.isEmpty())
-            questionService.setBySurvey(survey.getId(), questions);
-
+        surveyService.add(survey);
         return Result.successData(survey.getId());
     }
 
@@ -84,109 +68,32 @@ public class SurveyController {
     @SaCheckLogin
     @DeleteMapping("/{surveyId}")
     public Result del(@PathVariable Integer surveyId) {
-        Survey survey = surveyRepository.findById(surveyId).orElseThrow(() ->
-                new CatValidationException("问卷不存在")
-        );
-        if (!userService.isLoginId(survey.getUserId()) && !userService.containsPermissionName("SurveyManage"))
-            return Result.unauthorized("无法删除，权限不足");
-
-        surveyRepository.delete(survey);
+        surveyService.del(surveyId);
         return Result.success();
     }
 
     @SaCheckLogin
     @DeleteMapping("")
     public Result del(@RequestBody JSONObject delSurvey) {
-        if (delSurvey.entrySet().isEmpty())
-        {
-            surveyRepository.deleteAllByUserId(userService.getLoginId());
-            return Result.success();
-        }
-
-        Object surveyIdListObj = delSurvey.get("surveyIdList");
-        if (!(surveyIdListObj instanceof List<?>))
-            return Result.validatedFailed("Survey: del: 类型错误");
-
-        List<Integer> surveyIdList = (List<Integer>) surveyIdListObj;
-        for (Integer curId : surveyIdList) {
-            if (!surveyRepository.existsByIdAndUserId(curId, userService.getLoginId()))
-                return Result.validatedFailed("无法删除，权限不足");
-
-            surveyRepository.deleteById(curId);
-        }
-
+        surveyService.delAll(delSurvey);
         return Result.success();
     }
 
     @SaCheckLogin
     @DeleteMapping("/user/{userId}/{surveyId}")
     public Result delByUser(@PathVariable Integer userId, @PathVariable Integer surveyId) {
-        Survey survey = surveyRepository.findByIdAndUserId(surveyId, userId).orElseThrow(() ->
-                new CatValidationException("问卷不存在或不属于此用户")
-        );
-        if (!userService.isLoginId(userId) && !userService.containsPermissionName("SurveyManage"))
-            return Result.unauthorized("无法删除，权限不足");
-
-        surveyRepository.delete(survey);
+        surveyService.del(userId, surveyId);
         return Result.success();
     }
 
     @SaCheckLogin
-    @Transactional
     @PutMapping("/{surveyId}")
     public Result modify(@PathVariable Integer surveyId, @RequestBody Survey newSurvey) {
-        Survey survey = surveyRepository.findById(surveyId).orElseThrow(() ->
-                new CatValidationException("问卷不存在")
-        );
-        if (!userService.isLoginId(survey.getUserId()) && !userService.containsPermissionName("SurveyManage"))
-            return Result.unauthorized("无法修改，权限不足");
-
-        Set<String> notAllow = new HashSet<>() {{
-            add("id");
-            add("userId");
-            add("createDate");
-        }};
-        Set<String> continueItem = new HashSet<>() {{
-            add("questionList");
-            add("responseList");
-        }};
-        Set<String> surveyFiled = Util.getObjectFiledName(survey);
-        Map<String, Object> surveyMap = Util.objectToMap(survey);
-        Map<String, Object> newSurveyMap = Util.objectToMap(newSurvey);
-        for (Map.Entry<String, Object> entry : newSurveyMap.entrySet()) {
-            if (entry.getValue() == null || continueItem.contains(entry.getKey()))
-                continue;
-            if (!surveyFiled.contains(entry.getKey()))
-                return Result.validatedFailed("修改失败, 非法属性: " + entry.getKey());
-            if (notAllow.contains(entry.getKey()))
-                return Result.validatedFailed("修改失败, 属性" + entry.getKey() + "为只读");
-            if (entry.getKey().equals("status") && !entry.getValue().equals("草稿")
-                    || (entry.getKey().equals("startDate") || entry.getKey().equals("endDate")) )
-            {
-                Date startDate = (newSurvey.getStartDate() == null ? survey.getStartDate() : newSurvey.getStartDate());
-                Date endDate = (newSurvey.getEndDate() == null ? survey.getEndDate() : newSurvey.getEndDate());
-
-                if (startDate == null || endDate == null)
-                    return Result.validatedFailed("开始时间和截止时间不能为空");
-                if (startDate.getTime() > endDate.getTime())
-                    return Result.validatedFailed("开始时间不得先于截至时间");
-            }
-
-            surveyMap.put(entry.getKey(), entry.getValue());
-        }
-
-        Survey surveyFinal = Util.mapToObject(surveyMap, Survey.class);
-        List<Question> questions = new ArrayList<>(newSurvey.getQuestionList());
-        surveyService.checkFullUpdate(surveyFinal);
-        surveyRepository.saveAndFlush(surveyFinal);
-        if (!questions.isEmpty()) // 设置questionList
-            questionService.setBySurvey(surveyFinal.getId(), questions);
-
+        surveyService.modify(surveyId, newSurvey);
         return Result.success();
     }
 
     @SaCheckLogin
-    @Transactional
     @PutMapping("/user/{userId}/{surveyId}")
     public Result modifyByUser(@PathVariable Integer userId,
                                @PathVariable Integer surveyId,
@@ -200,49 +107,26 @@ public class SurveyController {
 
     @GetMapping("/{surveyId}")
     public Result get(@PathVariable Integer surveyId) {
-        Survey survey = surveyRepository.findById(surveyId).orElseThrow(() ->
-                new CatValidationException("问卷不存在")
-        );
-
-        if (!userService.isLoginId(survey.getUserId()) &&
-                (!survey.getStatus().equals(SurveyStatusEnum.CARRYOUT.getName()) &&
-                        !userService.containsPermissionName("SurveyManage")))
-            return Result.unauthorized("无法访问，权限不足");
-
-        return Result.successData(survey);
+        return Result.successData(surveyService.get(surveyId));
     }
 
     @SaCheckLogin
     @GetMapping("/user/{userId}/{surveyId}")
     public Result getByUser(@PathVariable Integer userId, @PathVariable Integer surveyId) {
-        Survey survey = surveyRepository.findByIdAndUserId(surveyId, userId).orElseThrow(() ->
-                new CatValidationException("问卷不存在或不属于此用户")
-        );
-        if (!userService.isLoginId(survey.getUserId()) && !userService.containsPermissionName("SurveyManage"))
-            return Result.unauthorized("无法访问，权限不足");
-
-        return Result.successData(survey);
+        return Result.successData(surveyService.getByUser(userId, surveyId));
     }
 
     @SaCheckLogin
     @GetMapping("/user/{userId}")
     public Result getAllByUser(@PathVariable Integer userId) {
-        if (!userRepository.existsById(userId))
-            return Result.validatedFailed("用户不存在");
-        if (!userService.isLoginId(userId) && !userService.containsPermissionName("SurveyManage"))
-            return Result.unauthorized("无法获取, 权限不足");
-
-        return Result.successData(
-                surveyRepository.findAllByUserId(userId, Sort.by(Sort.Direction.DESC, "createDate"))
-        );
+        return Result.successData(surveyService.getAllByUser(userId));
     }
 
     @SaCheckLogin
     @GetMapping("")
     public Result getAllByLoginUser() {
-        return Result.successData(surveyRepository.findAllByUserId(
-                        userService.getLoginId(), Sort.by(Sort.Direction.DESC, "createDate")
-                )
+        return Result.successData(
+                surveyService.getAllByUser(userService.getLoginId())
         );
     }
 

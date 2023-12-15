@@ -7,6 +7,7 @@ import com.codecat.catsurvey.models.Response;
 import com.codecat.catsurvey.models.Survey;
 import com.codecat.catsurvey.repository.ResponseRepository;
 import com.codecat.catsurvey.repository.SurveyRepository;
+import com.codecat.catsurvey.service.ResponseService;
 import com.codecat.catsurvey.utils.Result;
 import com.codecat.catsurvey.common.valid.group.validationTime;
 import com.codecat.catsurvey.service.AnswerDetailService;
@@ -27,36 +28,20 @@ import java.util.List;
 @RequestMapping("/response")
 @CrossOrigin()
 public class ResponseController {
-    @Autowired
-    private ResponseRepository responseRepository;
 
     @Autowired
     private SurveyRepository surveyRepository;
 
     @Autowired
-    private AnswerDetailService answerDetailService;
+    private UserService userService;
 
     @Autowired
-    private UserService userService;
+    private ResponseService responseService;
 
     @Transactional
     @PostMapping("")
     public Result add(@RequestBody @Validated(validationTime.FullAdd.class) Response response) {
-        Survey survey = surveyRepository.findById(response.getSurveyId()).orElseThrow(() ->
-                new CatValidationException("问卷ID无效")
-        );
-
-        if (!survey.getStatus().equals("进行中") && !userService.containsPermissionName("SurveyManage"))
-            return Result.unauthorized("权限不足");
-
-        List<AnswerDetail> answerDetails = new ArrayList<>(response.getAnswerDetailList());
-
-        response.setUserId(userService.getLoginId());
-        responseRepository.saveAndFlush(response);
-        if (!answerDetails.isEmpty())
-            answerDetailService.setByResponse(response.getId(), answerDetails);
-
-        return Result.successData(response.getId());
+        return Result.successData(responseService.add(response));
     }
 
     @Transactional
@@ -64,83 +49,40 @@ public class ResponseController {
     public Result addBySurvey(@PathVariable Integer surveyId,
                               @RequestBody @Validated(validationTime.Add.class) Response response)
     {
-        if (!surveyRepository.existsById(surveyId))
-            return Result.validatedFailed("问卷不存在");
-
         response.setSurveyId(surveyId);
-        return this.add(response);
+        return add(response);
     }
 
     @SaCheckLogin
     @DeleteMapping("/{responseId}")
     public Result del(@PathVariable Integer responseId) {
-        Response response = responseRepository.findById(responseId).orElseThrow(() ->
-                new CatValidationException("答卷不存在")
-        );
-
-        Integer userId = response.getUserId();
-        if (!userService.isLoginId(userId) && !userService.containsPermissionName("SurveyManage"))
-            return Result.unauthorized("无法删除，权限不足");
-
-        responseRepository.deleteById(response.getId());
+        responseService.del(responseId);
         return Result.success();
     }
 
     @SaCheckLogin
     @DeleteMapping("/survey/{surveyId}/{responseId}")
     public Result delBySurvey(@PathVariable Integer surveyId, @PathVariable Integer responseId) {
-        Response response = responseRepository.findByIdAndSurveyId(responseId, surveyId).orElseThrow(() ->
-                new CatValidationException("答卷不存在或不属于该问卷")
-        );
-
-        Integer userId = response.getUserId();
-        if (!userService.isLoginId(userId) && !userService.containsPermissionName("SurveyManage"))
-            return Result.unauthorized("无法删除，权限不足");
-
-        responseRepository.deleteById(response.getId());
+        responseService.delBySurvey(surveyId, responseId);
         return Result.success();
     }
 
     @SaCheckLogin
     @GetMapping("/{responseId}")
     public Result get(@PathVariable Integer responseId) {
-        Response response = responseRepository.findById(responseId).orElseThrow(() ->
-                new CatValidationException("答卷不存在")
-        );
-
-        Integer userId = response.getUserId();
-        if (!userService.isLoginId(userId) && !userService.containsPermissionName("SurveyManage"))
-            return Result.unauthorized("无法获取，权限不足");
-
-        return Result.successData(response);
+        return Result.successData(responseService.get(responseId));
     }
 
     @SaCheckLogin
     @GetMapping("/survey/{surveyId}/{responseId}")
     public Result getBySurvey(@PathVariable Integer surveyId, @PathVariable Integer responseId) {
-        Response response = responseRepository.findByIdAndSurveyId(responseId, surveyId).orElseThrow(() ->
-                new CatValidationException("答卷不存在或不属于该问卷")
-        );
-
-        Integer userId = response.getSurvey().getUserId();
-        if (!userService.isLoginId(userId) && !userService.containsPermissionName("SurveyManage"))
-            return Result.unauthorized("无法获取，权限不足");
-
-        return Result.successData(response);
+        return Result.successData(responseService.getBySurvey(surveyId, responseId));
     }
 
     @SaCheckLogin
     @GetMapping("/survey/{surveyId}")
     public Result getAllBySurvey(@PathVariable Integer surveyId) {
-        Survey survey = surveyRepository.findById(surveyId).orElseThrow(() ->
-                new CatValidationException("问卷不存在")
-        );
-
-        Integer userId = survey.getUserId();
-        if (!userService.isLoginId(userId) && !userService.containsPermissionName("SurveyManage"))
-            return Result.unauthorized("无法获取，权限不足");
-
-        return Result.successData(responseRepository.findAllBySurveyId(surveyId));
+        return Result.successData(responseService.getAllBySurvey(surveyId));
     }
 
     @RequestMapping(value = {"/{responseId}/detail", "/{responseId}/detail/**"})
@@ -167,7 +109,7 @@ public class ResponseController {
                                  HttpServletResponse resp)
             throws ServletException, IOException
     {
-        if (!responseRepository.existsByIdAndSurveyId(responseId, surveyId))
+        if (!responseService.existsByIdAndSurveyId(responseId, surveyId))
             throw new CatValidationException("答卷不存在或不属于该问卷");
 
         List<String> pathSplit = List.of(req.getServletPath().split("/"));

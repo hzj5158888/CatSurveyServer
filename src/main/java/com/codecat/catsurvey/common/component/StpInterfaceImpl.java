@@ -2,7 +2,6 @@ package com.codecat.catsurvey.common.component;
 
 import cn.dev33.satoken.stp.StpInterface;
 import com.codecat.catsurvey.models.*;
-import com.codecat.catsurvey.service.RoleSerivce;
 import com.codecat.catsurvey.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -15,9 +14,6 @@ import java.util.Set;
 public class StpInterfaceImpl implements StpInterface {
     @Autowired
     private UserService userService;
-
-    @Autowired
-    private RoleSerivce roleSerivce;
 
     public StpInterfaceImpl() {}
 

@@ -57,9 +57,6 @@ public class QuestionController {
     public Result addBySurvey(@PathVariable Integer surveyId,
                               @RequestBody @Validated({validationTime.Add.class}) Question question)
     {
-        if (!surveyRepository.existsById(surveyId))
-            return Result.validatedFailed("问卷不存在");
-
         question.setSurveyId(surveyId);
         questionService.add(question);
         return Result.successData(question.getId());
@@ -68,30 +65,14 @@ public class QuestionController {
     @SaCheckLogin
     @DeleteMapping("/{questionId}")
     public Result del(@PathVariable Integer questionId) {
-        Question question = questionRepository.findById(questionId).orElseThrow(() ->
-                new CatValidationException("问题不存在")
-        );
-
-        Integer userId = question.getSurvey().getUserId();
-        if (!userService.isLoginId(userId) && !userService.containsPermissionName("SurveyManage"))
-            return Result.unauthorized("无法删除，权限不足");
-
-        questionRepository.delete(question);
+        questionService.del(questionId);
         return Result.success();
     }
 
     @SaCheckLogin
     @DeleteMapping("/survey/{surveyId}/{questionId}")
     public Result delBySurvey(@PathVariable Integer surveyId, @PathVariable Integer questionId) {
-        Question question = questionRepository.findByIdAndSurveyId(questionId, surveyId).orElseThrow(() ->
-                new CatValidationException("问题不存在或不属于该问卷")
-        );
-
-        Integer userId = question.getSurvey().getUserId();
-        if (!userService.isLoginId(userId) && !userService.containsPermissionName("SurveyManage"))
-            return Result.unauthorized("无法删除，权限不足");
-
-        questionRepository.delete(question);
+        questionService.delBySurvey(surveyId, questionId);
         return Result.success();
     }
 
@@ -113,57 +94,26 @@ public class QuestionController {
     public Result modifyBySurvey(@PathVariable Integer surveyId, @PathVariable Integer questionId,
                                  @RequestBody Question newQuestion)
     {
-        Question question = questionRepository.findByIdAndSurveyId(questionId, surveyId).orElseThrow(() ->
-                new CatValidationException("问题不存在或不属于该问卷")
-        );
-
-        Integer userId = question.getSurvey().getUserId();
-        if (!userService.isLoginId(userId) && !userService.containsPermissionName("SurveyManage"))
-            return Result.unauthorized("无法修改，权限不足");
-
-        return modify(questionId, newQuestion);
+        questionService.modifyBySurvey(surveyId, questionId, newQuestion);
+        return Result.success();
     }
 
     @SaCheckLogin
     @GetMapping("/{questionId}")
     public Result get(@PathVariable Integer questionId) {
-        Question question = questionRepository.findById(questionId).orElseThrow(() ->
-                new CatValidationException("问题不存在")
-        );
-
-        Integer userId = question.getSurvey().getUserId();
-        if (!userService.isLoginId(userId) && !userService.containsPermissionName("SurveyManage"))
-            return Result.unauthorized("无法获取，权限不足");
-
-        return Result.successData(question);
+        return Result.successData(questionService.get(questionId));
     }
 
     @SaCheckLogin
     @GetMapping("/survey/{surveyId}")
     public Result getAllBySurvey(@PathVariable Integer surveyId) {
-        Survey survey = surveyRepository.findById(surveyId).orElseThrow(() ->
-                new CatValidationException("问卷不存在")
-        );
-        if (!userService.isLoginId(survey.getUserId()) && !userService.containsPermissionName("SurveyManage"))
-            return Result.unauthorized("无法访问，权限不足");
-
-        return Result.successData(
-                questionRepository.findAllBySurveyId(surveyId, Sort.by("iOrder"))
-        );
+        return Result.successData(questionService.getAllBySurvey(surveyId));
     }
 
     @SaCheckLogin
     @GetMapping("/survey/{surveyId}/{questionId}")
     public Result getBySurvey(@PathVariable Integer surveyId, @PathVariable Integer questionId) {
-        Question question = questionRepository.findByIdAndSurveyId(questionId, surveyId).orElseThrow(() ->
-                new CatValidationException("问题不存在或不属于该问卷")
-        );
-
-        Integer userId = question.getSurvey().getUserId();
-        if (!userService.isLoginId(userId) && !userService.containsPermissionName("SurveyManage"))
-            return Result.unauthorized("无法修改，权限不足");
-
-        return Result.successData(question);
+        return Result.successData(questionService.getBySurvey(surveyId, questionId));
     }
 
     @SaCheckLogin
@@ -192,7 +142,7 @@ public class QuestionController {
                                  HttpServletResponse resp)
             throws ServletException, IOException
     {
-        if (!questionRepository.existsByIdAndSurveyId(questionId, surveyId))
+        if (!questionService.existsByIdAndSurveyId(questionId, surveyId))
             throw new CatValidationException("问题不存在或不属于该问卷");
 
         List<String> pathSplit = List.of(req.getServletPath().split("/"));

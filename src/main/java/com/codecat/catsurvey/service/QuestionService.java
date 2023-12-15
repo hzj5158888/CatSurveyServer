@@ -7,6 +7,7 @@ import com.codecat.catsurvey.models.Question;
 import com.codecat.catsurvey.models.Survey;
 import com.codecat.catsurvey.repository.QuestionRepository;
 import com.codecat.catsurvey.repository.SurveyRepository;
+import com.codecat.catsurvey.utils.Result;
 import com.codecat.catsurvey.utils.Util;
 import com.codecat.catsurvey.common.valid.group.validationTime;
 import jakarta.validation.Valid;
@@ -60,6 +61,32 @@ public class QuestionService {
         setIOrder(question.getId(), question.getIOrder());
         if (!question.getOptionList().isEmpty())
             optionService.setByQuestion(question.getId(), optionList);
+    }
+
+    @Transactional
+    public void del(Integer questionId) {
+        Question question = questionRepository.findById(questionId).orElseThrow(() ->
+                new CatValidationException("问题不存在")
+        );
+
+        Integer userId = question.getSurvey().getUserId();
+        if (!userService.isLoginId(userId))
+            throw new CatAuthorizedException("无法删除，权限不足");
+
+        questionRepository.delete(question);
+    }
+
+    @Transactional
+    public void delBySurvey(Integer surveyId, Integer questionId) {
+        Question question = questionRepository.findByIdAndSurveyId(questionId, surveyId).orElseThrow(() ->
+                new CatValidationException("问题不存在或不属于该问卷")
+        );
+
+        Integer userId = question.getSurvey().getUserId();
+        if (!userService.isLoginId(userId))
+            throw new CatAuthorizedException("无法删除，权限不足");
+
+        questionRepository.delete(question);
     }
 
     @Transactional
@@ -149,6 +176,61 @@ public class QuestionService {
         setIOrder(questionFinal.getId(), questionFinal.getIOrder());
         if (!options.isEmpty())
             optionService.setByQuestion(questionFinal.getId(), options);
+    }
+
+    @Transactional
+    public void modifyBySurvey(Integer surveyId, Integer questionId, Question newQuestion) {
+        Question question = questionRepository.findByIdAndSurveyId(questionId, surveyId).orElseThrow(() ->
+                new CatValidationException("问题不存在或不属于该问卷")
+        );
+
+        Integer userId = question.getSurvey().getUserId();
+        if (!userService.isLoginId(userId))
+            throw new CatAuthorizedException("无法修改，权限不足");
+
+        modify(questionId, newQuestion);
+    }
+
+    @Transactional
+    public Question get(Integer questionId) {
+        Question question = questionRepository.findById(questionId).orElseThrow(() ->
+                new CatValidationException("问题不存在")
+        );
+
+        Integer userId = question.getSurvey().getUserId();
+        if (!userService.isLoginId(userId))
+            throw new CatAuthorizedException("无法获取，权限不足");
+
+        return question;
+    }
+
+    @Transactional
+    public List<Question> getAllBySurvey(Integer surveyId) {
+        Survey survey = surveyRepository.findById(surveyId).orElseThrow(() ->
+                new CatValidationException("问卷不存在")
+        );
+        if (!userService.isLoginId(survey.getUserId()))
+            throw new CatAuthorizedException("无法访问，权限不足");
+
+        return questionRepository.findAllBySurveyId(surveyId, Sort.by("iOrder"));
+    }
+
+    @Transactional
+    public Question getBySurvey(Integer surveyId, Integer questionId) {
+        Question question = questionRepository.findByIdAndSurveyId(questionId, surveyId).orElseThrow(() ->
+                new CatValidationException("问题不存在或不属于该问卷")
+        );
+
+        Integer userId = question.getSurvey().getUserId();
+        if (!userService.isLoginId(userId))
+            throw new CatAuthorizedException("无法修改，权限不足");
+
+        return question;
+    }
+
+    @Transactional
+    public boolean existsByIdAndSurveyId(Integer questionId, Integer surveyId) {
+        return questionRepository.existsByIdAndSurveyId(questionId, surveyId);
     }
 
     public void setIOrder(Integer questionId, Integer iOrder) {

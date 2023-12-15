@@ -9,6 +9,7 @@ import com.codecat.catsurvey.models.Survey;
 import com.codecat.catsurvey.repository.OptionRepository;
 import com.codecat.catsurvey.repository.QuestionRepository;
 import com.codecat.catsurvey.repository.SurveyRepository;
+import com.codecat.catsurvey.utils.Result;
 import com.codecat.catsurvey.utils.Util;
 import com.codecat.catsurvey.common.valid.group.validationTime;
 import jakarta.validation.Valid;
@@ -17,6 +18,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.*;
 
@@ -67,6 +70,32 @@ public class OptionService {
     }
 
     @Transactional
+    public void del(Integer optionId) {
+        Option option = optionRepository.findById(optionId).orElseThrow(() ->
+                new CatValidationException("选项不存在")
+        );
+
+        Integer userId = option.getQuestion().getSurvey().getUserId();
+        if (!userService.isLoginId(userId))
+            throw new CatValidationException("无法删除，权限不足");
+
+        optionRepository.deleteById(optionId);
+    }
+
+    @Transactional
+    public void delByQuestion(Integer questionId, Integer optionId) {
+        Option option = optionRepository.findByIdAndQuestionId(optionId, questionId).orElseThrow(() ->
+                new CatValidationException("选项不存在或不属于此问题")
+        );
+
+        Integer userId = option.getQuestion().getSurvey().getUserId();
+        if (!userService.isLoginId(userId))
+            throw new CatValidationException("无法删除，权限不足");
+
+        optionRepository.deleteById(optionId);
+    }
+
+    @Transactional
     public void modify(Integer optionId, Option newOption) {
         if (newOption == null)
             throw new CatValidationException("无效请求, 数据为空");
@@ -102,6 +131,14 @@ public class OptionService {
         checkFullUpdate(optionFinal);
         optionRepository.saveAndFlush(optionFinal);
         setIOrder(optionFinal.getId(), optionFinal.getIOrder());
+    }
+
+    @Transactional
+    public void modifyByQuestion(Integer questionId, Integer optionId, Option newOption) {
+        if (!optionRepository.existsByIdAndQuestionId(optionId, questionId))
+            throw new CatValidationException("选项不存在或不属于此问题");
+
+        modify(optionId, newOption);
     }
 
     @Transactional
@@ -152,6 +189,7 @@ public class OptionService {
         }
     }
 
+    @Transactional
     public void setIOrder(Integer optionId, Integer iOrder) {
         Option option = optionRepository.findById(optionId).orElseThrow(() ->
                 new CatValidationException("选项不存在")
@@ -193,5 +231,30 @@ public class OptionService {
             res.get(i).setIOrder(i);
 
         optionRepository.saveAllAndFlush(res);
+    }
+
+    @Transactional
+    public Option get(Integer optionId) {
+        return optionRepository.findById(optionId).orElseThrow(() ->
+                new CatValidationException("选项不存在")
+        );
+    }
+
+    @Transactional
+    public Option getByQuestion(Integer questionId, Integer optionId) {
+        Option option = optionRepository.findByIdAndQuestionId(optionId, questionId).orElseThrow(() ->
+                new CatValidationException("选项不存在或不属于此问题")
+        );
+
+        Integer userId = option.getQuestion().getSurvey().getUserId();
+        if (!userService.isLoginId(userId))
+            throw new CatAuthorizedException("无法修改，权限不足");
+
+        return option;
+    }
+
+    @Transactional
+    public List<Option> getAllByQuestion(Integer questionId) {
+        return optionRepository.findAllByQuestionId(questionId, Sort.by("iOrder"));
     }
 }

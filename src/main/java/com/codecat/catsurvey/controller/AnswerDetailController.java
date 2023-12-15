@@ -19,16 +19,7 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin()
 public class AnswerDetailController {
     @Autowired
-    private AnswerDetailRepository answerDetailRepository;
-
-    @Autowired
-    private ResponseRepository responseRepository;
-
-    @Autowired
     private AnswerDetailService answerDetailService;
-
-    @Autowired
-    private UserService userService;
 
     @PostMapping("")
     public Result add(@RequestBody @Validated(validationTime.FullAdd.class) AnswerDetail answerDetail) {
@@ -46,45 +37,21 @@ public class AnswerDetailController {
     @SaCheckLogin
     @DeleteMapping("/{answerDetailId}")
     public Result del(@PathVariable Integer answerDetailId) {
-        AnswerDetail answerDetail = answerDetailRepository.findById(answerDetailId).orElseThrow(() ->
-                new CatValidationException("答案不存在")
-        );
-
-        Integer userId = answerDetail.getResponse().getSurvey().getUserId();
-        if (!userService.isLoginId(userId) && !userService.containsPermissionName("SurveyManage"))
-            return Result.unauthorized("无法删除，权限不足");
-
-        answerDetailRepository.deleteById(answerDetailId);
+        answerDetailService.del(answerDetailId);
         return Result.success();
     }
 
     @SaCheckLogin
     @DeleteMapping("/response/{responseId}/{answerDetailId}")
     public Result delByResponse(@PathVariable Integer responseId, @PathVariable Integer answerDetailId) {
-        AnswerDetail answerDetail = answerDetailRepository.findByIdAndResponseId(answerDetailId, responseId).orElseThrow(() ->
-                new CatValidationException("答案不存在或不属于此答卷")
-        );
-
-        Integer userId = answerDetail.getResponse().getSurvey().getUserId();
-        if (!userService.isLoginId(userId) && !userService.containsPermissionName("SurveyManage"))
-            return Result.unauthorized("无法删除，权限不足");
-
-        answerDetailRepository.deleteById(answerDetailId);
+        answerDetailService.delByResponse(responseId, answerDetailId);
         return Result.success();
     }
 
     @SaCheckLogin
     @GetMapping("/{answerDetailId}")
     public Result get(@PathVariable Integer answerDetailId) {
-        AnswerDetail answerDetail = answerDetailRepository.findById(answerDetailId).orElseThrow(() ->
-                new CatValidationException("答案ID不存在")
-        );
-
-        Integer userId = answerDetail.getResponse().getSurvey().getUserId();
-        if (!userService.isLoginId(userId) && !userService.containsPermissionName("SurveyManage"))
-            return Result.unauthorized("无法获取，权限不足");
-
-        return Result.successData(answerDetail);
+        return Result.successData(answerDetailService.get(answerDetailId));
     }
 
     @SaCheckLogin
@@ -92,30 +59,12 @@ public class AnswerDetailController {
     public Result getByResponse(@PathVariable Integer responseId,
                                 @PathVariable Integer answerDetailId)
     {
-        AnswerDetail answerDetail = answerDetailRepository.findByIdAndResponseId(answerDetailId, responseId).orElseThrow(() ->
-                new CatValidationException("答案不存在或不属于此答卷")
-        );
-
-        Integer userId = answerDetail.getResponse().getSurvey().getUserId();
-        if (!userService.isLoginId(userId) && !userService.containsPermissionName("SurveyManage"))
-            return Result.unauthorized("无法获取，权限不足");
-
-        return Result.successData(answerDetail);
+        return Result.successData(answerDetailService.getByResponse(responseId, answerDetailId));
     }
 
     @SaCheckLogin
     @GetMapping("/response/{responseId}")
     public Result getAllByResponse(@PathVariable Integer responseId) {
-        Response response = responseRepository.findById(responseId).orElseThrow(() ->
-                new CatValidationException("答卷不存在")
-        );
-
-        Integer userId = response.getSurvey().getUserId();
-        if (!userService.isLoginId(userId) && !userService.containsPermissionName("SurveyManage"))
-            return Result.unauthorized("无法获取，权限不足");
-
-        return Result.successData(
-                answerDetailRepository.findAllByResponseId(responseId)
-        );
+        return Result.successData(answerDetailService.getAllByResponse(responseId));
     }
 }

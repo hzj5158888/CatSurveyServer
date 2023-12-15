@@ -21,16 +21,7 @@ import java.util.*;
 @CrossOrigin()
 public class OptionController {
     @Autowired
-    private OptionRepository optionRepository;
-
-    @Autowired
     private OptionService optionService;
-
-    @Autowired
-    private QuestionRepository questionRepository;
-
-    @Autowired
-    private UserService userService;
 
     @SaCheckLogin
     @PostMapping("")
@@ -44,9 +35,6 @@ public class OptionController {
     public Result addByQuestion(@PathVariable Integer questionId,
                                 @RequestBody @Validated({validationTime.Add.class}) Option option)
     {
-        if (!questionRepository.existsById(questionId))
-            return Result.validatedFailed("问题不存在");
-
         option.setQuestionId(questionId);
         optionService.add(option);
         return Result.successData(option.getId());
@@ -55,30 +43,14 @@ public class OptionController {
     @SaCheckLogin
     @DeleteMapping("/{optionId}")
     public Result del(@PathVariable Integer optionId) {
-        Option option = optionRepository.findById(optionId).orElseThrow(() ->
-                new CatValidationException("选项不存在")
-        );
-
-        Integer userId = option.getQuestion().getSurvey().getUserId();
-        if (!userService.isLoginId(userId) && !userService.containsPermissionName("SurveyManage"))
-            return Result.unauthorized("无法删除，权限不足");
-
-        optionRepository.deleteById(optionId);
+        optionService.del(optionId);
         return Result.success();
     }
 
     @SaCheckLogin
     @DeleteMapping("/question/{questionId}/{optionId}")
     public Result delByQuestion(@PathVariable Integer questionId, @PathVariable Integer optionId) {
-        Option option = optionRepository.findByIdAndQuestionId(optionId, questionId).orElseThrow(() ->
-                new CatValidationException("选项不存在或不属于此问题")
-        );
-
-        Integer userId = option.getQuestion().getSurvey().getUserId();
-        if (!userService.isLoginId(userId) && !userService.containsPermissionName("SurveyManage"))
-            return Result.unauthorized("无法删除，权限不足");
-
-        optionRepository.deleteById(optionId);
+        optionService.delByQuestion(questionId, optionId);
         return Result.success();
     }
 
@@ -102,41 +74,25 @@ public class OptionController {
                                    @PathVariable Integer optionId,
                                    @RequestBody Option newOption)
     {
-        if (!optionRepository.existsByIdAndQuestionId(optionId, questionId))
-            return Result.validatedFailed("选项不存在或不属于此问题");
-
-        return modify(optionId, newOption);
+        optionService.modifyByQuestion(questionId, optionId, newOption);
+        return Result.success();
     }
 
     @SaCheckLogin
     @GetMapping("/{optionId}")
     public Result get(@PathVariable Integer optionId) {
-        Option option = optionRepository.findById(optionId).orElseThrow(() ->
-                new CatValidationException("选项不存在")
-        );
-
-        return Result.successData(option);
+        return Result.successData(optionService.get(optionId));
     }
 
     @SaCheckLogin
     @GetMapping("/question/{questionId}/{optionId}")
     public Result getByQuestion(@PathVariable Integer questionId, @PathVariable Integer optionId) {
-        Option option = optionRepository.findByIdAndQuestionId(optionId, questionId).orElseThrow(() ->
-                new CatValidationException("选项不存在或不属于此问题")
-        );
-
-        Integer userId = option.getQuestion().getSurvey().getUserId();
-        if (!userService.isLoginId(userId) && !userService.containsPermissionName("SurveyManage"))
-            return Result.unauthorized("无法修改，权限不足");
-
-        return Result.successData(option);
+        return Result.successData(optionService.getByQuestion(questionId, optionId));
     }
 
     @SaCheckLogin
     @GetMapping("/question/{questionId}")
     public Result getAllByQuestion(@PathVariable Integer questionId) {
-        return Result.successData(
-                optionRepository.findAllByQuestionId(questionId, Sort.by("iOrder"))
-        );
+        return Result.successData(optionService.getAllByQuestion(questionId));
     }
 }
