@@ -135,7 +135,6 @@ public class SurveyService {
             if (notAllow.contains(entry.getKey()))
                 throw new CatValidationException("修改失败, 属性" + entry.getKey() + "为只读");
 
-            System.out.println(entry.getKey() + ' ' + entry.getValue());
             if (SurveyStatusEnum.CARRYOUT.getName().equals(newSurveyMap.get("status"))
                     && ((entry.getKey().equals("startDate")
                         || entry.getKey().equals("endDate")
@@ -152,6 +151,11 @@ public class SurveyService {
 
                 if (startDate.getTime() > endDate.getTime())
                     throw new CatValidationException("开始时间不得先于截至时间");
+
+                surveyMap.put("startDate", startDate);
+                surveyMap.put("endDate", endDate);
+                if (entry.getKey().equals("startDate") || entry.getKey().equals("endDate"))
+                    continue;
             }
 
             surveyMap.put(entry.getKey(), entry.getValue());

@@ -1,0 +1,9 @@
+spring:
+  datasource:
+    url: jdbc:mysql://jifu.cuza.fun:3306/codecat
+    username: gdpujf
+    password: gdpujf
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+server:
+  port: 8100

@@ -1,14 +1,8 @@
 spring:
-    datasource:
-      url: jdbc:mysql://localhost:3306/codecat
-      username: root
-      password: gdpujf2021
-      driver-class-name: com.mysql.cj.jdbc.Driver
-    main:
-      allow-circular-references: true
-
-server:
-  port: 8000
+  profiles:
+    active: dev
+  main:
+    allow-circular-references: true
 
   # Sa-Token配置
 sa-token:

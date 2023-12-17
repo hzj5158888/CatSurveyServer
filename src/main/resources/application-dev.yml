@@ -1,0 +1,9 @@
+spring:
+    datasource:
+      url: jdbc:mysql://localhost:3306/codecat
+      username: root
+      password: gdpujf2021
+      driver-class-name: com.mysql.cj.jdbc.Driver
+
+server:
+  port: 8000
