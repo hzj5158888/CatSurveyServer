@@ -10,7 +10,8 @@ import lombok.NoArgsConstructor;
 public enum QuestionTypeEnum {
     RADIO("单选"),
     CHECKBOX("多选"),
-    TEXT("文本");
+    TEXTAREA("文本"),
+    TEXT("单行文本");
 
     private String name;
 }

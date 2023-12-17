@@ -1,4 +1,4 @@
-package com.codecat.catsurvey.controller;
+package com.codecat.catsurvey.controller.admin;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.annotation.SaCheckPermission;
@@ -23,8 +23,10 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/question/template")
-public class QuestionTemplateController {
+@RequestMapping("/admin/template/question")
+@SaCheckLogin
+@SaCheckPermission("TemplateManage")
+public class AdminQuestionTemplateController {
     @Autowired
     private QuestionTemplateRepository questionTemplateRepository;
 

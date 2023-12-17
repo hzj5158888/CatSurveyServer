@@ -280,9 +280,6 @@ public class UserService {
                 new CatValidationException("非法userId: " + userId)
         );
 
-        if (!isLoginId(userId) && !containsPermissionName("UserManage"))
-            throw new CatAuthorizedException("无法修改, 权限不足");
-
         boolean needLogout = false;
         Set<String> notAllow = new HashSet<>() {{
             add("id");
@@ -313,6 +310,7 @@ public class UserService {
             userMap.put(entry.getKey(), entry.getValue());
         }
 
+        System.out.println(userMap);
         User userFinal = Util.mapToObject(userMap, User.class);
         checkFullUpdate(userFinal);
         userRepository.saveAndFlush(userFinal);
@@ -325,6 +323,11 @@ public class UserService {
         return userRepository.findById(userId).orElseThrow(() ->
                 new CatValidationException("用户不存在")
         );
+    }
+
+    @Transactional
+    public boolean existsById(Integer userId) {
+        return userRepository.existsById(userId);
     }
 
     @Validated(validationTime.FullUpdate.class)

@@ -1,6 +1,7 @@
 package com.codecat.catsurvey.models;
 
 import com.alibaba.fastjson2.annotation.JSONField;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -28,13 +29,13 @@ public class UserRole {
     private int roleId;
 
     @ToString.Exclude
-    @JSONField(serialize = false)
+    @JsonIgnore
     @ManyToOne(targetEntity = User.class, cascade = CascadeType.REFRESH)
     @JoinColumn(name = "user_id", referencedColumnName = "id", insertable = false, updatable = false)
     private User user;
 
     @ToString.Exclude
-    @JSONField(serialize = false)
+    @JsonIgnore
     @ManyToOne(targetEntity = Role.class, cascade = CascadeType.REFRESH)
     @JoinColumn(name = "role_id", referencedColumnName = "id", insertable = false, updatable = false)
     private Role role;

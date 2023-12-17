@@ -57,10 +57,6 @@ public class ResponseService {
                 new CatValidationException("答卷不存在")
         );
 
-        Integer userId = response.getUserId();
-        if (!userService.isLoginId(userId))
-            throw new CatAuthorizedException("无法删除，权限不足");
-
         responseRepository.deleteById(response.getId());
     }
 
@@ -69,10 +65,6 @@ public class ResponseService {
         Response response = responseRepository.findByIdAndSurveyId(responseId, surveyId).orElseThrow(() ->
                 new CatValidationException("答卷不存在或不属于该问卷")
         );
-
-        Integer userId = response.getUserId();
-        if (!userService.isLoginId(userId))
-            throw new CatAuthorizedException("无法删除，权限不足");
 
         responseRepository.deleteById(response.getId());
     }
@@ -92,28 +84,38 @@ public class ResponseService {
 
     @Transactional
     public Response getBySurvey(Integer surveyId, Integer responseId) {
-        Response response = responseRepository.findByIdAndSurveyId(responseId, surveyId).orElseThrow(() ->
+        return responseRepository.findByIdAndSurveyId(responseId, surveyId).orElseThrow(() ->
                 new CatValidationException("答卷不存在或不属于该问卷")
         );
-
-        Integer userId = response.getSurvey().getUserId();
-        if (!userService.isLoginId(userId))
-            throw new CatAuthorizedException("无法获取，权限不足");
-
-        return response;
     }
 
     @Transactional
     public List<Response> getAllBySurvey(Integer surveyId) {
-        Survey survey = surveyRepository.findById(surveyId).orElseThrow(() ->
-                new CatValidationException("问卷不存在")
-        );
-
-        Integer userId = survey.getUserId();
-        if (!userService.isLoginId(userId))
-            throw new CatAuthorizedException("无法获取，权限不足");
+        if (!surveyRepository.existsById(surveyId))
+            throw new CatValidationException("问卷不存在");
 
         return responseRepository.findAllBySurveyId(surveyId);
+    }
+
+    @Transactional
+    public Survey getSurvey(Integer responseId) {
+        Response response = responseRepository.findById(responseId).orElseThrow(() ->
+                new CatValidationException("答卷不存在")
+        );
+
+        return surveyRepository.findById(response.getSurveyId()).orElseThrow(() ->
+                new CatValidationException("问卷不存在")
+        );
+    }
+
+
+    @Transactional
+    public Integer getUserId(Integer responseId) {
+        Response response = responseRepository.findById(responseId).orElseThrow(() ->
+                new CatValidationException("答卷不存在")
+        );
+
+        return response.getUserId();
     }
 
     @Transactional

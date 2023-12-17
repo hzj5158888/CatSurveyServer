@@ -11,8 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class AnswerDetailService {
@@ -48,23 +47,36 @@ public class AnswerDetailService {
                 new CatValidationException("问卷不存在")
         );
 
-        if (!survey.getStatus().equals("进行中") && !userService.containsPermissionName("SurveyManage"))
+        if (!survey.getStatus().equals("进行中"))
             throw new CatAuthorizedException("权限不足");
         if (!response.getSurveyId().equals(question.getSurveyId()))
             throw new CatValidationException("responseId与questionId不属于同一问卷survey");
         if (answerDetailRepository.existsByResponseIdAndQuestionId(response.getId(), question.getId()))
             throw new CatValidationException("该问题答案已存在");
+        Set<String> textName = new HashSet<>() {{ // 文本类型
+            add(QuestionTypeEnum.TEXT.getName());
+            add(QuestionTypeEnum.TEXTAREA.getName());
+        }};
+        if (!textName.contains(question.getType())) {
+            JSONObject jsonAnswer = JSONObject.parseObject((String) answerDetail.getJsonAnswer());
+            Set<String> keySet = jsonAnswer.keySet();
+            if (!keySet.contains("selected") || keySet.size() > 2)
+                throw new CatValidationException("json数据错误");
+            if (!(jsonAnswer.get("selected") instanceof List<?>))
+                throw new CatValidationException("selected为null或类型错误");
 
-        if (!question.getType().equals(QuestionTypeEnum.TEXT.getName())) {
-            Option option = optionRepository.findById(answerDetail.getOptionId()).orElseThrow(() ->
-                    new CatValidationException("选项不存在")
-            );
+            List<Integer> optionIdList = (List<Integer>) jsonAnswer.get("selected");
+            for (Integer curOptionId : optionIdList) {
+                Option option = optionRepository.findById(curOptionId).orElseThrow(() ->
+                        new CatValidationException("选项不存在")
+                );
 
-            if (!option.getQuestionId().equals(question.getId()))
-                throw new CatValidationException("option中questionId与answer中questionId不同");
+                if (!option.getQuestionId().equals(question.getId()))
+                    throw new CatValidationException("option中questionId与answer中questionId不同");
+            }
         }
 
-        JSONObject jsonAns = (JSONObject) answerDetail.getJsonAnswer();
+        JSONObject jsonAns = JSONObject.parseObject((String) answerDetail.getJsonAnswer());
         answerDetail.setJsonAnswer(jsonAns.toString());
         answerDetailRepository.saveAndFlush(answerDetail);
 

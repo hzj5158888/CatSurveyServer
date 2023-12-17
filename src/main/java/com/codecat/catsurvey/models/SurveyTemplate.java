@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.annotation.JSONField;
 import com.codecat.catsurvey.common.valid.function.survey.SurveyStatusExists;
 import com.codecat.catsurvey.common.valid.function.user.UserIdExists;
 import com.codecat.catsurvey.common.valid.group.validationTime;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Null;
@@ -51,7 +52,7 @@ public class SurveyTemplate {
     private String status;
 
     @ToString.Exclude
-    @JSONField(serialize = false)
+    @JsonIgnore
     @ManyToOne(targetEntity = User.class, cascade = CascadeType.REFRESH)
     @JoinColumn(name = "user_id", referencedColumnName = "id", insertable = false, updatable = false)
     private User user;

@@ -3,6 +3,7 @@ package com.codecat.catsurvey.models;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.codecat.catsurvey.common.valid.function.question.QuestionIdExists;
 import com.codecat.catsurvey.common.valid.group.validationTime;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -38,14 +39,10 @@ public class Option implements Comparable<Option> {
     private Integer iOrder;
 
     @ToString.Exclude
-    @JSONField(serialize = false)
+    @JsonIgnore
     @ManyToOne(targetEntity = Question.class, cascade = CascadeType.REFRESH)
     @JoinColumn(name = "question_id", referencedColumnName = "id", insertable = false, updatable = false)
     private Question question;
-
-    @OneToMany(targetEntity = AnswerDetail.class, fetch = FetchType.EAGER, cascade = {CascadeType.REFRESH, CascadeType.REMOVE})
-    @JoinColumn(name = "option_id", referencedColumnName = "id", insertable = false, updatable = false)
-    private List<AnswerDetail> answerDetailList = new ArrayList<>();
 
     @Override
     public int compareTo(Option other) {

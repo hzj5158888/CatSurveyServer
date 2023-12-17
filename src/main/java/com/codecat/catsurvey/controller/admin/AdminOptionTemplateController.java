@@ -1,4 +1,4 @@
-package com.codecat.catsurvey.controller;
+package com.codecat.catsurvey.controller.admin;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.annotation.SaCheckPermission;
@@ -22,8 +22,10 @@ import java.util.Map;
 import java.util.Set;
 
 @RestController
-@RequestMapping("/option/template")
-public class OptionTemplateController {
+@RequestMapping("/admin/template/option")
+@SaCheckLogin
+@SaCheckPermission("TemplateManage")
+public class AdminOptionTemplateController {
     @Autowired
     private OptionTemplateRepository optionTemplateRepository;
 

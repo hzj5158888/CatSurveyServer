@@ -2,6 +2,7 @@ package com.codecat.catsurvey.models;
 
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.codecat.catsurvey.common.valid.group.validationTime;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -35,7 +36,7 @@ public class OptionTemplate implements Comparable<OptionTemplate> {
     private Integer iOrder;
 
     @ToString.Exclude
-    @JSONField(serialize = false)
+    @JsonIgnore
     @ManyToOne(targetEntity = QuestionTemplate.class, cascade = CascadeType.REFRESH)
     @JoinColumn(name = "question_template_id", referencedColumnName = "id", insertable = false, updatable = false)
     private QuestionTemplate questionTemplate;

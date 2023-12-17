@@ -1,6 +1,7 @@
 package com.codecat.catsurvey.models;
 
 import com.alibaba.fastjson2.annotation.JSONField;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -27,14 +28,14 @@ public class RolePermission {
     @Column(name = "permission_id", nullable = false)
     private int permissionId;
 
-    @JSONField(serialize = false)
+    @JsonIgnore
     @ToString.Exclude
     @ManyToOne(targetEntity = Role.class, cascade = CascadeType.REFRESH)
     @JoinColumn(name = "role_id", referencedColumnName = "id", insertable = false, updatable = false)
     private Role role;
 
     @ToString.Exclude
-    @JSONField(serialize = false)
+    @JsonIgnore
     @ManyToOne(targetEntity = Permission.class, cascade = CascadeType.REFRESH)
     @JoinColumn(name = "permission_id", referencedColumnName = "id", insertable = false, updatable = false)
     private Permission permission;

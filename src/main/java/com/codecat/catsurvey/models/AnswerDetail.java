@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.annotation.JSONField;
 import com.codecat.catsurvey.common.valid.function.question.QuestionIdExists;
 import com.codecat.catsurvey.common.valid.function.response.ResponseIdExists;
 import com.codecat.catsurvey.common.valid.group.validationTime;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Null;
@@ -47,13 +48,13 @@ public class AnswerDetail {
     private Object jsonAnswer;
 
     @ToString.Exclude
-    @JSONField(serialize = false)
+    @JsonIgnore
     @ManyToOne(targetEntity = Response.class, cascade = CascadeType.REFRESH)
     @JoinColumn(name = "response_id", referencedColumnName = "id", insertable = false, updatable = false)
     private Response response;
 
     @ToString.Exclude
-    @JSONField(serialize = false)
+    @JsonIgnore
     @ManyToOne(targetEntity = Question.class, cascade = CascadeType.REFRESH)
     @JoinColumn(name = "question_id", referencedColumnName = "id", insertable = false, updatable = false)
     private Question question;

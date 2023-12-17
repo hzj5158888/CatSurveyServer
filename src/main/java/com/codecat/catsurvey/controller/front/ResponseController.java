@@ -1,6 +1,7 @@
-package com.codecat.catsurvey.controller;
+package com.codecat.catsurvey.controller.front;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import com.codecat.catsurvey.exception.CatAuthorizedException;
 import com.codecat.catsurvey.exception.CatValidationException;
 import com.codecat.catsurvey.models.AnswerDetail;
 import com.codecat.catsurvey.models.Response;
@@ -8,6 +9,7 @@ import com.codecat.catsurvey.models.Survey;
 import com.codecat.catsurvey.repository.ResponseRepository;
 import com.codecat.catsurvey.repository.SurveyRepository;
 import com.codecat.catsurvey.service.ResponseService;
+import com.codecat.catsurvey.service.SurveyService;
 import com.codecat.catsurvey.utils.Result;
 import com.codecat.catsurvey.common.valid.group.validationTime;
 import com.codecat.catsurvey.service.AnswerDetailService;
@@ -28,23 +30,20 @@ import java.util.List;
 @RequestMapping("/response")
 @CrossOrigin()
 public class ResponseController {
-
     @Autowired
-    private SurveyRepository surveyRepository;
+    private ResponseService responseService;
 
     @Autowired
     private UserService userService;
 
     @Autowired
-    private ResponseService responseService;
+    private SurveyService surveyService;
 
-    @Transactional
     @PostMapping("")
     public Result add(@RequestBody @Validated(validationTime.FullAdd.class) Response response) {
         return Result.successData(responseService.add(response));
     }
 
-    @Transactional
     @PostMapping("/survey/{surveyId}")
     public Result addBySurvey(@PathVariable Integer surveyId,
                               @RequestBody @Validated(validationTime.Add.class) Response response)
@@ -56,6 +55,9 @@ public class ResponseController {
     @SaCheckLogin
     @DeleteMapping("/{responseId}")
     public Result del(@PathVariable Integer responseId) {
+        if (!userService.isLoginId(responseService.getSurvey(responseId).getUserId()))
+            throw new CatAuthorizedException("无法删除，权限不足");
+
         responseService.del(responseId);
         return Result.success();
     }
@@ -63,6 +65,9 @@ public class ResponseController {
     @SaCheckLogin
     @DeleteMapping("/survey/{surveyId}/{responseId}")
     public Result delBySurvey(@PathVariable Integer surveyId, @PathVariable Integer responseId) {
+        if (!userService.isLoginId(responseService.getSurvey(responseId).getUserId()))
+            throw new CatAuthorizedException("无法删除，权限不足");
+
         responseService.delBySurvey(surveyId, responseId);
         return Result.success();
     }
@@ -70,21 +75,31 @@ public class ResponseController {
     @SaCheckLogin
     @GetMapping("/{responseId}")
     public Result get(@PathVariable Integer responseId) {
+        if (!userService.isLoginId(responseService.getUserId(responseId)))
+            throw new CatAuthorizedException("无法获取，权限不足");
+
         return Result.successData(responseService.get(responseId));
     }
 
     @SaCheckLogin
     @GetMapping("/survey/{surveyId}/{responseId}")
     public Result getBySurvey(@PathVariable Integer surveyId, @PathVariable Integer responseId) {
+        if (!userService.isLoginId(surveyService.getUserId(surveyId)))
+            throw new CatAuthorizedException("无法获取，权限不足");
+
         return Result.successData(responseService.getBySurvey(surveyId, responseId));
     }
 
     @SaCheckLogin
     @GetMapping("/survey/{surveyId}")
     public Result getAllBySurvey(@PathVariable Integer surveyId) {
+        if (!userService.isLoginId(surveyService.getUserId(surveyId)))
+            throw new CatAuthorizedException("无法获取，权限不足");
+
         return Result.successData(responseService.getAllBySurvey(surveyId));
     }
 
+    /*
     @RequestMapping(value = {"/{responseId}/detail", "/{responseId}/detail/**"})
     public void doDetail(@PathVariable Integer responseId, HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException
@@ -123,5 +138,5 @@ public class ResponseController {
             suf += "/";
 
         req.getRequestDispatcher(pre + suf).forward(req, resp);
-    }
+    }*/
 }

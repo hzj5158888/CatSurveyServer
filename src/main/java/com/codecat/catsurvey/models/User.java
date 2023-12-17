@@ -3,6 +3,7 @@ package com.codecat.catsurvey.models;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.codecat.catsurvey.common.valid.function.user.UserNameUnique;
 import com.codecat.catsurvey.common.valid.group.validationTime;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
@@ -12,6 +13,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +23,7 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @Table(name = "users", schema = "codecat")
+@EntityListeners(AuditingEntityListener.class)
 public class User {
     @Id
     @Null(message = "id为只读", groups = {validationTime.FullAdd.class, validationTime.Add.class})
@@ -34,7 +37,7 @@ public class User {
     @Column(name = "username", nullable = false)
     private String userName;
 
-    @JSONField(serialize = false)
+    @JsonIgnore
     @NotNull(message = "密码不能为空")
     @Length(min = 6, max = 16, message = "密码长度为6-16位")
     @Pattern(regexp = "^[A-Za-z0-9.]+$", message = "密码只能由数字英文以及'.'组成")
@@ -51,7 +54,7 @@ public class User {
     @Column(name = "wechat")
     private String wechat;
 
-    @JSONField(serialize = false)
+    @JsonIgnore
     @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", referencedColumnName = "id", insertable = false, updatable = false)
     private List<UserRole> userRoleList = new ArrayList<>();

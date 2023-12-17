@@ -1,8 +1,10 @@
-package com.codecat.catsurvey.controller;
+package com.codecat.catsurvey.controller.front;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaIgnore;
 import com.alibaba.fastjson2.JSONObject;
 import com.codecat.catsurvey.common.Enum.survey.SurveyStatusEnum;
+import com.codecat.catsurvey.exception.CatAuthorizedException;
 import com.codecat.catsurvey.exception.CatValidationException;
 import com.codecat.catsurvey.models.Question;
 import com.codecat.catsurvey.models.Survey;
@@ -30,99 +32,107 @@ import java.util.*;
 @RestController
 @RequestMapping("/survey")
 @CrossOrigin()
+@SaCheckLogin
 public class SurveyController {
-    @Autowired
-    private UserRepository userRepository;
-
     @Autowired
     private UserService userService;
 
     @Autowired
-    private SurveyRepository surveyRepository;
-
-    @Autowired
     private SurveyService surveyService;
 
-    @Autowired
-    private QuestionService questionService;
-
-    @SaCheckLogin
     @PostMapping("")
     public Result add(@RequestBody @Validated(validationTime.FullAdd.class) Survey survey) {
         surveyService.add(survey);
         return Result.successData(survey.getId());
     }
 
-    @SaCheckLogin
     @PostMapping("/user/{userId}")
     public Result addByUser(@PathVariable Integer userId,
                             @RequestBody @Validated(validationTime.Add.class) Survey survey)
     {
-        if (!userRepository.existsById(userId))
+        if (!userService.existsById(userId))
             return Result.validatedFailed("用户不存在");
 
         survey.setUserId(userId);
-        return this.add(survey);
+        return add(survey);
     }
 
-    @SaCheckLogin
     @DeleteMapping("/{surveyId}")
     public Result del(@PathVariable Integer surveyId) {
+        if (!userService.isLoginId(surveyService.getUserId(surveyId)))
+            throw new CatAuthorizedException("无法删除，权限不足");
+
         surveyService.del(surveyId);
         return Result.success();
     }
 
-    @SaCheckLogin
     @DeleteMapping("")
     public Result del(@RequestBody JSONObject delSurvey) {
-        surveyService.delAll(delSurvey);
+        surveyService.delAllCheck(delSurvey);
         return Result.success();
     }
 
-    @SaCheckLogin
     @DeleteMapping("/user/{userId}/{surveyId}")
     public Result delByUser(@PathVariable Integer userId, @PathVariable Integer surveyId) {
         surveyService.del(userId, surveyId);
         return Result.success();
     }
 
-    @SaCheckLogin
     @PutMapping("/{surveyId}")
     public Result modify(@PathVariable Integer surveyId, @RequestBody Survey newSurvey) {
+        if (!userService.isLoginId(surveyService.getUserId(surveyId)))
+            throw new CatAuthorizedException("无法修改，权限不足");
+
         surveyService.modify(surveyId, newSurvey);
         return Result.success();
     }
 
-    @SaCheckLogin
     @PutMapping("/user/{userId}/{surveyId}")
     public Result modifyByUser(@PathVariable Integer userId,
                                @PathVariable Integer surveyId,
                                 @RequestBody Survey newSurvey)
     {
-        if (!surveyRepository.existsByIdAndUserId(surveyId, userId))
+        if (!surveyService.existsByIdAndUserId(surveyId, userId))
             return Result.validatedFailed("问卷不存在或不属于此用户");
 
         return modify(surveyId, newSurvey);
     }
 
+    @SaIgnore
     @GetMapping("/{surveyId}")
     public Result get(@PathVariable Integer surveyId) {
-        return Result.successData(surveyService.get(surveyId));
+        if (!userService.isLoginId(surveyService.getUserId(surveyId))
+            && !surveyService.getStatus(surveyId).equals(SurveyStatusEnum.CARRYOUT.getName()))
+            return Result.unauthorized("无法访问，权限不足");
+
+        Survey survey = surveyService.get(surveyId);
+        if (!userService.isLoginId(surveyService.getUserId(surveyId))) {
+            survey.setResponseList(new ArrayList<>());
+            for (int i = 0; i < survey.getQuestionList().size(); i++)
+                survey.getQuestionList().get(i).setAnswerDetailList(new ArrayList<>());
+        }
+
+        return Result.successData(survey);
     }
 
-    @SaCheckLogin
     @GetMapping("/user/{userId}/{surveyId}")
     public Result getByUser(@PathVariable Integer userId, @PathVariable Integer surveyId) {
+        if (!userService.isLoginId(userId))
+            return Result.unauthorized("无法访问，权限不足");
+
         return Result.successData(surveyService.getByUser(userId, surveyId));
     }
 
-    @SaCheckLogin
+
     @GetMapping("/user/{userId}")
     public Result getAllByUser(@PathVariable Integer userId) {
+        if (!userService.isLoginId(userId))
+            return Result.unauthorized("无法访问，权限不足");
+
         return Result.successData(surveyService.getAllByUser(userId));
     }
 
-    @SaCheckLogin
+
     @GetMapping("")
     public Result getAllByLoginUser() {
         return Result.successData(
@@ -130,46 +140,7 @@ public class SurveyController {
         );
     }
 
-    @RequestMapping(value = {"/{surveyId}/question", "/{surveyId}/question/**"})
-    public void doQuestion(@PathVariable Integer surveyId, HttpServletRequest req, HttpServletResponse resp)
-            throws ServletException, IOException
-    {
-        List<String> pathSplit = List.of(req.getServletPath().split("/"));
-        List<String> pathNeed = new ArrayList<>();
-        if (pathSplit.size() > 4)
-            pathNeed.addAll(pathSplit.subList(4, pathSplit.size()));
-
-        String suf = String.join("/", pathNeed);
-        String pre = "/question/survey/" + surveyId + (suf.isEmpty() ? "" : "/");
-        if (req.getServletPath().charAt(req.getServletPath().length() - 1) == '/')
-            suf += "/";
-
-        req.getRequestDispatcher(pre + suf).forward(req, resp);
-    }
-
-    @RequestMapping(value = {"/user/{userId}/{surveyId}/question", "/user/{userId}/{surveyId}/question/**"})
-    public void doQuestionByUser(@PathVariable Integer userId,
-                                 @PathVariable Integer surveyId,
-                                 HttpServletRequest req,
-                                 HttpServletResponse resp)
-            throws ServletException, IOException
-    {
-        if (!surveyRepository.existsByIdAndUserId(surveyId, userId))
-            throw new CatValidationException("问卷不存在或不属于此用户");
-
-        List<String> pathSplit = List.of(req.getServletPath().split("/"));
-        List<String> pathNeed = new ArrayList<>();
-        if (pathSplit.size() > 6)
-            pathNeed.addAll(pathSplit.subList(6, pathSplit.size()));
-
-        String suf = String.join("/", pathNeed);
-        String pre = "/question/survey/" + surveyId + (suf.isEmpty() ? "" : "/");
-        if (req.getServletPath().charAt(req.getServletPath().length() - 1) == '/')
-            suf += "/";
-
-        req.getRequestDispatcher(pre + suf).forward(req, resp);
-    }
-
+    @SaIgnore
     @RequestMapping(value = {"/{surveyId}/response", "/{surveyId}/response/**"})
     public void doResponse(@PathVariable Integer surveyId,
                            HttpServletRequest req,
@@ -189,6 +160,7 @@ public class SurveyController {
         req.getRequestDispatcher(pre + suf).forward(req, resp);
     }
 
+    @SaIgnore
     @RequestMapping(value = {"/user/{userId}/{surveyId}/response", "/user/{userId}/{surveyId}/response/**"})
     public void doResponseByUser(@PathVariable Integer userId,
                                  @PathVariable Integer surveyId,
@@ -196,7 +168,7 @@ public class SurveyController {
                                  HttpServletResponse resp)
             throws ServletException, IOException
     {
-        if (!surveyRepository.existsByIdAndUserId(surveyId, userId))
+        if (!surveyService.existsByIdAndUserId(surveyId, userId))
             throw new CatValidationException("问卷不存在或不属于此用户");
 
         List<String> pathSplit = List.of(req.getServletPath().split("/"));

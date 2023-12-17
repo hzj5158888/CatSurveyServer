@@ -1,6 +1,7 @@
 package com.codecat.catsurvey.models;
 
 import com.alibaba.fastjson2.annotation.JSONField;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -25,7 +26,7 @@ public class Role {
     @Column(name = "name", nullable = false, length = 255)
     private String name;
 
-    @JSONField(serialize = false)
+    @JsonIgnore
     @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id", referencedColumnName = "id", insertable = false, updatable = false)
     private List<RolePermission> rolePermissionList = new ArrayList<>();

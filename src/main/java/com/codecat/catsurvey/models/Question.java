@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.annotation.JSONField;
 import com.codecat.catsurvey.common.valid.function.question.QuestionTypeExists;
 import com.codecat.catsurvey.common.valid.function.survey.SurveyIdExists;
 import com.codecat.catsurvey.common.valid.group.validationTime;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -51,7 +52,7 @@ public class Question implements Comparable<Question> {
     @Column(name = "is_required", nullable = false)
     private byte isRequired = 1;
 
-    @JSONField(serialize = false)
+    @JsonIgnore
     @ToString.Exclude
     @ManyToOne(targetEntity = Survey.class, cascade = CascadeType.REFRESH)
     @JoinColumn(name = "survey_id", referencedColumnName = "id", insertable = false, updatable = false)

@@ -44,7 +44,7 @@ public class SurveyService {
         if (!userService.isLoginId(survey.getUserId()))
             throw new CatAuthorizedException("无法添加，权限不足");
 
-        if (!survey.getStatus().equals("草稿")) {
+        if (!survey.getStatus().equals(SurveyStatusEnum.DRAFT.getName())) {
             if (survey.getStartDate() == null || survey.getEndDate() == null)
                 throw new CatValidationException("开始时间和截止时间不能为空");
             if (survey.getStartDate().getTime() > survey.getEndDate().getTime())
@@ -77,7 +77,8 @@ public class SurveyService {
         surveyRepository.delete(survey);
     }
 
-    public void delAll(@RequestBody JSONObject delSurvey) {
+    @Transactional
+    public void delAll(JSONObject delSurvey) {
         if (delSurvey.entrySet().isEmpty()) {
             surveyRepository.deleteAllByUserId(userService.getLoginId());
             return;
@@ -89,11 +90,23 @@ public class SurveyService {
 
         List<Integer> surveyIdList = (List<Integer>) surveyIdListObj;
         for (Integer curId : surveyIdList) {
-            if (!surveyRepository.existsByIdAndUserId(curId, userService.getLoginId()))
-                throw new CatValidationException("无法删除，权限不足");
-
             surveyRepository.deleteById(curId);
         }
+    }
+
+    @Transactional
+    public void delAllCheck(JSONObject delSurvey) {
+        Object surveyIdListObj = delSurvey.get("surveyIdList");
+        if (!(surveyIdListObj instanceof List<?>))
+            throw new CatValidationException("类型错误");
+
+        List<Integer> surveyIdList = (List<Integer>) surveyIdListObj;
+        for (Integer curId : surveyIdList) {
+            if (!surveyRepository.existsByIdAndUserId(curId, userService.getLoginId()))
+                throw new CatValidationException("无法删除，权限不足");
+        }
+
+        delAll(delSurvey);
     }
 
     @Transactional
@@ -101,8 +114,6 @@ public class SurveyService {
         Survey survey = surveyRepository.findById(surveyId).orElseThrow(() ->
                 new CatValidationException("问卷不存在")
         );
-        if (!userService.isLoginId(survey.getUserId()))
-            throw new CatAuthorizedException("无法修改，权限不足");
 
         Set<String> notAllow = new HashSet<>() {{
             add("id");
@@ -123,14 +134,22 @@ public class SurveyService {
                 throw new CatValidationException("修改失败, 非法属性: " + entry.getKey());
             if (notAllow.contains(entry.getKey()))
                 throw new CatValidationException("修改失败, 属性" + entry.getKey() + "为只读");
-            if (entry.getKey().equals("status") && !entry.getValue().equals("草稿")
-                    || (entry.getKey().equals("startDate") || entry.getKey().equals("endDate")) )
+
+            System.out.println(entry.getKey() + ' ' + entry.getValue());
+            if (SurveyStatusEnum.CARRYOUT.getName().equals(newSurveyMap.get("status"))
+                    && ((entry.getKey().equals("startDate")
+                        || entry.getKey().equals("endDate")
+                        || entry.getKey().equals("status")))
+                )
             {
                 Date startDate = (newSurvey.getStartDate() == null ? survey.getStartDate() : newSurvey.getStartDate());
                 Date endDate = (newSurvey.getEndDate() == null ? survey.getEndDate() : newSurvey.getEndDate());
 
-                if (startDate == null || endDate == null)
-                    throw new CatValidationException("开始时间和截止时间不能为空");
+                if (startDate == null)
+                    startDate = new Date(System.currentTimeMillis());
+                if (endDate == null)
+                    endDate = new Date((long) Integer.MAX_VALUE * 1000);
+
                 if (startDate.getTime() > endDate.getTime())
                     throw new CatValidationException("开始时间不得先于截至时间");
             }
@@ -164,8 +183,6 @@ public class SurveyService {
         Survey survey = surveyRepository.findByIdAndUserId(surveyId, userId).orElseThrow(() ->
                 new CatValidationException("问卷不存在或不属于此用户")
         );
-        if (!userService.isLoginId(survey.getUserId()))
-            throw new CatAuthorizedException("无法访问，权限不足");
 
         return survey;
     }
@@ -173,10 +190,21 @@ public class SurveyService {
     public List<Survey> getAllByUser(Integer userId) {
         if (!userRepository.existsById(userId))
             throw new CatValidationException("用户不存在");
-        if (!userService.isLoginId(userId))
-            throw new CatAuthorizedException("无法获取, 权限不足");
 
         return surveyRepository.findAllByUserId(userId, Sort.by(Sort.Direction.DESC, "createDate"));
+    }
+
+    @Transactional
+    public String getStatus(Integer surveyId) {
+        return get(surveyId).getStatus();
+    }
+
+    public Integer getUserId(Integer surveyId) {
+        return get(surveyId).getUserId();
+    }
+
+    public boolean existsByIdAndUserId(Integer surveyId, Integer userId) {
+        return surveyRepository.existsByIdAndUserId(surveyId, userId);
     }
 
     @Validated(validationTime.FullUpdate.class)

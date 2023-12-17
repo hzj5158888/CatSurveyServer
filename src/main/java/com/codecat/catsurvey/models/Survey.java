@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.annotation.JSONField;
 import com.codecat.catsurvey.common.valid.function.survey.SurveyStatusExists;
 import com.codecat.catsurvey.common.valid.function.user.UserIdExists;
 import com.codecat.catsurvey.common.valid.group.validationTime;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Null;
@@ -11,6 +12,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -58,7 +60,7 @@ public class Survey {
     private String status;
 
     @ToString.Exclude
-    @JSONField(serialize = false)
+    @JsonIgnore
     @ManyToOne(targetEntity = User.class, cascade = CascadeType.REFRESH)
     @JoinColumn(name = "user_id", referencedColumnName = "id", insertable = false, updatable = false)
     private User user;
@@ -68,6 +70,7 @@ public class Survey {
     @JoinColumn(name = "survey_id", referencedColumnName = "id", insertable = false, updatable = false)
     private List<Question> questionList = new ArrayList<>();
 
+    @OrderBy("submitDate desc")
     @OneToMany(targetEntity = Response.class, fetch = FetchType.EAGER, cascade = {CascadeType.REFRESH, CascadeType.REMOVE})
     @JoinColumn(name = "survey_id", referencedColumnName = "id", insertable = false, updatable = false)
     private List<Response> responseList = new ArrayList<>();

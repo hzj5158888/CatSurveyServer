@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.annotation.JSONField;
 import com.codecat.catsurvey.common.valid.function.survey.SurveyIdExists;
 import com.codecat.catsurvey.common.valid.function.user.UserIdExists;
 import com.codecat.catsurvey.common.valid.group.validationTime;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Null;
@@ -11,6 +12,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -44,7 +46,7 @@ public class Response {
     @Column(name = "submit_date", nullable = false)
     private Date submitDate;
 
-    @JSONField(serialize = false)
+    @JsonIgnore
     @ToString.Exclude
     @ManyToOne(targetEntity = Survey.class, cascade = CascadeType.REFRESH)
     @JoinColumn(name = "survey_id", referencedColumnName = "id", insertable = false, updatable = false)
