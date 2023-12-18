@@ -19,6 +19,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.relational.core.sql.In;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,8 +38,24 @@ public class UserController {
     @SaIgnore
     @PostMapping("")
     public Result add(@RequestBody @Validated(validationTime.FullAdd.class) User user) {
+        if (user.getId()!=null)
+            return Result.validatedFailed("数据传输出错，多给了id");
         userService.add(user);
+        if(user.getId()!=null)
+            return Result.failedMsg("注册失败！");
+        //成功
         return Result.successData(user.getId());
+    }
+
+    @PutMapping("")
+    public Result update(@RequestBody User user) {
+        if(user.getId()!=null && StpUtil.getLoginIdAsInt() != user.getId()){
+            return Result.failedMsg("不能修改别人的信息");
+        }
+        User ret = userService.update(user);
+        if(ret==null)
+            return Result.failedMsg("修改失败");
+        return Result.successMsg("修改个人信息成功");
     }
 
     @PutMapping("/{userId}")
@@ -48,11 +65,6 @@ public class UserController {
 
         userService.modify(userId, user);
         return Result.success();
-    }
-
-    @PutMapping("")
-    public Result modifyLoginUser(@RequestBody JSONObject user) {
-        return modify(userService.getLoginId(), user);
     }
 
     @GetMapping("")

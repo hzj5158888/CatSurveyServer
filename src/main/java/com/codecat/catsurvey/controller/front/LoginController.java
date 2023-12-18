@@ -4,13 +4,15 @@ import cn.dev33.satoken.stp.SaTokenInfo;
 import cn.dev33.satoken.stp.StpUtil;
 import com.alibaba.fastjson2.JSONObject;
 import com.codecat.catsurvey.models.Role;
+import com.codecat.catsurvey.models.User;
+import com.codecat.catsurvey.bean.UserInfo;
+import com.codecat.catsurvey.service.LoginService;
 import com.codecat.catsurvey.service.UserService;
 import com.codecat.catsurvey.utils.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
@@ -19,28 +21,31 @@ public class LoginController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private LoginService loginService;
+
     @PostMapping("/login")
     public Result login(@RequestBody JSONObject loginInfo) {
         String userName = (String) loginInfo.get("userName");
         String password = (String) loginInfo.get("password");
         if (userName == null || password == null)
-            return Result.failedMsg("用户名和密码不能为空");
+            return Result.failedMsg("用户名或密码不能为空");
 
-        SaTokenInfo saTokenInfo = userService.getToken(userName, password);
-        if (saTokenInfo == null)
+        User user = loginService.login(userName,password);
+        if (user == null || !userName.equals(user.getUserName()) || !password.equals(user.getPassword()))
             return Result.validatedFailed("用户名或密码错误");
 
-        Integer loginId = Integer.parseInt( (String) saTokenInfo.getLoginId());
+        // 登陆成功,发放token SaToken
+        StpUtil.login(user.getId());
+        SaTokenInfo saTokenInfo = StpUtil.getTokenInfo();
+        String accessToken = saTokenInfo.getTokenValue();
+        List<String> role = loginService.getRoleList(user.getId())
+                                        .stream()
+                                        .map(Role::getName)
+                                        .collect(Collectors.toList());
 
-        Map<String, Object> loginRes = new HashMap<>();
-        loginRes.put("accessToken", saTokenInfo.getTokenValue());
-        loginRes.put("userId", loginId);
-        loginRes.put("userName", userName);
-        loginRes.put("role",
-                userService.getRoleList(loginId).stream().map(Role::getName).collect(Collectors.toList())
-        );
-
-        return Result.successData(loginRes);
+        UserInfo userInfo = new UserInfo(user.getId(), userName, role, accessToken);
+        return Result.successData(userInfo);
     }
 
     @PostMapping("/logout")

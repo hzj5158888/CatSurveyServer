@@ -154,6 +154,9 @@ public class UserService {
         userRepository.saveAndFlush(user);
         addRole(user.getId(), "User");
     }
+    public User update(User user){
+        return userRepository.saveAndFlush(user);
+    }
 
     @Transactional
     public boolean addRole(Integer userId, String roleName) {
@@ -170,8 +173,7 @@ public class UserService {
 
         Optional<Role> roleOpt = roleRepository.findByName(roleName);
         if (roleOpt.isEmpty()) {
-            System.out.println("UserService setRoleAll: unavailable roleName:" + roleName);
-            return false;
+            throw new CatValidationException("UserService setRoleAll: unavailable roleName:" + roleName);
         } else if (roleSet.contains(roleOpt.get().getId()))
             return true;
 
