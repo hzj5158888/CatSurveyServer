@@ -2,6 +2,7 @@ package com.codecat.catsurvey.utils;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.TypeReference;
 import com.alibaba.fastjson2.util.BeanUtils;
 import com.fasterxml.jackson.core.JsonParser;
@@ -16,14 +17,14 @@ import java.util.*;
 
 public class Util {
     public static Map<String, Object> objectToMap(Object object) {
-        return JSONObject.parseObject(JSON.toJSONString(object));
+        return JSONObject.parseObject(JSON.toJSONString(object, JSONWriter.Feature.WriteMapNullValue));
     }
 
     public static <T> T mapToObject(Map<String, Object> source, Class<T> target) {
         if (source == null)
             return null;
 
-        return JSONObject.parseObject(JSON.toJSONString(source), target);
+        return JSONObject.parseObject(JSON.toJSONString(source, JSONWriter.Feature.WriteMapNullValue), target);
     }
 
     public static Set<String> getObjectFiledName(Object object) {

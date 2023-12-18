@@ -286,11 +286,12 @@ public class UserService {
         }};
         Set<String> continueItem = new HashSet<>() {{
             add("userRoleList");
+            add("oldPassword");
         }};
         Set<String> userFiled = Util.getObjectFiledName(userOld);
         Map<String, Object> userMap = Util.objectToMap(userOld);
         for (Map.Entry<String, Object> entry : user.entrySet()) {
-            if (entry.getKey().equals("oldPassword") || continueItem.contains(entry.getKey()))
+            if (entry.getValue() == null || continueItem.contains(entry.getKey()))
                 continue;
             if (!userFiled.contains(entry.getKey()))
                 throw new CatValidationException("用户信息修改失败, 非法属性: " + entry.getKey());
