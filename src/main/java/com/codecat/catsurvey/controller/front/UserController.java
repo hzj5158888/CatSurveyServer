@@ -36,7 +36,7 @@ public class UserController {
 
     @SaIgnore
     @PostMapping("")
-    public Result add(@RequestBody User user) {
+    public Result add(@RequestBody @Validated(validationTime.FullAdd.class) User user) {
         userService.add(user);
         return Result.successData(user.getId());
     }
