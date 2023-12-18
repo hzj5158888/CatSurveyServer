@@ -136,9 +136,6 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <schemaPaths>
-                                <param>src/main/resources/graphql-client</param>
-                            </schemaPaths>
                             <packageName>com.codecat.catsurvey.codegen</packageName>
                             <addGeneratedAnnotation>true</addGeneratedAnnotation>
                         </configuration>

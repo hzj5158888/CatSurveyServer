@@ -1,8 +1,8 @@
 spring:
   datasource:
     url: jdbc:mysql://jifu.cuza.fun:3306/codecat
-    username: gdpujf
-    password: gdpujf
+    username: codecat
+    password: codecat
     driver-class-name: com.mysql.cj.jdbc.Driver
 
 server:
