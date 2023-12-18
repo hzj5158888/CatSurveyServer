@@ -62,11 +62,8 @@ public class UserController {
      */
     @PutMapping("")
     public Result update(@RequestBody User user) {
-        if(user.getId() != null && StpUtil.getLoginIdAsInt() != user.getId()){
-            return Result.failedMsg("不能修改别人的信息");
-        }
-
-        user.setPassword(MD5Util.getMD5(user.getPassword()));//密码加密
+        user.setId(userService.getLoginId()); // 只能修改自己
+        user.setPassword(MD5Util.getMD5(user.getPassword())); // 密码加密
         User ret = userService.update(user);
         if (ret == null || ret.getId() == null)
             return Result.failedMsg("修改失败");
@@ -114,6 +111,8 @@ public class UserController {
                             .map(Role::getName)
                             .collect(Collectors.toList())
         );
+
+        System.out.println(user);
 
         return Result.successData(userMap);
     }

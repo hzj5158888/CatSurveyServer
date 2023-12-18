@@ -190,6 +190,62 @@ public class UserService {
         return true;
     }
 
+    @Transactional
+    public void modify(Integer userId, JSONObject user) {
+        User userOld = userRepository.findById(userId).orElseThrow(() ->
+                new CatValidationException("非法userId: " + userId)
+        );
+
+        boolean needLogout = false;
+        Set<String> notAllow = new HashSet<>() {{
+            add("id");
+        }};
+        Set<String> continueItem = new HashSet<>() {{
+            add("userRoleList");
+            add("oldPassword");
+        }};
+        Set<String> userFiled = Util.getObjectFiledName(userOld);
+        Map<String, Object> userMap = Util.objectToMap(userOld);
+        for (Map.Entry<String, Object> entry : user.entrySet()) {
+            if (entry.getValue() == null || continueItem.contains(entry.getKey()))
+                continue;
+            if (!userFiled.contains(entry.getKey()))
+                throw new CatValidationException("用户信息修改失败, 非法属性: " + entry.getKey());
+            if (notAllow.contains(entry.getKey()))
+                throw new CatValidationException("用户信息修改失败, 属性" + entry.getKey() + "为只读");
+
+            if (entry.getKey().equals("password")) {
+                String oldPassword = (String) user.get("oldPassword");
+                if (oldPassword == null)
+                    throw new CatValidationException("原密码为空");
+                if (!userOld.getPassword().equals(oldPassword))
+                    throw new CatValidationException("原密码错误");
+
+                needLogout = true;
+            }
+
+            userMap.put(entry.getKey(), entry.getValue());
+        }
+
+        User userFinal = Util.mapToObject(userMap, User.class);
+        checkFullUpdate(userFinal);
+        userRepository.saveAndFlush(userFinal);
+        if (needLogout)
+            StpUtil.logout();
+    }
+
+    @Transactional
+    public User getById(Integer userId) {
+        return userRepository.findById(userId).orElseThrow(() ->
+                new CatValidationException("用户不存在")
+        );
+    }
+
+    @Transactional
+    public boolean existsById(Integer userId) {
+        return userRepository.existsById(userId);
+    }
+
     private List<UserRole> toUserRoleList(List<Integer> roleIdList, Integer userId) {
         List<UserRole> ans = new ArrayList<>();
         for (Integer roleId : roleIdList) {
@@ -206,7 +262,7 @@ public class UserService {
     @Transactional
     public void addRoleAll(Integer userId, List<String> roleNameList) {
         if (userId == null || !userRepository.existsById(userId))
-           throw new CatValidationException("UserService addRoleAll: unavailable userId: " + userId);
+            throw new CatValidationException("UserService addRoleAll: unavailable userId: " + userId);
 
         Set<Integer> roleSet = new HashSet<>();
         List<Role> curRole = getRoleList(userId);
@@ -279,62 +335,6 @@ public class UserService {
 
         List<UserRole> userRoleList = toUserRoleList(roleSet.stream().toList(), userId);
         userRoleRepository.saveAllAndFlush(userRoleList);
-    }
-
-    @Transactional
-    public void modify(Integer userId, JSONObject user) {
-        User userOld = userRepository.findById(userId).orElseThrow(() ->
-                new CatValidationException("非法userId: " + userId)
-        );
-
-        boolean needLogout = false;
-        Set<String> notAllow = new HashSet<>() {{
-            add("id");
-        }};
-        Set<String> continueItem = new HashSet<>() {{
-            add("userRoleList");
-            add("oldPassword");
-        }};
-        Set<String> userFiled = Util.getObjectFiledName(userOld);
-        Map<String, Object> userMap = Util.objectToMap(userOld);
-        for (Map.Entry<String, Object> entry : user.entrySet()) {
-            if (entry.getValue() == null || continueItem.contains(entry.getKey()))
-                continue;
-            if (!userFiled.contains(entry.getKey()))
-                throw new CatValidationException("用户信息修改失败, 非法属性: " + entry.getKey());
-            if (notAllow.contains(entry.getKey()))
-                throw new CatValidationException("用户信息修改失败, 属性" + entry.getKey() + "为只读");
-
-            if (entry.getKey().equals("password")) {
-                String oldPassword = (String) user.get("oldPassword");
-                if (oldPassword == null)
-                    throw new CatValidationException("原密码为空");
-                if (!userOld.getPassword().equals(oldPassword))
-                    throw new CatValidationException("原密码错误");
-
-                needLogout = true;
-            }
-
-            userMap.put(entry.getKey(), entry.getValue());
-        }
-
-        User userFinal = Util.mapToObject(userMap, User.class);
-        checkFullUpdate(userFinal);
-        userRepository.saveAndFlush(userFinal);
-        if (needLogout)
-            StpUtil.logout();
-    }
-
-    @Transactional
-    public User getById(Integer userId) {
-        return userRepository.findById(userId).orElseThrow(() ->
-                new CatValidationException("用户不存在")
-        );
-    }
-
-    @Transactional
-    public boolean existsById(Integer userId) {
-        return userRepository.existsById(userId);
     }
 
     @Validated(validationTime.FullUpdate.class)
