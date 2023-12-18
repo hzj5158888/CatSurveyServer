@@ -310,7 +310,6 @@ public class UserService {
             userMap.put(entry.getKey(), entry.getValue());
         }
 
-        System.out.println(userMap);
         User userFinal = Util.mapToObject(userMap, User.class);
         checkFullUpdate(userFinal);
         userRepository.saveAndFlush(userFinal);
