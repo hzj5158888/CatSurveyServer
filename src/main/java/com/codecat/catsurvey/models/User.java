@@ -34,7 +34,7 @@ public class User {
     @NotNull(message = "用户名不能为空")
     @Pattern(regexp = "^[A-Za-z0-9]+$", message = "用户名只能由数字英文组成")
     @UserNameUnique(message = "用户名重复", groups = validationTime.FullAdd.class)
-    @Column(name = "username", nullable = false)
+    @Column(name = "user_name", nullable = false)
     private String userName;
 
     @NotNull(message = "密码不能为空")
