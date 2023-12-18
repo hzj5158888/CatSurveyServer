@@ -40,15 +40,17 @@ public class UserController {
     @SaIgnore
     @PostMapping("")
     public Result add(@RequestBody @Validated(validationTime.FullAdd.class) User user) {
-        if (user.getId()!=null)
+        if (user.getId() != null)
             return Result.validatedFailed("数据传输出错，多给了id");
-        user.setPassword(MD5Util.getMD5(user.getPassword())); //密码加密
-        Boolean existsUser = userService.existsUser(user); //查询用户是否存在
-        if(existsUser)
+
+        user.setPassword(MD5Util.getMD5(user.getPassword())); // 密码加密
+        if (userService.existsByUserName(user.getUserName())) //查询用户是否存在
             return Result.failedMsg("用户已经存在");
+
         userService.add(user);
-        if(user.getId()==null)
+        if (user.getId() == null)
             return Result.failedMsg("注册失败！");
+
         //成功
         return Result.successData(user.getId());
     }
@@ -60,26 +62,31 @@ public class UserController {
      */
     @PutMapping("")
     public Result update(@RequestBody User user) {
-        if(user.getId()!=null && StpUtil.getLoginIdAsInt() != user.getId()){
+        if(user.getId() != null && StpUtil.getLoginIdAsInt() != user.getId()){
             return Result.failedMsg("不能修改别人的信息");
         }
+
         user.setPassword(MD5Util.getMD5(user.getPassword()));//密码加密
         User ret = userService.update(user);
-        if(ret==null)
+        if (ret == null || ret.getId() == null)
             return Result.failedMsg("修改失败");
+
         return Result.successMsg("修改个人信息成功");
     }
+
     @PutMapping("/password")
     public Result updatePassword(@RequestBody UserPassword userPassword){
         if(!userPassword.getOldPassword().equals(userPassword.getPassword()))
             return Result.failedMsg("密码不一致");
-        Integer userId=StpUtil.getLoginIdAsInt();
+
+        Integer userId = StpUtil.getLoginIdAsInt();
         User user = new User();
         user.setId(userId);
         user.setPassword(userPassword.getPassword());
         User ret = userService.update(user);
-        if(ret==null)
+        if (ret == null || ret.getId() == null)
             return Result.failedMsg("修改密码失败");
+
         return Result.successMsg("修改密码成功");
     }
 
@@ -87,7 +94,8 @@ public class UserController {
     public Result modify(@PathVariable Integer userId, @RequestBody JSONObject user) {
         if (!userService.isLoginId(userId))
             throw new CatAuthorizedException("无法修改, 权限不足");
-        user.put("password",MD5Util.getMD5(user.get("password").toString()));//修改密码
+
+        user.put("password", MD5Util.getMD5(user.get("password").toString())); //修改密码
         userService.modify(userId, user);
         return Result.success();
     }

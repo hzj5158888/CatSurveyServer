@@ -154,9 +154,11 @@ public class UserService {
         userRepository.saveAndFlush(user);
         addRole(user.getId(), "User");
     }
-    public Boolean existsUser(User user){
-        return userRepository.existsByUserName(user.getUserName());
+
+    public Boolean existsByUserName(String userName){
+        return userRepository.existsByUserName(userName);
     }
+
     public User update(User user){
         return userRepository.saveAndFlush(user);
     }
