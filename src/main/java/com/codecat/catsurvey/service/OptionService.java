@@ -103,9 +103,12 @@ public class OptionService {
         Option option = optionRepository.findById(optionId).orElseThrow(() ->
                 new CatValidationException("选项不存在")
         );
+        Survey survey = surveyRepository.findById(option.getQuestion().getSurveyId()).orElseThrow(() ->
+                new CatValidationException("答卷不存在")
+        );
 
-        Integer userId = option.getQuestion().getSurvey().getUserId();
-        if (!userService.isLoginId(userId) && !userService.containsPermissionName("SurveyManage"))
+        Integer userId = survey.getUserId();
+        if (!userService.isLoginId(userId))
             throw new CatAuthorizedException("无法修改，权限不足");
 
         Set<String> notAllow = new HashSet<>(){{
