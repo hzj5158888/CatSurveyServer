@@ -128,8 +128,6 @@ public class UserController {
                             .collect(Collectors.toList())
         );
 
-        System.out.println(user);
-
         return Result.successData(userMap);
     }
 

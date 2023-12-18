@@ -3,7 +3,6 @@ package com.codecat.catsurvey.service;
 import cn.dev33.satoken.stp.SaTokenInfo;
 import cn.dev33.satoken.stp.StpUtil;
 import com.alibaba.fastjson2.JSONObject;
-import com.codecat.catsurvey.exception.CatAuthorizedException;
 import com.codecat.catsurvey.exception.CatValidationException;
 import com.codecat.catsurvey.models.Permission;
 import com.codecat.catsurvey.models.Role;
@@ -13,17 +12,13 @@ import com.codecat.catsurvey.repository.RoleRepository;
 import com.codecat.catsurvey.repository.UserRepository;
 import com.codecat.catsurvey.repository.UserRoleRepository;
 import com.codecat.catsurvey.utils.MD5Util;
-import com.codecat.catsurvey.utils.Result;
 import com.codecat.catsurvey.utils.Util;
 import com.codecat.catsurvey.common.valid.group.validationTime;
 import jakarta.validation.Valid;
-import jakarta.validation.ValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -165,11 +160,9 @@ public class UserService {
     }
 
     @Transactional
-    public boolean addRole(Integer userId, String roleName) {
-        if (userId == null || !userRepository.existsById(userId)) {
-            System.out.println("UserService addRole: unavailable userId: " + userId);
-            return false;
-        }
+    public void addRole(Integer userId, String roleName) {
+        if (userId == null || !userRepository.existsById(userId))
+            throw new CatValidationException("UserService addRole: unavailable userId: " + userId);
 
         Set<Integer> roleSet = new HashSet<>();
         List<Role> curRole = getRoleList(userId);
@@ -178,17 +171,15 @@ public class UserService {
         }
 
         Optional<Role> roleOpt = roleRepository.findByName(roleName);
-        if (roleOpt.isEmpty()) {
+        if (roleOpt.isEmpty())
             throw new CatValidationException("UserService setRoleAll: unavailable roleName:" + roleName);
-        } else if (roleSet.contains(roleOpt.get().getId()))
-            return true;
+        else if (roleSet.contains(roleOpt.get().getId()))
+            return;
 
         UserRole userRole = new UserRole();
         userRole.setUserId(userId);
         userRole.setRoleId(roleOpt.get().getId());
         userRoleRepository.saveAndFlush(userRole);
-
-        return true;
     }
 
     @Transactional
