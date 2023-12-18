@@ -63,7 +63,7 @@ public class UserService {
 
     public SaTokenInfo getToken(String userName, String password) {
         User user = userRepository.findByUserName(userName).orElseThrow(() ->
-                new ValidationException("非法userName: " + userName)
+                new CatValidationException("非法userName: " + userName)
         );
 
         if (!user.getUserName().equals(userName)) // 区分大小写
@@ -80,7 +80,7 @@ public class UserService {
             return null;
 
         User user = userRepository.findById(userId).orElseThrow(() ->
-                new ValidationException("非法userId: " + userId)
+                new CatValidationException("非法userId: " + userId)
         );
 
         List<UserRole> userRoleList = user.getUserRoleList();
