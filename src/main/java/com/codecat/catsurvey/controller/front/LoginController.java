@@ -8,6 +8,7 @@ import com.codecat.catsurvey.models.User;
 import com.codecat.catsurvey.bean.UserInfo;
 import com.codecat.catsurvey.service.LoginService;
 import com.codecat.catsurvey.service.UserService;
+import com.codecat.catsurvey.utils.MD5Util;
 import com.codecat.catsurvey.utils.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -30,8 +31,8 @@ public class LoginController {
         String password = (String) loginInfo.get("password");
         if (userName == null || password == null)
             return Result.failedMsg("用户名或密码不能为空");
-
-        User user = loginService.login(userName,password);
+        password = MD5Util.getMD5(password);
+        User user = loginService.login(userName, password);
         if (user == null || !userName.equals(user.getUserName()) || !password.equals(user.getPassword()))
             return Result.validatedFailed("用户名或密码错误");
 

@@ -33,13 +33,13 @@ public class User {
 
     @NotNull(message = "用户名不能为空")
     @Pattern(regexp = "^[A-Za-z0-9]+$", message = "用户名只能由数字英文组成")
-    @UserNameUnique(message = "用户名重复", groups = validationTime.FullAdd.class)
+    @UserNameUnique(message = "用户名已存在哦", groups = validationTime.FullAdd.class)
     @Column(name = "user_name", nullable = false)
     private String userName;
 
     @NotNull(message = "密码不能为空")
-    @Length(min = 6, max = 16, message = "密码长度为6-16位")
-    @Pattern(regexp = "^[A-Za-z0-9.]+$", message = "密码只能由数字英文以及'.'组成")
+    //@Length(min = 6, max = 16, message = "密码长度为6-16位")//密码已经加密，不能有此限制
+    //@Pattern(regexp = "^[A-Za-z0-9.]+$", message = "密码只能由数字英文以及'.'组成")
     @Column(name = "password", nullable = false)
     private String password;
 
