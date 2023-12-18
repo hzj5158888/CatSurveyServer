@@ -30,11 +30,6 @@ public class Util {
         return objectToMap(object).keySet();
     }
 
-    protected Type getType(int index) {
-        Type superClass = getClass().getGenericSuperclass();
-        return ((ParameterizedType) superClass).getActualTypeArguments()[index];
-    }
-
     @SuppressWarnings("unchecked")
     public static List<Object> objectToList(Object object) {
         return (List<Object>) object;

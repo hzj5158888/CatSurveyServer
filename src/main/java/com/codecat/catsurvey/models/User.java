@@ -37,7 +37,7 @@ public class User {
     @Column(name = "username", nullable = false)
     private String userName;
 
-    @JsonIgnore
+    @JSONField(serialize = false)
     @NotNull(message = "密码不能为空")
     @Length(min = 6, max = 16, message = "密码长度为6-16位")
     @Pattern(regexp = "^[A-Za-z0-9.]+$", message = "密码只能由数字英文以及'.'组成")
@@ -54,7 +54,7 @@ public class User {
     @Column(name = "wechat")
     private String wechat;
 
-    @JsonIgnore
+    @JSONField(serialize = false)
     @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", referencedColumnName = "id", insertable = false, updatable = false)
     private List<UserRole> userRoleList = new ArrayList<>();

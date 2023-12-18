@@ -51,7 +51,7 @@ public class QuestionTemplate implements Comparable<QuestionTemplate> {
     private byte isRequired = 1;
 
     @ToString.Exclude
-    @JsonIgnore
+    @JSONField(serialize = false)
     @ManyToOne(targetEntity = SurveyTemplate.class, cascade = CascadeType.REFRESH)
     @JoinColumn(name = "template_id", referencedColumnName = "id", insertable = false, updatable = false)
     private SurveyTemplate surveyTemplate;

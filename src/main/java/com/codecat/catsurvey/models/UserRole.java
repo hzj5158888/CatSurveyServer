@@ -29,13 +29,13 @@ public class UserRole {
     private int roleId;
 
     @ToString.Exclude
-    @JsonIgnore
+    @JSONField(serialize = false)
     @ManyToOne(targetEntity = User.class, cascade = CascadeType.REFRESH)
     @JoinColumn(name = "user_id", referencedColumnName = "id", insertable = false, updatable = false)
     private User user;
 
     @ToString.Exclude
-    @JsonIgnore
+    @JSONField(serialize = false)
     @ManyToOne(targetEntity = Role.class, cascade = CascadeType.REFRESH)
     @JoinColumn(name = "role_id", referencedColumnName = "id", insertable = false, updatable = false)
     private Role role;

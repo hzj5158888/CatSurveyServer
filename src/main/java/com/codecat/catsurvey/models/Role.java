@@ -26,7 +26,7 @@ public class Role {
     @Column(name = "name", nullable = false, length = 255)
     private String name;
 
-    @JsonIgnore
+    @JSONField(serialize = false)
     @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id", referencedColumnName = "id", insertable = false, updatable = false)
     private List<RolePermission> rolePermissionList = new ArrayList<>();

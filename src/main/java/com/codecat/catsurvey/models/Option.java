@@ -39,7 +39,7 @@ public class Option implements Comparable<Option> {
     private Integer iOrder;
 
     @ToString.Exclude
-    @JsonIgnore
+    @JSONField(serialize = false)
     @ManyToOne(targetEntity = Question.class, cascade = CascadeType.REFRESH)
     @JoinColumn(name = "question_id", referencedColumnName = "id", insertable = false, updatable = false)
     private Question question;

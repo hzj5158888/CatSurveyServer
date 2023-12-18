@@ -28,14 +28,14 @@ public class RolePermission {
     @Column(name = "permission_id", nullable = false)
     private int permissionId;
 
-    @JsonIgnore
+    @JSONField(serialize = false)
     @ToString.Exclude
     @ManyToOne(targetEntity = Role.class, cascade = CascadeType.REFRESH)
     @JoinColumn(name = "role_id", referencedColumnName = "id", insertable = false, updatable = false)
     private Role role;
 
     @ToString.Exclude
-    @JsonIgnore
+    @JSONField(serialize = false)
     @ManyToOne(targetEntity = Permission.class, cascade = CascadeType.REFRESH)
     @JoinColumn(name = "permission_id", referencedColumnName = "id", insertable = false, updatable = false)
     private Permission permission;

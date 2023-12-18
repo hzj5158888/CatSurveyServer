@@ -36,7 +36,7 @@ public class OptionTemplate implements Comparable<OptionTemplate> {
     private Integer iOrder;
 
     @ToString.Exclude
-    @JsonIgnore
+    @JSONField(serialize = false)
     @ManyToOne(targetEntity = QuestionTemplate.class, cascade = CascadeType.REFRESH)
     @JoinColumn(name = "question_template_id", referencedColumnName = "id", insertable = false, updatable = false)
     private QuestionTemplate questionTemplate;

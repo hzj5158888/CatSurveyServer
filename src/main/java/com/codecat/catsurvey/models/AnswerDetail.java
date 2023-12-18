@@ -48,13 +48,13 @@ public class AnswerDetail {
     private Object jsonAnswer;
 
     @ToString.Exclude
-    @JsonIgnore
+    @JSONField(serialize = false)
     @ManyToOne(targetEntity = Response.class, cascade = CascadeType.REFRESH)
     @JoinColumn(name = "response_id", referencedColumnName = "id", insertable = false, updatable = false)
     private Response response;
 
     @ToString.Exclude
-    @JsonIgnore
+    @JSONField(serialize = false)
     @ManyToOne(targetEntity = Question.class, cascade = CascadeType.REFRESH)
     @JoinColumn(name = "question_id", referencedColumnName = "id", insertable = false, updatable = false)
     private Question question;

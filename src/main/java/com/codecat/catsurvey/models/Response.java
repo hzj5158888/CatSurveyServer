@@ -46,7 +46,7 @@ public class Response {
     @Column(name = "submit_date", nullable = false)
     private Date submitDate;
 
-    @JsonIgnore
+    @JSONField(serialize = false)
     @ToString.Exclude
     @ManyToOne(targetEntity = Survey.class, cascade = CascadeType.REFRESH)
     @JoinColumn(name = "survey_id", referencedColumnName = "id", insertable = false, updatable = false)
