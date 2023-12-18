@@ -12,6 +12,7 @@ import com.codecat.catsurvey.models.UserRole;
 import com.codecat.catsurvey.repository.RoleRepository;
 import com.codecat.catsurvey.repository.UserRepository;
 import com.codecat.catsurvey.repository.UserRoleRepository;
+import com.codecat.catsurvey.utils.MD5Util;
 import com.codecat.catsurvey.utils.Result;
 import com.codecat.catsurvey.utils.Util;
 import com.codecat.catsurvey.common.valid.group.validationTime;
@@ -215,12 +216,14 @@ public class UserService {
                 throw new CatValidationException("用户信息修改失败, 属性" + entry.getKey() + "为只读");
 
             if (entry.getKey().equals("password")) {
+                String password = (String) user.get("password");
                 String oldPassword = (String) user.get("oldPassword");
                 if (oldPassword == null)
                     throw new CatValidationException("原密码为空");
-                if (!userOld.getPassword().equals(oldPassword))
+                if (!userOld.getPassword().equals(MD5Util.getMD5(oldPassword)))
                     throw new CatValidationException("原密码错误");
 
+                user.put("password", MD5Util.getMD5(password));
                 needLogout = true;
             }
 

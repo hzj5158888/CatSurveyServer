@@ -33,7 +33,7 @@ public class User {
 
     @NotNull(message = "用户名不能为空")
     @Pattern(regexp = "^[A-Za-z0-9]+$", message = "用户名只能由数字英文组成")
-    @UserNameUnique(message = "用户名已存在哦", groups = validationTime.FullAdd.class)
+    @UserNameUnique(message = "用户名已存在", groups = validationTime.FullAdd.class)
     @Column(name = "user_name", nullable = false)
     private String userName;
 

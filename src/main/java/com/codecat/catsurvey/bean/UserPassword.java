@@ -9,5 +9,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UserPassword {
     String oldPassword;
-    String Password;
+    String password;
 }

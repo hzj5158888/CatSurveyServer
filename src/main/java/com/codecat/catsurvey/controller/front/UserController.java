@@ -61,9 +61,23 @@ public class UserController {
      * @return
      */
     @PutMapping("")
-    public Result update(@RequestBody User user) {
-        user.setId(userService.getLoginId()); // 只能修改自己
-        user.setPassword(MD5Util.getMD5(user.getPassword())); // 密码加密
+    public Result update(@RequestBody User user)
+    {
+        if (user.getPassword() != null)
+            return Result.validatedFailed("此接口无法修改密码");
+
+        User oldUser = userService.getById(userService.getLoginId()); // 查询当前用户
+
+        user.setId(oldUser.getId()); // 只能修改自己
+        user.setPassword(oldUser.getPassword());
+        user.setUserName(oldUser.getUserName());
+        if (user.getEmail() == null) // 覆盖数据
+            user.setEmail(oldUser.getEmail());
+        if (user.getPhone() == null)
+            user.setPhone(oldUser.getPhone());
+        if (user.getWechat() == null)
+            user.setWechat(oldUser.getWechat());
+
         User ret = userService.update(user);
         if (ret == null || ret.getId() == null)
             return Result.failedMsg("修改失败");
@@ -72,15 +86,17 @@ public class UserController {
     }
 
     @PutMapping("/password")
-    public Result updatePassword(@RequestBody UserPassword userPassword){
-        if(!userPassword.getOldPassword().equals(userPassword.getPassword()))
-            return Result.failedMsg("密码不一致");
+    public Result updatePassword(@RequestBody UserPassword userPassword)
+    {
+        User curUser = userService.getById(userService.getLoginId()); // 查询当前用户
 
-        Integer userId = StpUtil.getLoginIdAsInt();
-        User user = new User();
-        user.setId(userId);
-        user.setPassword(userPassword.getPassword());
-        User ret = userService.update(user);
+        if (!curUser.getPassword().equals(MD5Util.getMD5(userPassword.getOldPassword())))
+            return Result.unauthorized("原密码错误");
+        if (userPassword.getPassword() == null)
+            return Result.validatedFailed("密码不能为空");
+
+        curUser.setPassword(MD5Util.getMD5(userPassword.getPassword()));
+        User ret = userService.update(curUser);
         if (ret == null || ret.getId() == null)
             return Result.failedMsg("修改密码失败");
 
