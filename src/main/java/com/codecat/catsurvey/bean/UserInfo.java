@@ -13,5 +13,6 @@ public class UserInfo {
     private Integer userId;
     private String userName;
     private List<String> role;
+    private List<String> permission;
     private String accessToken;
 }

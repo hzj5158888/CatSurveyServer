@@ -31,18 +31,11 @@ public class StpInterfaceImpl implements StpInterface {
     @Override
     public List<String> getRoleList(Object loginIdObj, String loginType) {
         if (loginIdObj == null) {
-            System.out.println("getRoleList: loginId is null");
+            System.out.println("getAllRole: loginId is null");
             return null;
         }
 
         Integer loginId = Integer.parseInt((String) loginIdObj);
-        List<Role> RoleList = userService.getRoleList(loginId);
-
-        Set<String> ans = new HashSet<>();
-        for (Role role : RoleList) {
-            ans.add(role.getName());
-        }
-
-        return ans.stream().toList();
+        return userService.getAllRoleName(loginId);
     }
 }

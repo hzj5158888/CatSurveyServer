@@ -1,19 +1,16 @@
 package com.codecat.catsurvey.service;
 
 import com.alibaba.fastjson2.JSONObject;
-import com.codecat.catsurvey.exception.CatAuthorizedException;
 import com.codecat.catsurvey.exception.CatValidationException;
 import com.codecat.catsurvey.models.Permission;
 import com.codecat.catsurvey.models.Role;
 import com.codecat.catsurvey.models.RolePermission;
 import com.codecat.catsurvey.repository.RoleRepository;
 import com.codecat.catsurvey.repository.UserRepository;
-import com.codecat.catsurvey.utils.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -80,7 +77,7 @@ public class RoleSerivce {
     }
 
     public List<Role> getAllByUser(Integer userId) {
-        return userService.getRoleList(userId);
+        return userService.getAllRole(userId);
     }
 
     public List<Permission> getPermissionList(Integer roleId) {

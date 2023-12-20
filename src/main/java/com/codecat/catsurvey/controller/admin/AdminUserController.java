@@ -2,23 +2,16 @@ package com.codecat.catsurvey.controller.admin;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.annotation.SaCheckPermission;
-import cn.dev33.satoken.annotation.SaIgnore;
 import com.alibaba.fastjson2.JSONObject;
 import com.codecat.catsurvey.common.valid.group.validationTime;
 import com.codecat.catsurvey.models.Role;
 import com.codecat.catsurvey.models.User;
 import com.codecat.catsurvey.service.UserService;
 import com.codecat.catsurvey.utils.Result;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -53,7 +46,7 @@ public class AdminUserController {
         User user = userService.getById(userService.getLoginId());
         Map<String, Object> userMap = UserService.filter(user);
         userMap.put("role",
-                userService.getRoleList(user.getId()).stream().map(Role::getName).collect(Collectors.toList())
+                userService.getAllRole(user.getId()).stream().map(Role::getName).collect(Collectors.toList())
         );
 
         return Result.successData(userMap);

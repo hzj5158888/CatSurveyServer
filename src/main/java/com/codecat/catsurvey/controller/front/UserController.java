@@ -2,26 +2,19 @@ package com.codecat.catsurvey.controller.front;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.annotation.SaIgnore;
-import cn.dev33.satoken.stp.SaTokenInfo;
-import cn.dev33.satoken.stp.StpUtil;
 import com.alibaba.fastjson2.JSONObject;
 import com.codecat.catsurvey.bean.UserPassword;
 import com.codecat.catsurvey.exception.CatAuthorizedException;
-import com.codecat.catsurvey.exception.CatValidationException;
 import com.codecat.catsurvey.models.Role;
 import com.codecat.catsurvey.models.User;
-import com.codecat.catsurvey.repository.SurveyRepository;
-import com.codecat.catsurvey.repository.UserRepository;
 import com.codecat.catsurvey.utils.MD5Util;
 import com.codecat.catsurvey.utils.Result;
-import com.codecat.catsurvey.utils.Util;
 import com.codecat.catsurvey.common.valid.group.validationTime;
 import com.codecat.catsurvey.service.UserService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.relational.core.sql.In;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -108,7 +101,6 @@ public class UserController {
         if (!userService.isLoginId(userId))
             throw new CatAuthorizedException("无法修改其它用户的信息");
 
-        user.put("password", MD5Util.getMD5(user.get("password").toString())); //修改密码
         userService.modify(userId, user);
         return Result.success();
     }
@@ -120,13 +112,10 @@ public class UserController {
     @GetMapping("")
     public Result getLoginUser() {
         User user = userService.getById(userService.getLoginId());
+
         Map<String, Object> userMap = UserService.filter(user);
-        userMap.put("role",
-                userService.getRoleList(user.getId())
-                            .stream()
-                            .map(Role::getName)
-                            .collect(Collectors.toList())
-        );
+        userMap.put("role", userService.getAllRoleName(user.getId()));
+        userMap.put("permission", userService.getAllPermission(user.getId()));
 
         return Result.successData(userMap);
     }

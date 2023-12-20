@@ -31,6 +31,7 @@ public class LoginController {
         String password = (String) loginInfo.get("password");
         if (userName == null || password == null)
             return Result.failedMsg("用户名或密码不能为空");
+
         password = MD5Util.getMD5(password);
         User user = loginService.login(userName, password);
         if (user == null || !userName.equals(user.getUserName()) || !password.equals(user.getPassword()))
@@ -40,12 +41,10 @@ public class LoginController {
         StpUtil.login(user.getId());
         SaTokenInfo saTokenInfo = StpUtil.getTokenInfo();
         String accessToken = saTokenInfo.getTokenValue();
-        List<String> role = loginService.getRoleList(user.getId())
-                                        .stream()
-                                        .map(Role::getName)
-                                        .collect(Collectors.toList());
+        List<String> roles = userService.getAllRoleName(user.getId());
+        List<String> permissions = userService.getAllPermissionName(user.getId()).stream().toList();
 
-        UserInfo userInfo = new UserInfo(user.getId(), userName, role, accessToken);
+        UserInfo userInfo = new UserInfo(user.getId(), userName, roles, permissions, accessToken);
         return Result.successData(userInfo);
     }
 

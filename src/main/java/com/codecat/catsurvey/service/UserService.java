@@ -71,7 +71,7 @@ public class UserService {
         return StpUtil.getTokenInfo();
     }
 
-    public List<Role> getRoleList(Integer userId) {
+    public List<Role> getAllRole(Integer userId) {
         if (userId == null)
             return null;
 
@@ -85,6 +85,12 @@ public class UserService {
 
         return userRoleList.stream()
                 .map(UserRole::getRole)
+                .collect(Collectors.toList());
+    }
+
+    public List<String> getAllRoleName(Integer userId) {
+        return getAllRole(userId).stream()
+                .map(Role::getName)
                 .collect(Collectors.toList());
     }
 
@@ -123,7 +129,7 @@ public class UserService {
         if (userId == null)
             return null;
 
-        List<Role> roleList = getRoleList(userId);
+        List<Role> roleList = getAllRole(userId);
         Set<Permission> permissionSet = new HashSet<>();
         for (Role role : roleList) {
             permissionSet.addAll(
@@ -165,7 +171,7 @@ public class UserService {
             throw new CatValidationException("UserService addRole: unavailable userId: " + userId);
 
         Set<Integer> roleSet = new HashSet<>();
-        List<Role> curRole = getRoleList(userId);
+        List<Role> curRole = getAllRole(userId);
         for (Role role : curRole) {
             roleSet.add(role.getId());
         }
@@ -259,7 +265,7 @@ public class UserService {
             throw new CatValidationException("UserService addRoleAll: unavailable userId: " + userId);
 
         Set<Integer> roleSet = new HashSet<>();
-        List<Role> curRole = getRoleList(userId);
+        List<Role> curRole = getAllRole(userId);
         for (Role role : curRole) {
             roleSet.add(role.getId());
         }
@@ -307,7 +313,7 @@ public class UserService {
         }
 
         Set<Integer> roleSet = new HashSet<>();
-        List<Role> curRole = getRoleList(userId);
+        List<Role> curRole = getAllRole(userId);
         for (Role role : curRole) {
             roleSet.add(role.getId());
         }
