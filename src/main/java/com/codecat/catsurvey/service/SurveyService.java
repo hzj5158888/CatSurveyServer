@@ -158,14 +158,12 @@ public class SurveyService {
             questionService.setBySurvey(surveyFinal.getId(), questions);
     }
 
-    @Transactional
     public Survey get(Integer surveyId) {
         return surveyRepository.findById(surveyId).orElseThrow(() ->
                 new CatValidationException("问卷不存在")
         );
     }
-
-    @Transactional
+    
     public Survey getByUser(Integer userId, Integer surveyId) {
         return surveyRepository.findByIdAndUserId(surveyId, userId).orElseThrow(() ->
                 new CatValidationException("问卷不存在或不属于此用户")
@@ -188,7 +186,7 @@ public class SurveyService {
     public Integer getUserId(Integer surveyId) {
         return get(surveyId).getUserId();
     }
-    
+
     public List<Question> getQuestionList(Integer surveyId) {
         return questionService.getAllBySurvey(surveyId);
     }
