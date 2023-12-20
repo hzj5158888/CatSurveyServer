@@ -42,13 +42,6 @@ public class ResponseController {
 
     @PostMapping("")
     public Result add(@RequestBody @Validated(validationTime.FullAdd.class) Response response) {
-        Survey survey = surveyService.get(response.getSurveyId());
-
-        if (!survey.getStatus().equals(SurveyStatusEnum.CARRYOUT.getName()))
-            throw new CatValidationException("无法回答非进行中的问卷");
-        if (survey.getEndDate().getTime() < System.currentTimeMillis())
-            throw new CatValidationException("时间已过，无法作答");
-
         return Result.successData(responseService.add(response));
     }
 

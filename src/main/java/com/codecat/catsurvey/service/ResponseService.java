@@ -28,6 +28,9 @@ public class ResponseService {
     private SurveyRepository surveyRepository;
 
     @Autowired
+    private SurveyService surveyService;
+
+    @Autowired
     private UserService userService;
 
     @Autowired
@@ -35,6 +38,13 @@ public class ResponseService {
 
     @Transactional
     public Integer add(Response response) {
+        Survey survey = surveyService.get(response.getSurveyId());
+
+        if (!survey.getStatus().equals(SurveyStatusEnum.CARRYOUT.getName()))
+            throw new CatValidationException("无法回答非进行中的问卷");
+        if (survey.getEndDate().getTime() < System.currentTimeMillis())
+            throw new CatValidationException("时间已过，无法作答");
+
         List<AnswerDetail> answerDetails = new ArrayList<>(response.getAnswerDetailList());
 
         response.setUserId(userService.getLoginId());
