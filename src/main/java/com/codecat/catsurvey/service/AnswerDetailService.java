@@ -49,7 +49,7 @@ public class AnswerDetailService {
         );
 
         if (!SurveyStatusEnum.CARRYOUT.getName().equals(survey.getStatus()))
-            throw new CatAuthorizedException("非进行中问卷不能添加答案");
+            throw new CatValidationException("非进行中问卷不能添加答案");
         if (!response.getSurveyId().equals(question.getSurveyId()))
             throw new CatValidationException("responseId与questionId不属于同一问卷survey");
         if (answerDetailRepository.existsByResponseIdAndQuestionId(response.getId(), question.getId()))

@@ -159,9 +159,8 @@ public class QuestionService {
 
     @Transactional
     public void modifyBySurvey(Integer surveyId, Integer questionId, Question newQuestion) {
-        Question question = questionRepository.findByIdAndSurveyId(questionId, surveyId).orElseThrow(() ->
-                new CatValidationException("问题不存在或不属于该问卷")
-        );
+        if (!questionRepository.existsByIdAndSurveyId(questionId, surveyId))
+            throw new CatValidationException("问题不存在或不属于该问卷");
 
         modify(questionId, newQuestion);
     }
@@ -175,11 +174,8 @@ public class QuestionService {
 
     @Transactional
     public List<Question> getAllBySurvey(Integer surveyId) {
-        Survey survey = surveyRepository.findById(surveyId).orElseThrow(() ->
-                new CatValidationException("问卷不存在")
-        );
-        if (!userService.isLoginId(survey.getUserId()))
-            throw new CatAuthorizedException("无法访问，权限不足");
+        if (!surveyRepository.existsById(surveyId))
+            throw new CatValidationException("问卷不存在");
 
         return questionRepository.findAllBySurveyId(surveyId, Sort.by("iOrder"));
     }
@@ -206,7 +202,7 @@ public class QuestionService {
         );
 
         if (!userService.isLoginId(survey.getUserId()))
-            throw new CatAuthorizedException("无法修改，权限不足");
+            throw new CatAuthorizedException("无法操作其它用户的问题");
     }
 
     public void setIOrder(Integer questionId, Integer iOrder) {

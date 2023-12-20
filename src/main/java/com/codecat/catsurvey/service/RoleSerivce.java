@@ -33,8 +33,6 @@ public class RoleSerivce {
 
     @Transactional
     public void addByUser(Integer userId, JSONObject roleNameBody) {
-        if (!userRepository.existsById(userId))
-            throw new CatValidationException("非法的userID: " + userId);
         if (roleNameBody == null || roleNameBody.get("roleName") == null)
             throw new CatValidationException("非法请求，数据为空");
 
@@ -51,8 +49,6 @@ public class RoleSerivce {
 
     @Transactional
     public void delByUser(Integer userId, JSONObject roleNameBody) {
-        if (!userRepository.existsById(userId))
-            throw new CatValidationException("非法的userID: " + userId);
         if (roleNameBody == null || roleNameBody.get("roleName") == null)
             throw new CatValidationException("非法请求，数据为空");
 
@@ -68,9 +64,7 @@ public class RoleSerivce {
     }
 
     @Transactional
-    public void setByUser(Integer userId, @RequestBody JSONObject roleNameBody) {
-        if (!userRepository.existsById(userId))
-            throw new CatValidationException("非法的userID: " + userId);
+    public void setByUser(Integer userId, JSONObject roleNameBody) {
         if (roleNameBody == null || roleNameBody.get("roleName") == null)
             throw new CatValidationException("非法请求，数据为空");
 
@@ -86,11 +80,6 @@ public class RoleSerivce {
     }
 
     public List<Role> getAllByUser(Integer userId) {
-        if (!userRepository.existsById(userId))
-            throw new CatValidationException("非法的userID: " + userId);
-        if (!userService.isLoginId(userId))
-            throw new CatAuthorizedException("无法获取, 权限不足");
-
         return userService.getRoleList(userId);
     }
 
