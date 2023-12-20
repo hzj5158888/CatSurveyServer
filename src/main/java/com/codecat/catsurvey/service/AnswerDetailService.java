@@ -3,14 +3,17 @@ package com.codecat.catsurvey.service;
 import com.alibaba.fastjson2.JSONObject;
 import com.codecat.catsurvey.common.Enum.question.QuestionTypeEnum;
 import com.codecat.catsurvey.common.Enum.survey.SurveyStatusEnum;
+import com.codecat.catsurvey.common.valid.group.validationTime;
 import com.codecat.catsurvey.exception.CatAuthorizedException;
 import com.codecat.catsurvey.exception.CatValidationException;
 import com.codecat.catsurvey.models.*;
 import com.codecat.catsurvey.repository.*;
 import com.codecat.catsurvey.utils.Result;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.*;
 
@@ -35,7 +38,8 @@ public class AnswerDetailService {
     private UserService userService;
 
     @Transactional
-    public Integer add(AnswerDetail answerDetail) {
+    @Validated(value = validationTime.FullAdd.class)
+    public Integer add(@Valid AnswerDetail answerDetail) {
         if (answerDetail == null)
             throw new CatValidationException("无效请求，数据为空");
 
