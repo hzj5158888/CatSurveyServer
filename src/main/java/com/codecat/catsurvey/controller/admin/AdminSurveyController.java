@@ -51,6 +51,9 @@ public class AdminSurveyController {
 
     @DeleteMapping("/{surveyId}")
     public Result del(@PathVariable Integer surveyId) {
+        if (surveyService.isTemplate(surveyId))
+            return Result.validatedFailed("无法删除模板, 权限不足");
+
         surveyService.del(surveyId);
         return Result.success();
     }
@@ -76,42 +79,18 @@ public class AdminSurveyController {
 
     @PutMapping("/{surveyId}")
     public Result modify(@PathVariable Integer surveyId, @RequestBody Survey newSurvey) {
+        if (surveyService.isTemplate(surveyId))
+            return Result.validatedFailed("无法修改模板");
+
         surveyService.modify(surveyId, newSurvey);
         return Result.success();
     }
 
-    @PutMapping("/user/{userId}/{surveyId}")
-    public Result modifyByUser(@PathVariable Integer userId,
-                               @PathVariable Integer surveyId,
-                               @RequestBody Survey newSurvey)
-    {
-        return modify(surveyId, newSurvey);
-    }
-
-    @SaIgnore
     @GetMapping("/{surveyId}")
     public Result get(@PathVariable Integer surveyId) {
         return Result.successData(surveyService.get(surveyId));
     }
 
-    @GetMapping("/user/{userId}/{surveyId}")
-    public Result getByUser(@PathVariable Integer userId, @PathVariable Integer surveyId) {
-
-
-        return Result.successData(surveyService.getByUser(userId, surveyId));
-    }
-
-
-    @GetMapping("/user/{userId}")
-    public Result getAllByUser(@PathVariable Integer userId) {
-        return Result.successData(surveyService.getAllByUser(userId));
-    }
-
-
     @GetMapping("")
-    public Result getAllByLoginUser() {
-        return Result.successData(
-                surveyService.getAllByUser(userService.getLoginId())
-        );
-    }
+    public Result getAll() { return Result.successData(surveyService.getAll()); }
 }

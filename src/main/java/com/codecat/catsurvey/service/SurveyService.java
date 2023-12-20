@@ -140,6 +140,10 @@ public class SurveyService {
         );
     }
 
+    public List<Survey> getAll() {
+        return surveyRepository.findAll();
+    }
+
     public List<Survey> getAllByUser(Integer userId) {
         if (!userRepository.existsById(userId))
             throw new CatValidationException("用户不存在");
