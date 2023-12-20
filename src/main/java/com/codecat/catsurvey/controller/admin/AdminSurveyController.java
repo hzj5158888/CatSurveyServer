@@ -60,15 +60,15 @@ public class AdminSurveyController {
 
     @DeleteMapping("")
     public Result del(@RequestBody JSONObject delSurvey) {
-        if (delSurvey.entrySet().isEmpty()) {
-            surveyService.deleteAllByUserId(userService.getLoginId());
+        if (delSurvey.entrySet().isEmpty())
             return Result.success();
-        }
 
         Object surveyIdListObj = delSurvey.get("surveyIdList");
+        if (surveyIdListObj == null)
+            return Result.success();
         if (!(surveyIdListObj instanceof List<?>))
-            throw new CatValidationException("类型错误");
-
+            return Result.validatedFailed("类型错误");
+        
         List<Integer> surveyIdList = (List<Integer>) surveyIdListObj;
         for (Integer curId : surveyIdList) {
             surveyService.del(curId);
