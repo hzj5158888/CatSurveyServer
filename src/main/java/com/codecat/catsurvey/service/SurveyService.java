@@ -110,14 +110,11 @@ public class SurveyService {
             add("questionList");
             add("responseList");
         }};
-        Set<String> surveyFiled = Util.getObjectFiledName(survey);
         Map<String, Object> surveyMap = Util.objectToMap(survey);
         Map<String, Object> newSurveyMap = Util.objectToMap(newSurvey);
         for (Map.Entry<String, Object> entry : newSurveyMap.entrySet()) {
             if (entry.getValue() == null || continueItem.contains(entry.getKey()))
                 continue;
-            if (!surveyFiled.contains(entry.getKey()))
-                throw new CatValidationException("修改失败, 非法属性: " + entry.getKey());
             if (notAllow.contains(entry.getKey()))
                 throw new CatValidationException("修改失败, 属性" + entry.getKey() + "为只读");
 

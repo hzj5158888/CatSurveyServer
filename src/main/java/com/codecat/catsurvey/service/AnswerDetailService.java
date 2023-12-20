@@ -163,6 +163,6 @@ public class AnswerDetailService {
         if (!userService.isLoginId(userId))
             throw new CatAuthorizedException("无法获取，权限不足");
 
-        return  answerDetailRepository.findAllByResponseId(responseId);
+        return answerDetailRepository.findAllByResponseId(responseId);
     }
 }

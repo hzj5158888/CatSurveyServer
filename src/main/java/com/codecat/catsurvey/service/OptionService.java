@@ -116,14 +116,11 @@ public class OptionService {
             add("questionId");
             add("question");
         }};
-        Set<String> optionField = Util.getObjectFiledName(option);
         Map<String, Object> optionMap = Util.objectToMap(option);
         Map<String, Object> newOptionMap = Util.objectToMap(newOption);
         for (Map.Entry<String, Object> entry : newOptionMap.entrySet()) {
             if (entry.getValue() == null)
                 continue;
-            if (!optionField.contains(entry.getKey()))
-                throw new CatValidationException("修改失败, 非法属性: " + entry.getKey());
             if (notAllow.contains(entry.getKey()))
                 throw new CatValidationException("修改失败, 属性" + entry.getKey() + "为只读");
 

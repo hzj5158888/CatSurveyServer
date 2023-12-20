@@ -91,11 +91,8 @@ public class QuestionService {
 
     @Transactional
     public List<Integer> setBySurvey(Integer surveyId, List<Question> questions) {
-        Survey survey = surveyRepository.findById(surveyId).orElseThrow(() ->
-                new CatValidationException("问卷不存在")
-        );
-        if (!userService.isLoginId(survey.getUserId()) && !userService.containsPermissionName("SurveyManage"))
-            throw new CatAuthorizedException("无法访问，权限不足");
+        if (!surveyRepository.existsById(surveyId))
+            throw new CatValidationException("问卷不存在");
 
         Set<Integer> modify_set = new HashSet<>();
         for (int i = 0; i < questions.size(); i++) {
@@ -147,8 +144,6 @@ public class QuestionService {
         Question question = questionRepository.findById(questionId).orElseThrow(() ->
                 new CatValidationException("问题不存在")
         );
-        if (!userService.isLoginId(question.getSurvey().getUserId()) && !userService.containsPermissionName("SurveyManage"))
-            throw new CatAuthorizedException("无法修改，权限不足");
 
         Set<String> notAllow = new HashSet<>() {{
             add("id");
@@ -184,24 +179,14 @@ public class QuestionService {
                 new CatValidationException("问题不存在或不属于该问卷")
         );
 
-        Integer userId = question.getSurvey().getUserId();
-        if (!userService.isLoginId(userId))
-            throw new CatAuthorizedException("无法修改，权限不足");
-
         modify(questionId, newQuestion);
     }
 
     @Transactional
     public Question get(Integer questionId) {
-        Question question = questionRepository.findById(questionId).orElseThrow(() ->
+        return questionRepository.findById(questionId).orElseThrow(() ->
                 new CatValidationException("问题不存在")
         );
-
-        Integer userId = question.getSurvey().getUserId();
-        if (!userService.isLoginId(userId))
-            throw new CatAuthorizedException("无法获取，权限不足");
-
-        return question;
     }
 
     @Transactional
@@ -217,20 +202,27 @@ public class QuestionService {
 
     @Transactional
     public Question getBySurvey(Integer surveyId, Integer questionId) {
-        Question question = questionRepository.findByIdAndSurveyId(questionId, surveyId).orElseThrow(() ->
+        return questionRepository.findByIdAndSurveyId(questionId, surveyId).orElseThrow(() ->
                 new CatValidationException("问题不存在或不属于该问卷")
         );
-
-        Integer userId = question.getSurvey().getUserId();
-        if (!userService.isLoginId(userId))
-            throw new CatAuthorizedException("无法修改，权限不足");
-
-        return question;
     }
 
     @Transactional
     public boolean existsByIdAndSurveyId(Integer questionId, Integer surveyId) {
         return questionRepository.existsByIdAndSurveyId(questionId, surveyId);
+    }
+
+    @Transactional
+    public void isLoginUser(Integer questionId) {
+        Question question = questionRepository.findById(questionId).orElseThrow(() ->
+                new CatValidationException("问题不存在")
+        );
+        Survey survey = surveyRepository.findById(question.getSurveyId()).orElseThrow(() ->
+                new CatValidationException("问卷不存在")
+        );
+
+        if (!userService.isLoginId(survey.getUserId()))
+            throw new CatAuthorizedException("无法修改，权限不足");
     }
 
     public void setIOrder(Integer questionId, Integer iOrder) {
