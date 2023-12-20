@@ -39,11 +39,6 @@ public class ResponseService {
                 new CatValidationException("问卷ID无效")
         );
 
-        if (!survey.getStatus().equals(SurveyStatusEnum.CARRYOUT.getName()))
-            throw new CatValidationException("权限不足");
-        if (survey.getEndDate().getTime() < System.currentTimeMillis())
-            throw new CatValidationException("时间已过，无法作答");
-
         List<AnswerDetail> answerDetails = new ArrayList<>(response.getAnswerDetailList());
 
         response.setUserId(userService.getLoginId());

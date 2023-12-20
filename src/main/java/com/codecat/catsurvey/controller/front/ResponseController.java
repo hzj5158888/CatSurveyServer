@@ -1,6 +1,7 @@
 package com.codecat.catsurvey.controller.front;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import com.codecat.catsurvey.common.Enum.survey.SurveyStatusEnum;
 import com.codecat.catsurvey.exception.CatAuthorizedException;
 import com.codecat.catsurvey.exception.CatValidationException;
 import com.codecat.catsurvey.models.AnswerDetail;
@@ -41,6 +42,13 @@ public class ResponseController {
 
     @PostMapping("")
     public Result add(@RequestBody @Validated(validationTime.FullAdd.class) Response response) {
+        Survey survey = surveyService.get(response.getSurveyId());
+
+        if (!survey.getStatus().equals(SurveyStatusEnum.CARRYOUT.getName()))
+            throw new CatValidationException("权限不足");
+        if (survey.getEndDate().getTime() < System.currentTimeMillis())
+            throw new CatValidationException("时间已过，无法作答");
+        
         return Result.successData(responseService.add(response));
     }
 
