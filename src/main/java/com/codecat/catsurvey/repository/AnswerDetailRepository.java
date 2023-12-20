@@ -16,7 +16,9 @@ public interface AnswerDetailRepository extends JpaRepository<AnswerDetail, Inte
 
     List<AnswerDetail> findAllByResponseId(Integer responseId);
 
-    boolean existsByResponseIdAndQuestionId(Integer id, Integer id1);
+    boolean existsByIdAndResponseId(Integer id, Integer responseId);
+
+    boolean existsByResponseIdAndQuestionId(Integer responseId, Integer questionId);
 
     @Modifying
     @Transactional(isolation = Isolation.SERIALIZABLE)

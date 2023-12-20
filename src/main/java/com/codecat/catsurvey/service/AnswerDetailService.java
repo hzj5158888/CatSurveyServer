@@ -2,6 +2,7 @@ package com.codecat.catsurvey.service;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.codecat.catsurvey.common.Enum.question.QuestionTypeEnum;
+import com.codecat.catsurvey.common.Enum.survey.SurveyStatusEnum;
 import com.codecat.catsurvey.exception.CatAuthorizedException;
 import com.codecat.catsurvey.exception.CatValidationException;
 import com.codecat.catsurvey.models.*;
@@ -47,12 +48,13 @@ public class AnswerDetailService {
                 new CatValidationException("问卷不存在")
         );
 
-        if (!survey.getStatus().equals("进行中"))
-            throw new CatAuthorizedException("权限不足");
+        if (!SurveyStatusEnum.CARRYOUT.getName().equals(survey.getStatus()))
+            throw new CatAuthorizedException("非进行中问卷不能添加答案");
         if (!response.getSurveyId().equals(question.getSurveyId()))
             throw new CatValidationException("responseId与questionId不属于同一问卷survey");
         if (answerDetailRepository.existsByResponseIdAndQuestionId(response.getId(), question.getId()))
             throw new CatValidationException("该问题答案已存在");
+
         Set<String> textName = new HashSet<>() {{ // 文本类型
             add(QuestionTypeEnum.TEXT.getName());
             add(QuestionTypeEnum.TEXTAREA.getName());
@@ -85,26 +87,16 @@ public class AnswerDetailService {
 
     @Transactional
     public void del(Integer answerDetailId) {
-        AnswerDetail answerDetail = answerDetailRepository.findById(answerDetailId).orElseThrow(() ->
-                new CatValidationException("答案不存在")
-        );
-
-        Integer userId = answerDetail.getResponse().getSurvey().getUserId();
-        if (!userService.isLoginId(userId))
-            throw new CatAuthorizedException("无法删除，权限不足");
+        if (!answerDetailRepository.existsById(answerDetailId))
+            throw new CatValidationException("答案不存在");
 
         answerDetailRepository.deleteById(answerDetailId);
     }
 
     @Transactional
     public void delByResponse(Integer responseId, Integer answerDetailId) {
-        AnswerDetail answerDetail = answerDetailRepository.findByIdAndResponseId(answerDetailId, responseId).orElseThrow(() ->
-                new CatValidationException("答案不存在或不属于此答卷")
-        );
-
-        Integer userId = answerDetail.getResponse().getSurvey().getUserId();
-        if (!userService.isLoginId(userId))
-            throw new CatAuthorizedException("无法删除，权限不足");
+        if (!answerDetailRepository.existsByIdAndResponseId(answerDetailId, responseId))
+            throw new CatValidationException("答案不存在或不属于此答卷");
 
         answerDetailRepository.deleteById(answerDetailId);
     }
@@ -129,40 +121,43 @@ public class AnswerDetailService {
 
     @Transactional
     public AnswerDetail get(Integer answerDetailId) {
-        AnswerDetail answerDetail = answerDetailRepository.findById(answerDetailId).orElseThrow(() ->
-                new CatValidationException("答案ID不存在")
+        return answerDetailRepository.findById(answerDetailId).orElseThrow(() ->
+                new CatValidationException("答案不存在")
         );
-
-        Integer userId = answerDetail.getResponse().getSurvey().getUserId();
-        if (!userService.isLoginId(userId))
-            throw new CatAuthorizedException("无法获取，权限不足");
-
-        return answerDetail;
     }
 
     @Transactional
     public AnswerDetail getByResponse(Integer responseId, Integer answerDetailId) {
-        AnswerDetail answerDetail = answerDetailRepository.findByIdAndResponseId(answerDetailId, responseId).orElseThrow(() ->
+        return answerDetailRepository.findByIdAndResponseId(answerDetailId, responseId).orElseThrow(() ->
                 new CatValidationException("答案不存在或不属于此答卷")
         );
-
-        Integer userId = answerDetail.getResponse().getSurvey().getUserId();
-        if (!userService.isLoginId(userId))
-            throw new CatAuthorizedException("无法获取，权限不足");
-
-        return answerDetail;
     }
 
     @Transactional
     public List<AnswerDetail> getAllByResponse(Integer responseId) {
-        Response response = responseRepository.findById(responseId).orElseThrow(() ->
-                new CatValidationException("答卷不存在")
-        );
-
-        Integer userId = response.getSurvey().getUserId();
-        if (!userService.isLoginId(userId))
-            throw new CatAuthorizedException("无法获取，权限不足");
+        if (!responseRepository.existsById(responseId))
+            throw new CatValidationException("答卷不存在");
 
         return answerDetailRepository.findAllByResponseId(responseId);
+    }
+
+    public void isLoginUser(Integer answerDetailId) {
+        AnswerDetail answerDetail = answerDetailRepository.findById(answerDetailId).orElseThrow(() ->
+                new CatValidationException("答案不存在")
+        );
+        Response response = responseRepository.findById(answerDetail.getResponseId()).orElseThrow(() ->
+                new CatValidationException("答卷不存在")
+        );
+        Question question = questionRepository.findById(answerDetail.getQuestionId()).orElseThrow(() ->
+                new CatValidationException("问题不存在")
+        );
+        if (!question.getSurveyId().equals(response.getSurveyId()))
+            throw new CatValidationException("问题与答案不属于同一问卷");
+
+        Survey survey = surveyRepository.findById(question.getSurveyId()).orElseThrow(() ->
+                new CatValidationException("问卷不存在")
+        );
+        if (!userService.isLoginId(survey.getUserId()))
+            throw new CatValidationException("无法操作其他人的答案");
     }
 }
