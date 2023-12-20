@@ -51,10 +51,38 @@ public class QuestionService {
             question.setIOrder(Integer.MAX_VALUE);
 
         List<Option> optionList = new ArrayList<>(question.getOptionList());
+        question.setId(null);
         questionRepository.saveAndFlush(question);
         setIOrder(question.getId(), question.getIOrder());
         if (!question.getOptionList().isEmpty())
             optionService.setByQuestion(question.getId(), optionList);
+    }
+
+    @Transactional
+    public void add(List<Question> questionList) {
+        if (questionList == null)
+            throw new CatValidationException("无效请求，数据为空");
+
+        for (Question question : questionList)
+            add(question);
+    }
+
+    @Transactional
+    public void addBySurvey(Integer surveyId, Question question) {
+        if (!surveyRepository.existsById(surveyId))
+            throw new CatValidationException("问卷不存在");
+
+        question.setSurveyId(surveyId);
+        add(question);
+    }
+
+    @Transactional
+    public void addBySurvey(Integer surveyId, List<Question> questionList) {
+        if (surveyId == null || questionList == null)
+            throw new CatValidationException("无效请求，数据为空");
+
+        for (Question question : questionList)
+            addBySurvey(surveyId, question);
     }
 
     @Transactional
@@ -130,11 +158,11 @@ public class QuestionService {
         );
 
         Set<String> notAllow = new HashSet<>() {{
-            add("id");
             add("surveyId");
             add("survey");
         }};
         Set<String> continueItem = new HashSet<>() {{
+            add("id");
             add("optionList");
         }};
         Map<String, Object> questionMap = Util.objectToMap(question);
@@ -185,6 +213,11 @@ public class QuestionService {
         return questionRepository.findByIdAndSurveyId(questionId, surveyId).orElseThrow(() ->
                 new CatValidationException("问题不存在或不属于该问卷")
         );
+    }
+
+    @Transactional
+    public List<Option> getOptionList(Integer questionId) {
+        return optionService.getAllByQuestion(questionId);
     }
 
     @Transactional

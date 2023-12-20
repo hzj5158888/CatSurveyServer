@@ -79,6 +79,10 @@ public class SurveyController {
 
     @DeleteMapping("/user/{userId}/{surveyId}")
     public Result delByUser(@PathVariable Integer userId, @PathVariable Integer surveyId) {
+        Survey survey = surveyService.get(surveyId);
+        if (!userService.isLoginId(survey.getUserId()))
+            throw new CatAuthorizedException("无法删除其它用户问卷");
+
         surveyService.del(userId, surveyId);
         return Result.success();
     }

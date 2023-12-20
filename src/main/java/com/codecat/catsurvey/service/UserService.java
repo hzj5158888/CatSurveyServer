@@ -195,10 +195,8 @@ public class UserService {
         );
 
         boolean needLogout = false;
-        Set<String> notAllow = new HashSet<>() {{
-            add("id");
-        }};
         Set<String> continueItem = new HashSet<>() {{
+            add("id");
             add("userRoleList");
             add("oldPassword");
         }};
@@ -209,8 +207,6 @@ public class UserService {
                 continue;
             if (!userFiled.contains(entry.getKey()))
                 throw new CatValidationException("用户信息修改失败, 非法属性: " + entry.getKey());
-            if (notAllow.contains(entry.getKey()))
-                throw new CatValidationException("用户信息修改失败, 属性" + entry.getKey() + "为只读");
 
             if (entry.getKey().equals("password")) {
                 String password = (String) user.get("password");

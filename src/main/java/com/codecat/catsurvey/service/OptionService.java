@@ -58,8 +58,36 @@ public class OptionService {
         if (option.getIOrder() == null)
             option.setIOrder(Integer.MAX_VALUE);
 
+        option.setId(null);
         optionRepository.saveAndFlush(option);
         setIOrder(option.getId(), option.getIOrder());
+    }
+
+    @Transactional
+    public void add(List<Option> optionList) {
+        if (optionList == null)
+            throw new CatValidationException("无效请求，数据为空");
+
+        for (Option option : optionList)
+            add(option);
+    }
+
+    @Transactional
+    public void addByQuestion(Integer questionId, Option option) {
+        if (!questionRepository.existsById(questionId))
+            throw new CatValidationException("问题不存在");
+
+        option.setQuestionId(questionId);
+        add(option);
+    }
+
+    @Transactional
+    public void addByQuestion(Integer questionId, List<Option> optionList) {
+        if (questionId == null || optionList == null)
+            throw new CatValidationException("无效请求，数据为空");
+
+        for (Option option : optionList)
+            addByQuestion(questionId, option);
     }
 
     @Transactional
@@ -92,10 +120,13 @@ public class OptionService {
             add("questionId");
             add("question");
         }};
+        Set<String> continueItem = new HashSet<>() {{
+            add("id");
+        }};
         Map<String, Object> optionMap = Util.objectToMap(option);
         Map<String, Object> newOptionMap = Util.objectToMap(newOption);
         for (Map.Entry<String, Object> entry : newOptionMap.entrySet()) {
-            if (entry.getValue() == null)
+            if (entry.getValue() == null || continueItem.contains(entry.getKey()))
                 continue;
             if (notAllow.contains(entry.getKey()))
                 throw new CatValidationException("修改失败, 属性" + entry.getKey() + "为只读");

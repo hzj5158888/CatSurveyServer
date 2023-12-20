@@ -47,9 +47,10 @@ public class SurveyService {
         }
 
         List<Question> questions = new ArrayList<>(survey.getQuestionList());
+        survey.setId(null);
         surveyRepository.saveAndFlush(survey);
         if (!questions.isEmpty())
-            questionService.setBySurvey(survey.getId(), questions);
+            questionService.addBySurvey(survey.getId(), questions);
     }
 
     public void del(Integer surveyId) {
@@ -64,8 +65,6 @@ public class SurveyService {
         Survey survey = surveyRepository.findByIdAndUserId(surveyId, userId).orElseThrow(() ->
                 new CatValidationException("问卷不存在")
         );
-        if (!userService.isLoginId(survey.getUserId()))
-            throw new CatAuthorizedException("无法删除其它用户问卷");
 
         del(survey.getId());
     }
@@ -109,11 +108,11 @@ public class SurveyService {
         );
 
         Set<String> notAllow = new HashSet<>() {{
-            add("id");
             add("userId");
             add("createDate");
         }};
         Set<String> continueItem = new HashSet<>() {{
+            add("id");
             add("questionList");
             add("responseList");
         }};
@@ -187,6 +186,11 @@ public class SurveyService {
 
     public Integer getUserId(Integer surveyId) {
         return get(surveyId).getUserId();
+    }
+
+    @Transactional
+    public List<Question> getQuestionList(Integer surveyId) {
+        return questionService.getAllBySurvey(surveyId);
     }
 
     public boolean existsByIdAndUserId(Integer surveyId, Integer userId) {
