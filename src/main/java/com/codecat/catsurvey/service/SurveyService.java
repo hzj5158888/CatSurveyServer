@@ -8,6 +8,7 @@ import com.codecat.catsurvey.models.Question;
 import com.codecat.catsurvey.models.Survey;
 import com.codecat.catsurvey.common.valid.group.validationTime;
 import com.codecat.catsurvey.repository.SurveyRepository;
+import com.codecat.catsurvey.repository.TemplateRepository;
 import com.codecat.catsurvey.repository.UserRepository;
 import com.codecat.catsurvey.utils.Result;
 import com.codecat.catsurvey.utils.Util;
@@ -36,6 +37,9 @@ public class SurveyService {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private TemplateRepository templateRepository;
 
     @Transactional
     public void add(Survey survey) {
@@ -173,6 +177,10 @@ public class SurveyService {
             throw new CatValidationException("用户不存在");
 
         return surveyRepository.findAllByUserId(userId, Sort.by(Sort.Direction.DESC, "createDate"));
+    }
+
+    public boolean isTemplate(Integer surveyId) {
+        return templateRepository.existsBySurveyId(surveyId);
     }
 
     @Transactional

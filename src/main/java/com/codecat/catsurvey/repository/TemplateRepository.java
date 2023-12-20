@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface TemplateRepository extends JpaRepository<Template, Integer> {
+    boolean existsBySurveyId(Integer surveyId);
 }
