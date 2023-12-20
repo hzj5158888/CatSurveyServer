@@ -68,9 +68,12 @@ public class AdminSurveyController {
             return Result.success();
         if (!(surveyIdListObj instanceof List<?>))
             return Result.validatedFailed("类型错误");
-        
+
         List<Integer> surveyIdList = (List<Integer>) surveyIdListObj;
         for (Integer curId : surveyIdList) {
+            if (surveyService.isTemplate(curId))
+                return Result.validatedFailed("无法删除模板");
+
             surveyService.del(curId);
         }
 

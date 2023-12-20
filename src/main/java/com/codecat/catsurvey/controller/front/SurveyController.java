@@ -66,6 +66,8 @@ public class SurveyController {
     public Result del(@PathVariable Integer surveyId) {
         if (!userService.isLoginId(surveyService.getUserId(surveyId)))
             return Result.unauthorized("无法删除其它用户的问卷");
+        if (surveyService.isTemplate(surveyId))
+            return Result.validatedFailed("无法删除模板");
 
         surveyService.del(surveyId);
         return Result.success();
@@ -86,6 +88,8 @@ public class SurveyController {
         for (Integer curId : surveyIdList) {
             if (!surveyService.existsByIdAndUserId(curId, userService.getLoginId()))
                 return Result.validatedFailed("无法删除其它用户问卷");
+            if (surveyService.isTemplate(curId))
+                return Result.validatedFailed("无法删除模板");
 
             surveyService.del(curId);
         }
@@ -98,6 +102,8 @@ public class SurveyController {
         Survey survey = surveyService.get(surveyId);
         if (!userService.isLoginId(survey.getUserId()))
             throw new CatAuthorizedException("无法删除其它用户问卷");
+        if (surveyService.isTemplate(surveyId))
+            return Result.validatedFailed("无法删除模板");
 
         surveyService.del(userId, surveyId);
         return Result.success();
@@ -107,6 +113,8 @@ public class SurveyController {
     public Result modify(@PathVariable Integer surveyId, @RequestBody Survey newSurvey) {
         if (!userService.isLoginId(surveyService.getUserId(surveyId)))
             return Result.unauthorized("无法修改其它用户问卷");
+        if (surveyService.isTemplate(surveyId))
+            return Result.validatedFailed("无法修改模板");
 
         surveyService.modify(surveyId, newSurvey);
         return Result.success();
