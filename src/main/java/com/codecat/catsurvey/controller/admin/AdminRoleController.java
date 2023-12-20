@@ -3,7 +3,9 @@ package com.codecat.catsurvey.controller.admin;
 import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.annotation.SaCheckRole;
 import com.alibaba.fastjson2.JSONObject;
+import com.codecat.catsurvey.common.Enum.role.RoleNameEnum;
 import com.codecat.catsurvey.exception.CatValidationException;
+import com.codecat.catsurvey.models.Role;
 import com.codecat.catsurvey.service.RoleSerivce;
 import com.codecat.catsurvey.service.UserService;
 import com.codecat.catsurvey.utils.Result;
@@ -11,7 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/admin/role")
@@ -20,10 +24,10 @@ import java.util.List;
 @CrossOrigin()
 public class AdminRoleController {
     @Autowired
-    private RoleSerivce roleSerivce;
+    private UserService userService;
 
     @Autowired
-    private UserService userService;
+    private RoleSerivce roleSerivce;
 
     @PostMapping("/{userId}")
     public Result addRoleByUser(@PathVariable Integer userId, @RequestBody JSONObject roleNameObj) {
@@ -62,10 +66,22 @@ public class AdminRoleController {
     }
 
     @GetMapping("/{userId}")
-    public Result getRoleByUser(@PathVariable Integer userId) {
+    public Result getAllRoleByUser(@PathVariable Integer userId) {
         if (!userService.existsById(userId))
             return Result.validatedFailed("用户不存在");
 
         return Result.successData(userService.getAllRoleName(userId));
+    }
+
+    @GetMapping("")
+    public Result getAll() {
+        Map<String, String> ans = new HashMap<>();
+
+        List<Role> roleList = roleSerivce.getAll();
+        for (Role role : roleList) {
+            ans.put(role.getName(), RoleNameEnum.getChnName(role.getName()));
+        }
+
+        return Result.successData(ans);
     }
 }

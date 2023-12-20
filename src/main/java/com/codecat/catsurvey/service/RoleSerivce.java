@@ -21,6 +21,10 @@ public class RoleSerivce {
     @Autowired
     private RoleRepository roleRepository;
 
+    public List<Role> getAll() {
+        return roleRepository.findAll();
+    }
+
     public List<Permission> getPermissionList(Integer roleId) {
         Optional<Role> roleOpt = roleRepository.findById(roleId);
         if (roleOpt.isEmpty())

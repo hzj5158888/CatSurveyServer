@@ -19,7 +19,7 @@ public enum RoleNameEnum {
     private String name;
     private String chnName;
 
-    public String getChnName(String name) {
+    public static String getChnName(String name) {
         for (RoleNameEnum roleNameEnum : RoleNameEnum.values()) {
             if (roleNameEnum.getName().equals(name))
                 return roleNameEnum.getChnName();
@@ -28,7 +28,7 @@ public enum RoleNameEnum {
         return null;
     }
 
-    public String getName(String chnName) {
+    public static String getName(String chnName) {
         for (RoleNameEnum roleNameEnum : RoleNameEnum.values()) {
             if (roleNameEnum.getChnName().equals(chnName))
                 return roleNameEnum.getName();
