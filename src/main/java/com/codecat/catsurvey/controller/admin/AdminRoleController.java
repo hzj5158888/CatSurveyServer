@@ -45,8 +45,6 @@ public class AdminRoleController {
             return Result.validatedFailed("类型错误或数据为空");
 
         List<String> roleNameList = (List<String>) roleNameObj.get("roleNameList");
-        userService.addRoleAll(userId, roleNameList);
-
         userService.delRoleAll(userId, roleNameList);
         return Result.success();
     }
@@ -59,8 +57,6 @@ public class AdminRoleController {
             return Result.validatedFailed("类型错误或数据为空");
 
         List<String> roleNameList = (List<String>) roleNameObj.get("roleNameList");
-        userService.addRoleAll(userId, roleNameList);
-
         userService.setRoleAll(userId, roleNameList);
         return Result.success();
     }
