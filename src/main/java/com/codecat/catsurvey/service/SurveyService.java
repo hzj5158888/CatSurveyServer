@@ -57,6 +57,7 @@ public class SurveyService {
             questionService.addBySurvey(survey.getId(), questions);
     }
 
+    @Transactional
     public void del(Integer surveyId) {
         Survey survey = surveyRepository.findById(surveyId).orElseThrow(() ->
                 new CatValidationException("问卷不存在")
@@ -65,44 +66,13 @@ public class SurveyService {
         surveyRepository.delete(survey);
     }
 
+    @Transactional
     public void del(Integer userId, Integer surveyId) {
         Survey survey = surveyRepository.findByIdAndUserId(surveyId, userId).orElseThrow(() ->
                 new CatValidationException("问卷不存在")
         );
 
         del(survey.getId());
-    }
-
-    @Transactional
-    public void delAll(JSONObject delSurvey) {
-        if (delSurvey.entrySet().isEmpty()) {
-            surveyRepository.deleteAllByUserId(userService.getLoginId());
-            return;
-        }
-
-        Object surveyIdListObj = delSurvey.get("surveyIdList");
-        if (!(surveyIdListObj instanceof List<?>))
-            throw new CatValidationException("类型错误");
-
-        List<Integer> surveyIdList = (List<Integer>) surveyIdListObj;
-        for (Integer curId : surveyIdList) {
-            del(curId);
-        }
-    }
-
-    @Transactional
-    public void delAllCheck(JSONObject delSurvey) {
-        Object surveyIdListObj = delSurvey.get("surveyIdList");
-        if (!(surveyIdListObj instanceof List<?>))
-            throw new CatValidationException("类型错误");
-
-        List<Integer> surveyIdList = (List<Integer>) surveyIdListObj;
-        for (Integer curId : surveyIdList) {
-            if (!surveyRepository.existsByIdAndUserId(curId, userService.getLoginId()))
-                throw new CatValidationException("无法删除其它用户问卷");
-        }
-
-        delAll(delSurvey);
     }
 
     @Transactional
@@ -163,7 +133,7 @@ public class SurveyService {
                 new CatValidationException("问卷不存在")
         );
     }
-    
+
     public Survey getByUser(Integer userId, Integer surveyId) {
         return surveyRepository.findByIdAndUserId(surveyId, userId).orElseThrow(() ->
                 new CatValidationException("问卷不存在或不属于此用户")
@@ -193,6 +163,10 @@ public class SurveyService {
 
     public boolean existsByIdAndUserId(Integer surveyId, Integer userId) {
         return surveyRepository.existsByIdAndUserId(surveyId, userId);
+    }
+
+    public void deleteAllByUserId(Integer userId) {
+        surveyRepository.deleteAllByUserId(userId);
     }
 
     @Validated(validationTime.FullUpdate.class)

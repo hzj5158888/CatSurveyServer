@@ -73,7 +73,23 @@ public class SurveyController {
 
     @DeleteMapping("")
     public Result del(@RequestBody JSONObject delSurvey) {
-        surveyService.delAllCheck(delSurvey);
+        if (delSurvey.entrySet().isEmpty()) {
+            surveyService.deleteAllByUserId(userService.getLoginId());
+            return Result.success();
+        }
+
+        Object surveyIdListObj = delSurvey.get("surveyIdList");
+        if (!(surveyIdListObj instanceof List<?>))
+            return Result.validatedFailed("类型错误");
+
+        List<Integer> surveyIdList = (List<Integer>) surveyIdListObj;
+        for (Integer curId : surveyIdList) {
+            if (!surveyService.existsByIdAndUserId(curId, userService.getLoginId()))
+                return Result.validatedFailed("无法删除其它用户问卷");
+
+            surveyService.del(curId);
+        }
+
         return Result.success();
     }
 
