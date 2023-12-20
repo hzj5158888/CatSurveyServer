@@ -113,14 +113,14 @@ public class TemplateService {
         Template oldTemplate = templateRepository.findById(templateId).orElseThrow(() ->
                 new CatValidationException("模板不存在")
         );
+        if (template.getSurvey() == null)
+            return;
 
         template.setId(templateId);
         template.setSurveyId(oldTemplate.getSurveyId());
         template.setCreateDate(oldTemplate.getCreateDate());
-        if (template.getSurvey() == null)
-            return;
-
         surveyService.modify(oldTemplate.getSurveyId(), template.getSurvey());
+        
         template.setSurvey(null);
         templateRepository.saveAndFlush(template);
     }
