@@ -106,7 +106,7 @@ public class UserController {
     @PutMapping("/{userId}")
     public Result modify(@PathVariable Integer userId, @RequestBody JSONObject user) {
         if (!userService.isLoginId(userId))
-            throw new CatAuthorizedException("无法修改, 权限不足");
+            throw new CatAuthorizedException("无法修改其它用户的信息");
 
         user.put("password", MD5Util.getMD5(user.get("password").toString())); //修改密码
         userService.modify(userId, user);

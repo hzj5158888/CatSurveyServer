@@ -65,15 +65,9 @@ public class ResponseService {
 
     @Transactional
     public Response get(Integer responseId) {
-        Response response = responseRepository.findById(responseId).orElseThrow(() ->
+        return responseRepository.findById(responseId).orElseThrow(() ->
                 new CatValidationException("答卷不存在")
         );
-
-        Integer userId = response.getUserId();
-        if (!userService.isLoginId(userId))
-            throw new CatAuthorizedException("无法获取，权限不足");
-
-        return response;
     }
 
     @Transactional

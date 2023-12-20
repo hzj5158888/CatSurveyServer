@@ -65,7 +65,7 @@ public class SurveyService {
                 new CatValidationException("问卷不存在")
         );
         if (!userService.isLoginId(survey.getUserId()))
-            throw new CatAuthorizedException("无法删除，权限不足");
+            throw new CatAuthorizedException("无法删除其它用户问卷");
 
         del(survey.getId());
     }
@@ -96,7 +96,7 @@ public class SurveyService {
         List<Integer> surveyIdList = (List<Integer>) surveyIdListObj;
         for (Integer curId : surveyIdList) {
             if (!surveyRepository.existsByIdAndUserId(curId, userService.getLoginId()))
-                throw new CatValidationException("无法删除，权限不足");
+                throw new CatValidationException("无法删除其它用户问卷");
         }
 
         delAll(delSurvey);
