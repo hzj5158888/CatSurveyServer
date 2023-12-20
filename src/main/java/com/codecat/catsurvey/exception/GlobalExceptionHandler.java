@@ -7,6 +7,7 @@ import com.codecat.catsurvey.utils.Result;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.ValidationException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Service;
@@ -24,7 +25,6 @@ import java.util.stream.Collectors;
 public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public Result handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
-        e.printStackTrace();
         return Result.validatedFailed(
                 Objects.requireNonNull(e.getBindingResult().getFieldError()).getDefaultMessage()
         );
@@ -32,7 +32,6 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ConstraintViolationException.class)
     public Result handleConstraintViolationException(ConstraintViolationException e) {
-        e.printStackTrace();
         Set<ConstraintViolation<?>> violationSet = e.getConstraintViolations();
         String message = violationSet.stream()
                             .map(ConstraintViolation::getMessage)
@@ -44,13 +43,25 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public Result handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
         e.printStackTrace();
-        return Result.validatedFailed(e.getMessage());
+        return Result.validatedFailed("参数不存在或类型错误: " + e.getMessage());
     }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public Result handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException e) {
         e.printStackTrace();
-        return Result.validatedFailed(e.getMessage());
+        return Result.validatedFailed("参数非法：" + e.getMessage());
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public Result handleIllegalArgumentException(IllegalArgumentException e) {
+        e.printStackTrace();
+        return Result.failedMsg("参数非法: " + e.getMessage());
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public Result handleDataIntegrityViolationException(DataIntegrityViolationException e) { // 主键重复异常
+        e.printStackTrace();
+        return Result.failedMsg("内部异常");
     }
 
     @ExceptionHandler(CatValidationException.class)
@@ -65,7 +76,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(CatAuthorizedException.class)
     public Result handleAuthorizedException(CatAuthorizedException e) {
-        return Result.unauthorized(e.getMessage());
+        return Result.validatedFailed(e.getMessage());
     }
 
     @ExceptionHandler(NotPermissionException.class)
@@ -78,12 +89,6 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(NotRoleException.class)
     public Result handleNotRoleException(NotRoleException e) {
-        return Result.unauthorized(e.getMessage());
-    }
-
-    @ExceptionHandler(IllegalArgumentException.class)
-    public Result handleIllegalArgumentException(IllegalArgumentException e) {
-        e.printStackTrace();
-        return Result.failedMsg(e.getMessage());
+        return Result.validatedFailed(e.getMessage());
     }
 }
