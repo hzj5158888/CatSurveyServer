@@ -48,7 +48,7 @@ public class ResponseController {
             throw new CatValidationException("权限不足");
         if (survey.getEndDate().getTime() < System.currentTimeMillis())
             throw new CatValidationException("时间已过，无法作答");
-        
+
         return Result.successData(responseService.add(response));
     }
 

@@ -35,10 +35,6 @@ public class ResponseService {
 
     @Transactional
     public Integer add(Response response) {
-        Survey survey = surveyRepository.findById(response.getSurveyId()).orElseThrow(() ->
-                new CatValidationException("问卷ID无效")
-        );
-
         List<AnswerDetail> answerDetails = new ArrayList<>(response.getAnswerDetailList());
 
         response.setUserId(userService.getLoginId());
