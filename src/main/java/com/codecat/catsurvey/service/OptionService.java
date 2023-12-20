@@ -45,7 +45,8 @@ public class OptionService {
     public void checkFullUpdate(@Valid Option option) {}
 
     @Transactional
-    public void add(Option option) {
+    @Validated(value = validationTime.FullAdd.class)
+    public void add(@Valid Option option) {
         if (option == null)
             throw new CatValidationException("无效请求，数据为空");
 
@@ -116,7 +117,6 @@ public class OptionService {
         );
 
         Set<String> notAllow = new HashSet<>(){{
-            add("id");
             add("questionId");
             add("question");
         }};

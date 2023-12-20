@@ -94,6 +94,8 @@ public class TemplateService {
         survey.setStatus(SurveyStatusEnum.DRAFT.getName()); // 草稿
         survey.setUserId(userService.getLoginId());
         surveyService.add(survey);
+
+        template.setSurvey(null);
         template.setSurveyId(survey.getId());
         templateRepository.saveAndFlush(template);
     }
@@ -120,7 +122,7 @@ public class TemplateService {
         template.setSurveyId(oldTemplate.getSurveyId());
         template.setCreateDate(oldTemplate.getCreateDate());
         surveyService.modify(oldTemplate.getSurveyId(), template.getSurvey());
-        
+
         template.setSurvey(null);
         templateRepository.saveAndFlush(template);
     }

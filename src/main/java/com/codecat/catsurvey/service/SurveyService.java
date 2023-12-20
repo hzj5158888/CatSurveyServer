@@ -39,7 +39,8 @@ public class SurveyService {
     private TemplateRepository templateRepository;
 
     @Transactional
-    public void add(Survey survey) {
+    @Validated(validationTime.FullAdd.class)
+    public void add(@Valid Survey survey) {
         if (survey.getStatus().equals(SurveyStatusEnum.CARRYOUT.getName())) {
             if (survey.getStartDate() == null || survey.getEndDate() == null)
                 throw new CatValidationException("开始时间和截止时间不能为空");

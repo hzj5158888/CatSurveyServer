@@ -43,7 +43,8 @@ public class QuestionService {
     public void checkFullUpdate(@Valid Question question) {}
 
     @Transactional
-    public void add(Question question) {
+    @Validated(value = validationTime.FullAdd.class)
+    public void add(@Valid Question question) {
         if (question == null)
             throw new CatValidationException("无效请求，数据为空");
 
