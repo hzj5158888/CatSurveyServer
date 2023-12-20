@@ -46,12 +46,6 @@ public class QuestionService {
     public void add(Question question) {
         if (question == null)
             throw new CatValidationException("无效请求，数据为空");
-        
-        Survey survey = surveyRepository.findById(question.getSurveyId()).orElseThrow(() ->
-                new CatValidationException("问卷不存在")
-        );
-        if (!userService.isLoginId(survey.getUserId()) && !userService.containsPermissionName("SurveyManage"))
-            throw new CatAuthorizedException("无法访问，权限不足");
 
         if (question.getIOrder() == null)
             question.setIOrder(Integer.MAX_VALUE);
@@ -65,28 +59,18 @@ public class QuestionService {
 
     @Transactional
     public void del(Integer questionId) {
-        Question question = questionRepository.findById(questionId).orElseThrow(() ->
-                new CatValidationException("问题不存在")
-        );
+        if (!questionRepository.existsById(questionId))
+            throw new CatValidationException("问题不存在");
 
-        Integer userId = question.getSurvey().getUserId();
-        if (!userService.isLoginId(userId))
-            throw new CatAuthorizedException("无法删除，权限不足");
-
-        questionRepository.delete(question);
+        questionRepository.deleteById(questionId);
     }
 
     @Transactional
     public void delBySurvey(Integer surveyId, Integer questionId) {
-        Question question = questionRepository.findByIdAndSurveyId(questionId, surveyId).orElseThrow(() ->
-                new CatValidationException("问题不存在或不属于该问卷")
-        );
+        if (!questionRepository.existsByIdAndSurveyId(questionId, surveyId))
+            throw new CatValidationException("问题不存在或不属于该问卷");
 
-        Integer userId = question.getSurvey().getUserId();
-        if (!userService.isLoginId(userId))
-            throw new CatAuthorizedException("无法删除，权限不足");
-
-        questionRepository.delete(question);
+        questionRepository.deleteById(questionId);
     }
 
     @Transactional
