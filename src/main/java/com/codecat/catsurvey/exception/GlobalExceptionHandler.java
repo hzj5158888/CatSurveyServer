@@ -16,6 +16,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.NoHandlerFoundException;
 
 import java.util.Objects;
 import java.util.Set;
@@ -62,6 +63,12 @@ public class GlobalExceptionHandler {
     public Result handleDataIntegrityViolationException(DataIntegrityViolationException e) { // 主键重复异常
         e.printStackTrace();
         return Result.failedMsg("内部异常");
+    }
+
+    @ExceptionHandler(NoHandlerFoundException.class)
+    public Result handleNoHandlerFoundException(NoHandlerFoundException e) {
+        e.printStackTrace();
+        return Result.failedMsg(e.getMessage());
     }
 
     @ExceptionHandler(CatValidationException.class)
