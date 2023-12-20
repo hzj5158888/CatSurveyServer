@@ -95,6 +95,7 @@ public class TemplateService {
         survey.setUserId(userService.getLoginId());
         surveyService.add(survey);
 
+        template.setId(null);
         template.setSurvey(null);
         template.setSurveyId(survey.getId());
         templateRepository.saveAndFlush(template);

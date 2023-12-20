@@ -47,6 +47,7 @@ public class ResponseService {
 
         List<AnswerDetail> answerDetails = new ArrayList<>(response.getAnswerDetailList());
 
+        response.setId(null);
         response.setUserId(userService.getLoginId());
         responseRepository.saveAndFlush(response);
         if (!answerDetails.isEmpty())

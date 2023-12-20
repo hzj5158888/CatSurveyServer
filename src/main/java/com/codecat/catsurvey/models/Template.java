@@ -27,7 +27,6 @@ import java.util.List;
 @EntityListeners(AuditingEntityListener.class)
 public class Template {
     @Id
-    @Null(message = "id为只读", groups = {validationTime.FullAdd.class, validationTime.Add.class})
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Integer id;

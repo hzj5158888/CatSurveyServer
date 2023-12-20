@@ -21,7 +21,6 @@ import java.util.List;
 @Table(name = "ioption", schema = "codecat")
 public class Option implements Comparable<Option> {
     @Id
-    @Null(message = "id为只读", groups = {validationTime.FullAdd.class, validationTime.Add.class})
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Integer id;

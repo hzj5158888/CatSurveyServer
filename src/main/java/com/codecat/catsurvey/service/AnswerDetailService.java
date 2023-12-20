@@ -34,6 +34,7 @@ public class AnswerDetailService {
     @Autowired
     private UserService userService;
 
+    @Transactional
     public Integer add(AnswerDetail answerDetail) {
         if (answerDetail == null)
             throw new CatValidationException("无效请求，数据为空");
@@ -79,6 +80,7 @@ public class AnswerDetailService {
         }
 
         JSONObject jsonAns = JSONObject.parseObject((String) answerDetail.getJsonAnswer());
+        answerDetail.setId(null);
         answerDetail.setJsonAnswer(jsonAns.toString());
         answerDetailRepository.saveAndFlush(answerDetail);
 
