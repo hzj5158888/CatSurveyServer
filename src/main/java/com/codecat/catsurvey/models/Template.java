@@ -40,7 +40,7 @@ public class Template {
     private Date createDate;
 
     @NotNull(message = "问卷不能为空", groups = {validationTime.FullAdd.class})
-    @ManyToOne(targetEntity = Survey.class, cascade = CascadeType.REFRESH)
+    @ManyToOne(targetEntity = Survey.class, cascade = {CascadeType.REFRESH, CascadeType.REMOVE})
     @JoinColumn(name = "survey_id", referencedColumnName = "id", insertable = false, updatable = false)
     private Survey survey;
 }
