@@ -179,21 +179,16 @@ public class SurveyService {
         return surveyRepository.findAllByUserId(userId, Sort.by(Sort.Direction.DESC, "createDate"));
     }
 
-    public boolean isTemplate(Integer surveyId) {
-        return templateRepository.existsBySurveyId(surveyId);
-    }
+    public boolean isTemplate(Integer surveyId) { return templateRepository.existsBySurveyId(surveyId); }
 
-    @Transactional
     public String getStatus(Integer surveyId) {
         return get(surveyId).getStatus();
     }
 
-    @Transactional
     public Integer getUserId(Integer surveyId) {
         return get(surveyId).getUserId();
     }
-
-    @Transactional
+    
     public List<Question> getQuestionList(Integer surveyId) {
         return questionService.getAllBySurvey(surveyId);
     }
