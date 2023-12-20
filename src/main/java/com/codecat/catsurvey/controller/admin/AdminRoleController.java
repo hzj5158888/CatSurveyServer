@@ -20,7 +20,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/admin/role")
 @SaCheckLogin
-@SaCheckRole("SuperAdmin")
 @CrossOrigin()
 public class AdminRoleController {
     @Autowired
@@ -29,6 +28,7 @@ public class AdminRoleController {
     @Autowired
     private RoleSerivce roleSerivce;
 
+    @SaCheckRole("SuperAdmin")
     @PostMapping("/{userId}")
     public Result addRoleByUser(@PathVariable Integer userId, @RequestBody JSONObject roleNameObj) {
         if (!userService.existsById(userId))
@@ -41,6 +41,7 @@ public class AdminRoleController {
         return Result.success();
     }
 
+    @SaCheckRole("SuperAdmin")
     @DeleteMapping("/{userId}")
     public Result delRoleByUser(@PathVariable Integer userId, @RequestBody JSONObject roleNameObj) {
         if (!userService.existsById(userId))
@@ -53,6 +54,7 @@ public class AdminRoleController {
         return Result.success();
     }
 
+    @SaCheckRole("SuperAdmin")
     @PutMapping("/{userId}")
     public Result setRoleByUser(@PathVariable Integer userId, @RequestBody JSONObject roleNameObj) {
         if (!userService.existsById(userId))
@@ -65,6 +67,7 @@ public class AdminRoleController {
         return Result.success();
     }
 
+    @SaCheckRole("SuperAdmin")
     @GetMapping("/{userId}")
     public Result getAllRoleByUser(@PathVariable Integer userId) {
         if (!userService.existsById(userId))
