@@ -107,12 +107,10 @@ public class SurveyService {
                 new CatValidationException("问卷不存在")
         );
 
-        Set<String> notAllow = new HashSet<>() {{
-            add("userId");
-            add("createDate");
-        }};
         Set<String> continueItem = new HashSet<>() {{
             add("id");
+            add("userId");
+            add("createDate");
             add("questionList");
             add("responseList");
         }};
@@ -121,8 +119,6 @@ public class SurveyService {
         for (Map.Entry<String, Object> entry : newSurveyMap.entrySet()) {
             if (entry.getValue() == null || continueItem.contains(entry.getKey()))
                 continue;
-            if (notAllow.contains(entry.getKey()))
-                throw new CatValidationException("修改失败, 属性" + entry.getKey() + "为只读");
 
             if (SurveyStatusEnum.CARRYOUT.getName().equals(newSurveyMap.get("status"))
                     && ((entry.getKey().equals("startDate")
@@ -184,6 +180,7 @@ public class SurveyService {
         return get(surveyId).getStatus();
     }
 
+    @Transactional
     public Integer getUserId(Integer surveyId) {
         return get(surveyId).getUserId();
     }

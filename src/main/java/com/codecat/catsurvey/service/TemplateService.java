@@ -8,6 +8,7 @@ import com.codecat.catsurvey.models.Survey;
 import com.codecat.catsurvey.models.Template;
 import com.codecat.catsurvey.common.valid.group.validationTime;
 import com.codecat.catsurvey.repository.TemplateRepository;
+import com.codecat.catsurvey.utils.Util;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -30,25 +31,42 @@ public class TemplateService {
     @Autowired
     private QuestionService questionService;
 
+    @Autowired
+    private UserService userService;
+
     public Template filter(Template template) {
         if (template == null)
             return null;
 
         Survey survey =  surveyService.get(template.getSurveyId());
+        List<Question> questionRes = new ArrayList<>();
         List<Question> questionList = surveyService.getQuestionList(survey.getId());
         for (Question question : questionList) {
             List<Option> optionList = questionService.getOptionList(question.getId());
-            for (Option option : optionList)
-                option.setId(null);
 
-            question.setOptionList(optionList);
-            question.setId(null);
+            List<Option> optionRes = new ArrayList<>();
+            for (Option option : optionList) {
+                Option newOption = Util.clone(option, Option.class);
+                newOption.setId(null);
+                newOption.setQuestionId(null);
+                optionRes.add(newOption);
+            }
+
+            Question newQuestion = Util.clone(question, Question.class);
+            newQuestion.setOptionList(optionRes);
+            newQuestion.setId(null);
+            newQuestion.setAnswerDetailList(new ArrayList<>());
+            newQuestion.setSurveyId(null);
+            questionRes.add(newQuestion);
         }
-        survey.setQuestionList(questionList);
-        survey.setResponseList(new ArrayList<>());
+        Survey newSurvey = Util.clone(survey, Survey.class);
+        newSurvey.setQuestionList(questionRes);
+        newSurvey.setResponseList(new ArrayList<>());
+        newSurvey.setId(null);
+        newSurvey.setUserId(null);
 
         template.setSurveyId(null);
-        template.setSurvey(survey);
+        template.setSurvey(newSurvey);
         return template;
     }
 
@@ -74,6 +92,7 @@ public class TemplateService {
 
         survey.setId(null);
         survey.setStatus(SurveyStatusEnum.DRAFT.getName()); // 草稿
+        survey.setUserId(userService.getLoginId());
         surveyService.add(survey);
         template.setSurveyId(survey.getId());
         templateRepository.saveAndFlush(template);

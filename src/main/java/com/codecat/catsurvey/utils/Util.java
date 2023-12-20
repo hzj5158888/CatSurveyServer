@@ -27,6 +27,13 @@ public class Util {
         return JSONObject.parseObject(JSON.toJSONString(source, JSONWriter.Feature.WriteMapNullValue), target);
     }
 
+    public static <T> T clone(T src, Class<T> target) {
+        if (src == null)
+            return null;
+
+        return JSONObject.parseObject(JSON.toJSONString(src, JSONWriter.Feature.WriteMapNullValue), target);
+    }
+
     public static Set<String> getObjectFiledName(Object object) {
         return objectToMap(object).keySet();
     }
