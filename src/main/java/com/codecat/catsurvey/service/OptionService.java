@@ -64,7 +64,7 @@ public class OptionService {
 
     @Transactional
     public void del(Integer optionId) {
-        if (optionRepository.existsById(optionId))
+        if (!optionRepository.existsById(optionId))
             throw new CatValidationException("选项不存在");
 
         optionRepository.deleteById(optionId);
