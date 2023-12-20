@@ -39,7 +39,7 @@ public class SurveyService {
 
     @Transactional
     public void add(Survey survey) {
-        if (!survey.getStatus().equals(SurveyStatusEnum.DRAFT.getName())) {
+        if (survey.getStatus().equals(SurveyStatusEnum.CARRYOUT.getName())) {
             if (survey.getStartDate() == null || survey.getEndDate() == null)
                 throw new CatValidationException("开始时间和截止时间不能为空");
             if (survey.getStartDate().getTime() > survey.getEndDate().getTime())
