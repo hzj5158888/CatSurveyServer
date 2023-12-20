@@ -38,8 +38,8 @@ public class User {
     private String userName;
 
     @NotNull(message = "密码不能为空")
-    //@Length(min = 6, max = 16, message = "密码长度为6-16位", groups = validationTime.FullAdd.class) // 仅在添加时校验
-    //@Pattern(regexp = "^[A-Za-z0-9.]+$", message = "密码只能由数字英文以及'.'组成", groups = validationTime.FullAdd.class)
+    @Length(min = 6, max = 16, message = "密码长度为6-16位", groups = validationTime.FullAdd.class) // 仅在添加时校验
+    @Pattern(regexp = "^[A-Za-z0-9.]+$", message = "密码只能由数字英文以及'.'组成", groups = validationTime.FullAdd.class)
     @Column(name = "password", nullable = false)
     private String password;
 
