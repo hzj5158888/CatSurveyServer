@@ -117,10 +117,8 @@ public class TemplateService {
         template.setId(templateId);
         template.setSurveyId(oldTemplate.getSurveyId());
         template.setCreateDate(oldTemplate.getCreateDate());
-        if (template.getSurvey() == null) {
-            templateRepository.saveAndFlush(template);
+        if (template.getSurvey() == null)
             return;
-        }
 
         surveyService.modify(oldTemplate.getSurveyId(), template.getSurvey());
         template.setSurvey(null);
