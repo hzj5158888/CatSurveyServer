@@ -71,29 +71,6 @@ public class UserService {
         return StpUtil.getTokenInfo();
     }
 
-    public List<Role> getAllRole(Integer userId) {
-        if (userId == null)
-            return null;
-
-        User user = userRepository.findById(userId).orElseThrow(() ->
-                new CatValidationException("非法userId: " + userId)
-        );
-
-        List<UserRole> userRoleList = user.getUserRoleList();
-        if (userRoleList == null)
-            return new ArrayList<>();
-
-        return userRoleList.stream()
-                .map(UserRole::getRole)
-                .collect(Collectors.toList());
-    }
-
-    public List<String> getAllRoleName(Integer userId) {
-        return getAllRole(userId).stream()
-                .map(Role::getName)
-                .collect(Collectors.toList());
-    }
-
     public boolean isLoginId(Integer userId) {
         if (userId == null || !StpUtil.isLogin())
             return false;
@@ -107,48 +84,6 @@ public class UserService {
             return null;
 
         return Integer.parseInt((String) StpUtil.getLoginId());
-    }
-
-    public boolean containsPermissionName(String permissionName) {
-        if (permissionName == null || !StpUtil.isLogin())
-            return false;
-
-        Set<String> permissionNameSet = new HashSet<>(StpUtil.getPermissionList());
-        return permissionNameSet.contains(permissionName);
-    }
-
-    public boolean containsRoleName(String roleName) {
-        if (roleName == null || !StpUtil.isLogin())
-            return false;
-
-        Set<String> roleNameSet = new HashSet<>(StpUtil.getRoleList());
-        return roleNameSet.contains(roleName);
-    }
-
-    public Set<Permission> getAllPermission(Integer userId) {
-        if (userId == null)
-            return null;
-
-        List<Role> roleList = getAllRole(userId);
-        Set<Permission> permissionSet = new HashSet<>();
-        for (Role role : roleList) {
-            permissionSet.addAll(
-                    roleSerivce.getPermissionList(role.getId())
-            );
-        }
-
-        return permissionSet;
-    }
-
-    public Set<String> getAllPermissionName(Integer userId) {
-        Set<Permission> permissionSet = getAllPermission(userId);
-
-        Set<String> permissionName = new HashSet<>();
-        for (Permission permission : permissionSet) {
-            permissionName.add(permission.getName());
-        }
-
-        return permissionName;
     }
 
     @Transactional
@@ -168,7 +103,7 @@ public class UserService {
     @Transactional
     public void addRole(Integer userId, String roleName) {
         if (userId == null || !userRepository.existsById(userId))
-            throw new CatValidationException("UserService addRole: unavailable userId: " + userId);
+            throw new CatValidationException("用户不存在");
 
         Set<Integer> roleSet = new HashSet<>();
         List<Role> curRole = getAllRole(userId);
@@ -176,15 +111,15 @@ public class UserService {
             roleSet.add(role.getId());
         }
 
-        Optional<Role> roleOpt = roleRepository.findByName(roleName);
-        if (roleOpt.isEmpty())
-            throw new CatValidationException("UserService setRoleAll: unavailable roleName:" + roleName);
-        else if (roleSet.contains(roleOpt.get().getId()))
+        Role role = roleRepository.findByName(roleName).orElseThrow(() ->
+                new CatValidationException("角色名错误: " + roleName)
+        );
+        if (roleSet.contains(role.getId()))
             return;
 
         UserRole userRole = new UserRole();
         userRole.setUserId(userId);
-        userRole.setRoleId(roleOpt.get().getId());
+        userRole.setRoleId(role.getId());
         userRoleRepository.saveAndFlush(userRole);
     }
 
@@ -242,6 +177,72 @@ public class UserService {
         return userRepository.existsById(userId);
     }
 
+    public boolean containsPermissionName(String permissionName) {
+        if (permissionName == null || !StpUtil.isLogin())
+            return false;
+
+        Set<String> permissionNameSet = new HashSet<>(StpUtil.getPermissionList());
+        return permissionNameSet.contains(permissionName);
+    }
+
+    public boolean containsRoleName(String roleName) {
+        if (roleName == null || !StpUtil.isLogin())
+            return false;
+
+        Set<String> roleNameSet = new HashSet<>(StpUtil.getRoleList());
+        return roleNameSet.contains(roleName);
+    }
+
+    public Set<Permission> getAllPermission(Integer userId) {
+        if (userId == null)
+            return null;
+
+        List<Role> roleList = getAllRole(userId);
+        Set<Permission> permissionSet = new HashSet<>();
+        for (Role role : roleList) {
+            permissionSet.addAll(
+                    roleSerivce.getPermissionList(role.getId())
+            );
+        }
+
+        return permissionSet;
+    }
+
+    public Set<String> getAllPermissionName(Integer userId) {
+        Set<Permission> permissionSet = getAllPermission(userId);
+
+        Set<String> permissionName = new HashSet<>();
+        for (Permission permission : permissionSet) {
+            permissionName.add(permission.getName());
+        }
+
+        return permissionName;
+    }
+
+
+    public List<Role> getAllRole(Integer userId) {
+        if (userId == null)
+            return null;
+
+        User user = userRepository.findById(userId).orElseThrow(() ->
+                new CatValidationException("非法userId: " + userId)
+        );
+
+        List<UserRole> userRoleList = user.getUserRoleList();
+        if (userRoleList == null)
+            return new ArrayList<>();
+
+        return userRoleList.stream()
+                .map(UserRole::getRole)
+                .collect(Collectors.toList());
+    }
+
+    public List<String> getAllRoleName(Integer userId) {
+        return getAllRole(userId).stream()
+                .map(Role::getName)
+                .collect(Collectors.toList());
+    }
+
     private List<UserRole> toUserRoleList(List<Integer> roleIdList, Integer userId) {
         List<UserRole> ans = new ArrayList<>();
         for (Integer roleId : roleIdList) {
@@ -258,7 +259,7 @@ public class UserService {
     @Transactional
     public void addRoleAll(Integer userId, List<String> roleNameList) {
         if (userId == null || !userRepository.existsById(userId))
-            throw new CatValidationException("UserService addRoleAll: unavailable userId: " + userId);
+            throw new CatValidationException("用户不存在");
 
         Set<Integer> roleSet = new HashSet<>();
         List<Role> curRole = getAllRole(userId);
@@ -269,11 +270,11 @@ public class UserService {
         userRoleRepository.deleteAllByUserId(userId);
 
         for (String roleName : roleNameList) {
-            Optional<Role> roleOpt = roleRepository.findByName(roleName);
-            if (roleOpt.isEmpty())
-                throw new CatValidationException("UserService addRoleAll: unavailable roleName:" + roleName);
+            Role role = roleRepository.findByName(roleName).orElseThrow(() ->
+                    new CatValidationException("角色名错误: " + roleName)
+            );
 
-            roleSet.add(roleOpt.get().getId());
+            roleSet.add(role.getId());
         }
 
         List<UserRole> userRoleList = toUserRoleList(roleSet.stream().toList(), userId);
@@ -282,21 +283,20 @@ public class UserService {
 
     @Transactional
     public void setRoleAll(Integer userId, List<String> roleNameList) {
-        if (userId == null || !userRepository.existsById(userId)) {
-            throw new CatValidationException("UserService setRoleAll: unavailable userId: " + userId);
-        }
+        if (userId == null || !userRepository.existsById(userId))
+            throw new CatValidationException("用户不存在");
+
 
         userRoleRepository.deleteAllByUserId(userId);
 
         roleNameList.add("User");
         Set<Integer> roleSet = new HashSet<>();
         for (String roleName : roleNameList) {
-            Optional<Role> roleOpt = roleRepository.findByName(roleName);
-            if (roleOpt.isEmpty()) {
-                throw new CatValidationException("UserService setRoleAll: unavailable roleName:" + roleName);
-            }
+            Role role = roleRepository.findByName(roleName).orElseThrow(() ->
+                    new CatValidationException("角色名错误: " + roleName)
+            );
 
-            roleSet.add(roleOpt.get().getId());
+            roleSet.add(role.getId());
         }
 
         List<UserRole> userRoleList = toUserRoleList(roleSet.stream().toList(), userId);
@@ -305,9 +305,8 @@ public class UserService {
 
     @Transactional
     public void delRoleAll(Integer userId, List<String> roleNameList) {
-        if (userId == null || !userRepository.existsById(userId)) {
-            throw new CatValidationException("UserService delRoleAll: unavailable userId: " + userId);
-        }
+        if (userId == null || !userRepository.existsById(userId))
+            throw new CatValidationException("用户不存在");
 
         Set<Integer> roleSet = new HashSet<>();
         List<Role> curRole = getAllRole(userId);
@@ -318,16 +317,16 @@ public class UserService {
         userRoleRepository.deleteAllByUserId(userId);
 
         for (String roleName : roleNameList) {
-            Optional<Role> roleOpt = roleRepository.findByName(roleName);
-            if (roleOpt.isEmpty()) {
-                throw new CatValidationException("UserService setRoleAll: unavailable roleName:" + roleName);
-            } else if (!roleSet.contains(roleOpt.get().getId())) {
-                throw new CatValidationException("UserService delRoleAll: unable to del role:" + roleName + ", not exits in this user");
-            } else if (roleName.equals("User")) {
-                throw new CatValidationException("UserService delRoleAll: unable to del role: User, This is base role");
-            }
+            Role role = roleRepository.findByName(roleName).orElseThrow(() ->
+                    new CatValidationException("角色名错误: " + roleName)
+            );
 
-            roleSet.remove(roleOpt.get().getId());
+            if (!roleSet.contains(role.getId()))
+                throw new CatValidationException("无法删除角色: " + roleName + "、该用户不存在该角色");
+            if (roleName.equals("User"))
+                throw new CatValidationException("无法删除User角色，此为基本角色");
+
+            roleSet.remove(role.getId());
         }
 
         List<UserRole> userRoleList = toUserRoleList(roleSet.stream().toList(), userId);
