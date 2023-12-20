@@ -80,4 +80,10 @@ public class GlobalExceptionHandler {
     public Result handleNotRoleException(NotRoleException e) {
         return Result.unauthorized(e.getMessage());
     }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public Result handleIllegalArgumentException(IllegalArgumentException e) {
+        e.printStackTrace();
+        return Result.failedMsg(e.getMessage());
+    }
 }
