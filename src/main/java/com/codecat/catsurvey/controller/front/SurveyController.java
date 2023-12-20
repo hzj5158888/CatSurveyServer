@@ -47,13 +47,6 @@ public class SurveyController {
         if (!userService.isLoginId(survey.getUserId()))
             return Result.unauthorized("无法添加，权限不足");
 
-        if (!survey.getStatus().equals(SurveyStatusEnum.DRAFT.getName())) {
-            if (survey.getStartDate() == null || survey.getEndDate() == null)
-                return Result.validatedFailed("开始时间和截止时间不能为空");
-            if (survey.getStartDate().getTime() > survey.getEndDate().getTime())
-                return Result.validatedFailed("开始时间不得先于截至时间");
-        }
-
         surveyService.add(survey);
         return Result.successData(survey.getId());
     }
