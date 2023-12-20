@@ -22,7 +22,7 @@ public class AdminRoleController {
     @Autowired
     private UserService userService;
 
-    @PostMapping("/user/{userId}")
+    @PostMapping("/{userId}")
     public Result addRoleByUser(@PathVariable Integer userId, @RequestBody JSONObject roleName) {
         if (!userService.existsById(userId))
             return Result.validatedFailed("用户不存在");
@@ -31,8 +31,7 @@ public class AdminRoleController {
         return Result.success();
     }
 
-
-    @DeleteMapping("/user/{userId}")
+    @DeleteMapping("/{userId}")
     public Result delRoleByUser(@PathVariable Integer userId, @RequestBody JSONObject roleName) {
         if (!userService.existsById(userId))
             return Result.validatedFailed("用户不存在");
@@ -41,8 +40,7 @@ public class AdminRoleController {
         return Result.success();
     }
 
-
-    @PutMapping("/user/{userId}")
+    @PutMapping("/{userId}")
     public Result setRoleByUser(@PathVariable Integer userId, @RequestBody JSONObject roleName) {
         if (!userService.existsById(userId))
             return Result.validatedFailed("用户不存在");
@@ -51,7 +49,7 @@ public class AdminRoleController {
         return Result.success();
     }
 
-    @GetMapping("/user/{userId}")
+    @GetMapping("/{userId}")
     public Result getRoleByUser(@PathVariable Integer userId) {
         if (!userService.existsById(userId))
             return Result.validatedFailed("用户不存在");
