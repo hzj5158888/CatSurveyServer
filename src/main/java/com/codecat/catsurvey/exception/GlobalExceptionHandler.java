@@ -73,6 +73,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(CatValidationException.class)
     public Result handleValidationException(CatValidationException e) {
+        e.printStackTrace();
         return Result.validatedFailed(e.getMessage());
     }
 

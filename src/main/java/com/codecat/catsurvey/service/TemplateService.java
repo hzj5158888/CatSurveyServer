@@ -115,19 +115,15 @@ public class TemplateService {
         );
 
         template.setId(templateId);
+        template.setSurveyId(oldTemplate.getSurveyId());
         template.setCreateDate(oldTemplate.getCreateDate());
         if (template.getSurvey() == null) {
             templateRepository.saveAndFlush(template);
             return;
         }
 
-        if (template.getSurvey().getId() == null) {
-            surveyService.add(template.getSurvey());
-            template.setSurveyId(template.getSurvey().getId());
-        } else {
-            surveyService.modify(oldTemplate.getSurveyId(), template.getSurvey());
-        }
-
+        surveyService.modify(oldTemplate.getSurveyId(), template.getSurvey());
+        template.setSurvey(null);
         templateRepository.saveAndFlush(template);
     }
 

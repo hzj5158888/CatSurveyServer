@@ -36,9 +36,6 @@ public class SurveyService {
     private UserRepository userRepository;
 
     @Autowired
-    private UserService userService;
-
-    @Autowired
     private TemplateRepository templateRepository;
 
     @Transactional
@@ -50,8 +47,8 @@ public class SurveyService {
                 throw new CatValidationException("开始时间不得先于截至时间");
         }
 
-        List<Question> questions = new ArrayList<>(survey.getQuestionList());
         survey.setId(null);
+        List<Question> questions = new ArrayList<>(survey.getQuestionList());
         surveyRepository.saveAndFlush(survey);
         if (!questions.isEmpty())
             questionService.addBySurvey(survey.getId(), questions);
