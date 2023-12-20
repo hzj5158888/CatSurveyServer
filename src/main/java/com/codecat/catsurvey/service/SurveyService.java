@@ -39,18 +39,6 @@ public class SurveyService {
 
     @Transactional
     public void add(Survey survey) {
-        if (survey.getUserId() == null)
-            survey.setUserId(userService.getLoginId());
-        if (!userService.isLoginId(survey.getUserId()))
-            throw new CatAuthorizedException("无法添加，权限不足");
-
-        if (!survey.getStatus().equals(SurveyStatusEnum.DRAFT.getName())) {
-            if (survey.getStartDate() == null || survey.getEndDate() == null)
-                throw new CatValidationException("开始时间和截止时间不能为空");
-            if (survey.getStartDate().getTime() > survey.getEndDate().getTime())
-                throw new CatValidationException("开始时间不得先于截至时间");
-        }
-
         List<Question> questions = new ArrayList<>(survey.getQuestionList());
         surveyRepository.saveAndFlush(survey);
         if (!questions.isEmpty())
@@ -61,8 +49,6 @@ public class SurveyService {
         Survey survey = surveyRepository.findById(surveyId).orElseThrow(() ->
                 new CatValidationException("问卷不存在")
         );
-        if (!userService.isLoginId(survey.getUserId()))
-            throw new CatAuthorizedException("无法删除，权限不足");
 
         surveyRepository.delete(survey);
     }
@@ -74,7 +60,7 @@ public class SurveyService {
         if (!userService.isLoginId(survey.getUserId()))
             throw new CatAuthorizedException("无法删除，权限不足");
 
-        surveyRepository.delete(survey);
+        del(survey.getId());
     }
 
     @Transactional
@@ -90,7 +76,7 @@ public class SurveyService {
 
         List<Integer> surveyIdList = (List<Integer>) surveyIdListObj;
         for (Integer curId : surveyIdList) {
-            surveyRepository.deleteById(curId);
+            del(curId);
         }
     }
 
@@ -171,24 +157,16 @@ public class SurveyService {
 
     @Transactional
     public Survey get(Integer surveyId) {
-        Survey survey = surveyRepository.findById(surveyId).orElseThrow(() ->
+        return surveyRepository.findById(surveyId).orElseThrow(() ->
                 new CatValidationException("问卷不存在")
         );
-
-        if (!userService.isLoginId(survey.getUserId())
-                && !survey.getStatus().equals(SurveyStatusEnum.CARRYOUT.getName()))
-            throw new CatValidationException("无法访问，权限不足");
-
-        return survey;
     }
 
     @Transactional
     public Survey getByUser(Integer userId, Integer surveyId) {
-        Survey survey = surveyRepository.findByIdAndUserId(surveyId, userId).orElseThrow(() ->
+        return surveyRepository.findByIdAndUserId(surveyId, userId).orElseThrow(() ->
                 new CatValidationException("问卷不存在或不属于此用户")
         );
-
-        return survey;
     }
 
     public List<Survey> getAllByUser(Integer userId) {

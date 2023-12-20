@@ -42,6 +42,18 @@ public class SurveyController {
 
     @PostMapping("")
     public Result add(@RequestBody @Validated(validationTime.FullAdd.class) Survey survey) {
+        if (survey.getUserId() == null)
+            survey.setUserId(userService.getLoginId());
+        if (!userService.isLoginId(survey.getUserId()))
+            return Result.unauthorized("无法添加，权限不足");
+
+        if (!survey.getStatus().equals(SurveyStatusEnum.DRAFT.getName())) {
+            if (survey.getStartDate() == null || survey.getEndDate() == null)
+                return Result.validatedFailed("开始时间和截止时间不能为空");
+            if (survey.getStartDate().getTime() > survey.getEndDate().getTime())
+                return Result.validatedFailed("开始时间不得先于截至时间");
+        }
+
         surveyService.add(survey);
         return Result.successData(survey.getId());
     }
@@ -60,7 +72,7 @@ public class SurveyController {
     @DeleteMapping("/{surveyId}")
     public Result del(@PathVariable Integer surveyId) {
         if (!userService.isLoginId(surveyService.getUserId(surveyId)))
-            throw new CatAuthorizedException("无法删除，权限不足");
+            return Result.unauthorized("无法删除，权限不足");
 
         surveyService.del(surveyId);
         return Result.success();
@@ -81,7 +93,7 @@ public class SurveyController {
     @PutMapping("/{surveyId}")
     public Result modify(@PathVariable Integer surveyId, @RequestBody Survey newSurvey) {
         if (!userService.isLoginId(surveyService.getUserId(surveyId)))
-            throw new CatAuthorizedException("无法修改，权限不足");
+            return Result.unauthorized("无法修改非自身创建的问卷");
 
         surveyService.modify(surveyId, newSurvey);
         return Result.success();
