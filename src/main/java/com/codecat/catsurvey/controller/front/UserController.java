@@ -7,6 +7,7 @@ import com.codecat.catsurvey.bean.UserPassword;
 import com.codecat.catsurvey.exception.CatAuthorizedException;
 import com.codecat.catsurvey.models.Role;
 import com.codecat.catsurvey.models.User;
+import com.codecat.catsurvey.service.TemplateService;
 import com.codecat.catsurvey.utils.MD5Util;
 import com.codecat.catsurvey.utils.Result;
 import com.codecat.catsurvey.common.valid.group.validationTime;
@@ -29,6 +30,9 @@ import java.util.stream.Collectors;
 public class UserController {
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private TemplateService templateService;
 
     @SaIgnore
     @PostMapping("")
@@ -118,6 +122,13 @@ public class UserController {
         userMap.put("permission", userService.getAllPermission(user.getId()));
 
         return Result.successData(userMap);
+    }
+
+    @GetMapping("/template")
+    public Result getAllTemplate() {
+        return Result.successData(
+                templateService.filter(templateService.getAll())
+        );
     }
 
     @RequestMapping(value = {"/{userId}/survey", "/{userId}/survey/**"})
