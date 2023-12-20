@@ -66,6 +66,6 @@ public class AdminRoleController {
         if (!userService.existsById(userId))
             return Result.validatedFailed("用户不存在");
 
-        return Result.successData(userService.getAllRole(userId));
+        return Result.successData(userService.getAllRoleName(userId));
     }
 }

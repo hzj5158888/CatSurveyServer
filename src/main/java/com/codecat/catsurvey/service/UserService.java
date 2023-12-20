@@ -288,6 +288,7 @@ public class UserService {
 
         userRoleRepository.deleteAllByUserId(userId);
 
+        roleNameList.add("User");
         Set<Integer> roleSet = new HashSet<>();
         for (String roleName : roleNameList) {
             Optional<Role> roleOpt = roleRepository.findByName(roleName);
