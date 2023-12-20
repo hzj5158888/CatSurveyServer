@@ -10,6 +10,9 @@ import com.codecat.catsurvey.utils.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @RestController
 @RequestMapping("/admin/role")
 @SaCheckLogin
@@ -23,29 +26,42 @@ public class AdminRoleController {
     private UserService userService;
 
     @PostMapping("/{userId}")
-    public Result addRoleByUser(@PathVariable Integer userId, @RequestBody JSONObject roleName) {
+    public Result addRoleByUser(@PathVariable Integer userId, @RequestBody JSONObject roleNameObj) {
         if (!userService.existsById(userId))
             return Result.validatedFailed("用户不存在");
+        if (!(roleNameObj.get("roleNameList") instanceof List<?>))
+            return Result.validatedFailed("类型错误或数据为空");
 
-        roleSerivce.addByUser(userId, roleName);
+        List<String> roleNameList = (List<String>) roleNameObj.get("roleNameList");
+        userService.addRoleAll(userId, roleNameList);
         return Result.success();
     }
 
     @DeleteMapping("/{userId}")
-    public Result delRoleByUser(@PathVariable Integer userId, @RequestBody JSONObject roleName) {
+    public Result delRoleByUser(@PathVariable Integer userId, @RequestBody JSONObject roleNameObj) {
         if (!userService.existsById(userId))
             return Result.validatedFailed("用户不存在");
+        if (!(roleNameObj.get("roleNameList") instanceof List<?>))
+            return Result.validatedFailed("类型错误或数据为空");
 
-        roleSerivce.delByUser(userId, roleName);
+        List<String> roleNameList = (List<String>) roleNameObj.get("roleNameList");
+        userService.addRoleAll(userId, roleNameList);
+
+        userService.delRoleAll(userId, roleNameList);
         return Result.success();
     }
 
     @PutMapping("/{userId}")
-    public Result setRoleByUser(@PathVariable Integer userId, @RequestBody JSONObject roleName) {
+    public Result setRoleByUser(@PathVariable Integer userId, @RequestBody JSONObject roleNameObj) {
         if (!userService.existsById(userId))
             return Result.validatedFailed("用户不存在");
+        if (!(roleNameObj.get("roleNameList") instanceof List<?>))
+            return Result.validatedFailed("类型错误或数据为空");
 
-        roleSerivce.setByUser(userId, roleName);
+        List<String> roleNameList = (List<String>) roleNameObj.get("roleNameList");
+        userService.addRoleAll(userId, roleNameList);
+
+        userService.setRoleAll(userId, roleNameList);
         return Result.success();
     }
 
@@ -54,6 +70,6 @@ public class AdminRoleController {
         if (!userService.existsById(userId))
             return Result.validatedFailed("用户不存在");
 
-        return Result.successData(userService.getAllRoleName(userId));
+        return Result.successData(userService.getAllRole(userId));
     }
 }

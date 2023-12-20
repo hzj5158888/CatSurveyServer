@@ -21,65 +21,6 @@ public class RoleSerivce {
     @Autowired
     private RoleRepository roleRepository;
 
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    @Lazy
-    private UserService userService;
-
-    @Transactional
-    public void addByUser(Integer userId, JSONObject roleNameBody) {
-        if (roleNameBody == null || roleNameBody.get("roleName") == null)
-            throw new CatValidationException("非法请求，数据为空");
-
-        List<String> roleNameList;
-        if (roleNameBody.get("roleName") instanceof List<?>)
-            roleNameList = (List<String>) roleNameBody.get("roleName");
-        else {
-            roleNameList = new ArrayList<>();
-            roleNameList.add((String) roleNameBody.get("roleName"));
-        }
-
-        userService.addRoleAll(userId, roleNameList);
-    }
-
-    @Transactional
-    public void delByUser(Integer userId, JSONObject roleNameBody) {
-        if (roleNameBody == null || roleNameBody.get("roleName") == null)
-            throw new CatValidationException("非法请求，数据为空");
-
-        List<String> roleNameList;
-        if (roleNameBody.get("roleName") instanceof List<?>)
-            roleNameList = (List<String>) roleNameBody.get("roleName");
-        else {
-            roleNameList = new ArrayList<>();
-            roleNameList.add((String) roleNameBody.get("roleName"));
-        }
-
-        userService.delRoleAll(userId, roleNameList);
-    }
-
-    @Transactional
-    public void setByUser(Integer userId, JSONObject roleNameBody) {
-        if (roleNameBody == null || roleNameBody.get("roleName") == null)
-            throw new CatValidationException("非法请求，数据为空");
-
-        List<String> roleNameList;
-        if (roleNameBody.get("roleName") instanceof List<?>)
-            roleNameList = (List<String>) roleNameBody.get("roleName");
-        else {
-            roleNameList = new ArrayList<>();
-            roleNameList.add((String) roleNameBody.get("roleName"));
-        }
-
-        userService.setRoleAll(userId, roleNameList);
-    }
-
-    public List<Role> getAllByUser(Integer userId) {
-        return userService.getAllRole(userId);
-    }
-
     public List<Permission> getPermissionList(Integer roleId) {
         Optional<Role> roleOpt = roleRepository.findById(roleId);
         if (roleOpt.isEmpty())
