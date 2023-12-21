@@ -3,9 +3,8 @@ package com.codecat.catsurvey.controller.front;
 import cn.dev33.satoken.stp.SaTokenInfo;
 import cn.dev33.satoken.stp.StpUtil;
 import com.alibaba.fastjson2.JSONObject;
-import com.codecat.catsurvey.models.Role;
 import com.codecat.catsurvey.models.User;
-import com.codecat.catsurvey.bean.UserInfo;
+import com.codecat.catsurvey.bean.LoginInfo;
 import com.codecat.catsurvey.service.LoginService;
 import com.codecat.catsurvey.service.UserService;
 import com.codecat.catsurvey.utils.MD5Util;
@@ -14,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @CrossOrigin()
@@ -44,7 +42,7 @@ public class LoginController {
         List<String> roles = userService.getAllRoleName(user.getId());
         List<String> permissions = userService.getAllPermissionName(user.getId()).stream().toList();
 
-        UserInfo userInfo = new UserInfo(user.getId(), userName, roles, permissions, accessToken);
+        LoginInfo userInfo = new LoginInfo(user.getId(), userName, roles, permissions, accessToken);
         return Result.successData(userInfo);
     }
 

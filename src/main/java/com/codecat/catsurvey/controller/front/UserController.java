@@ -5,6 +5,7 @@ import cn.dev33.satoken.annotation.SaIgnore;
 import com.alibaba.fastjson2.JSONObject;
 import com.codecat.catsurvey.bean.UserPassword;
 import com.codecat.catsurvey.exception.CatAuthorizedException;
+import com.codecat.catsurvey.exception.CatValidationException;
 import com.codecat.catsurvey.models.Role;
 import com.codecat.catsurvey.models.User;
 import com.codecat.catsurvey.service.TemplateService;
@@ -104,6 +105,14 @@ public class UserController {
     public Result modify(@PathVariable Integer userId, @RequestBody JSONObject user) {
         if (!userService.isLoginId(userId))
             throw new CatAuthorizedException("无法修改其它用户的信息");
+
+        if (user.get("password") != null) {
+            String oldPassword = (String) user.get("oldPassword");
+            if (oldPassword == null)
+                throw new CatValidationException("原密码为空");
+            if (!userService.getPassword(userId).equals(MD5Util.getMD5(oldPassword)))
+                throw new CatValidationException("原密码错误");
+        }
 
         userService.modify(userId, user);
         return Result.success();

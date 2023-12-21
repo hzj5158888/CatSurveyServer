@@ -42,8 +42,6 @@ public class UserService {
         Map<String, Object> ans = Util.objectToMap(user);
         ans.remove("userRoleList");
         ans.remove("password");
-        ans.remove("id");
-        ans.put("userId", user.getId());
 
         return ans;
     }
@@ -101,26 +99,11 @@ public class UserService {
     }
 
     @Transactional
-    public void addRole(Integer userId, String roleName) {
+    public void del(Integer userId) {
         if (userId == null || !userRepository.existsById(userId))
             throw new CatValidationException("用户不存在");
 
-        Set<Integer> roleSet = new HashSet<>();
-        List<Role> curRole = getAllRole(userId);
-        for (Role role : curRole) {
-            roleSet.add(role.getId());
-        }
-
-        Role role = roleRepository.findByName(roleName).orElseThrow(() ->
-                new CatValidationException("角色名错误: " + roleName)
-        );
-        if (roleSet.contains(role.getId()))
-            return;
-
-        UserRole userRole = new UserRole();
-        userRole.setUserId(userId);
-        userRole.setRoleId(role.getId());
-        userRoleRepository.saveAndFlush(userRole);
+        userRepository.deleteById(userId);
     }
 
     @Transactional
@@ -138,20 +121,19 @@ public class UserService {
         Set<String> userFiled = Util.getObjectFiledName(userOld);
         Map<String, Object> userMap = Util.objectToMap(userOld);
         for (Map.Entry<String, Object> entry : user.entrySet()) {
-            if (entry.getValue() == null || continueItem.contains(entry.getKey()))
+            if (entry.getValue() == null
+                    || continueItem.contains(entry.getKey())
+                    || !userFiled.contains(entry.getKey()))
                 continue;
-            if (!userFiled.contains(entry.getKey()))
-                throw new CatValidationException("用户信息修改失败, 非法属性: " + entry.getKey());
 
             if (entry.getKey().equals("password")) {
                 String password = (String) user.get("password");
-                String oldPassword = (String) user.get("oldPassword");
-                if (oldPassword == null)
-                    throw new CatValidationException("原密码为空");
-                if (!userOld.getPassword().equals(MD5Util.getMD5(oldPassword)))
-                    throw new CatValidationException("原密码错误");
+                if (password == null || password.length() < 6 || password.length() > 16)
+                    throw new CatValidationException("密码长度为6-16位");
+                if (!password.matches("^[A-Za-z0-9.]+$"))
+                    throw new CatValidationException("密码只能由数字英文以及'.'组成");
 
-                user.put("password", MD5Util.getMD5(password));
+                entry.setValue(MD5Util.getMD5(password));
                 needLogout = true;
             }
 
@@ -170,6 +152,10 @@ public class UserService {
         return userRepository.findById(userId).orElseThrow(() ->
                 new CatValidationException("用户不存在")
         );
+    }
+
+    public List<User> getAll() {
+        return userRepository.findAll();
     }
 
     @Transactional
@@ -219,6 +205,28 @@ public class UserService {
         return permissionName;
     }
 
+    @Transactional
+    public void addRole(Integer userId, String roleName) {
+        if (userId == null || !userRepository.existsById(userId))
+            throw new CatValidationException("用户不存在");
+
+        Set<Integer> roleSet = new HashSet<>();
+        List<Role> curRole = getAllRole(userId);
+        for (Role role : curRole) {
+            roleSet.add(role.getId());
+        }
+
+        Role role = roleRepository.findByName(roleName).orElseThrow(() ->
+                new CatValidationException("角色名错误: " + roleName)
+        );
+        if (roleSet.contains(role.getId()))
+            return;
+
+        UserRole userRole = new UserRole();
+        userRole.setUserId(userId);
+        userRole.setRoleId(role.getId());
+        userRoleRepository.saveAndFlush(userRole);
+    }
 
     public List<Role> getAllRole(Integer userId) {
         if (userId == null)
@@ -331,6 +339,23 @@ public class UserService {
 
         List<UserRole> userRoleList = toUserRoleList(roleSet.stream().toList(), userId);
         userRoleRepository.saveAllAndFlush(userRoleList);
+    }
+
+    public boolean isAdmin(Integer userId) {
+        List<String> roleList = getAllRoleName(userId);
+        for (String roleName : roleList)
+            if (roleName.contains("Admin"))
+                return true;
+
+        return false;
+    }
+
+    public String getPassword(Integer userId) {
+        User user = userRepository.findById(userId).orElseThrow(() ->
+                new CatValidationException("用户不存在")
+        );
+
+        return user.getPassword();
     }
 
     @Validated(validationTime.FullUpdate.class)

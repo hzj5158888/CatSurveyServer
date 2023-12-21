@@ -54,7 +54,7 @@ public class User {
     private String wechat;
 
     @JSONField(serialize = false)
-    @OneToMany(fetch = FetchType.EAGER)
+    @OneToMany(fetch = FetchType.EAGER, cascade = {CascadeType.REFRESH, CascadeType.REMOVE})
     @JoinColumn(name = "user_id", referencedColumnName = "id", insertable = false, updatable = false)
     private List<UserRole> userRoleList = new ArrayList<>();
 }
