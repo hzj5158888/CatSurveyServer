@@ -57,7 +57,7 @@ public class ResponseController {
     @DeleteMapping("/{responseId}")
     public Result del(@PathVariable Integer responseId) {
         if (!userService.isLoginId(responseService.getSurvey(responseId).getUserId()))
-            throw new CatAuthorizedException("无法删除其它用户的答卷");
+            return Result.validatedFailed("无法删除其它用户的答卷");
 
         responseService.del(responseId);
         return Result.success();
@@ -67,7 +67,7 @@ public class ResponseController {
     @DeleteMapping("/survey/{surveyId}/{responseId}")
     public Result delBySurvey(@PathVariable Integer surveyId, @PathVariable Integer responseId) {
         if (!userService.isLoginId(responseService.getSurvey(responseId).getUserId()))
-            throw new CatAuthorizedException("无法删除其它用户的答卷");
+            return Result.validatedFailed("无法删除其它用户的答卷");
 
         responseService.delBySurvey(surveyId, responseId);
         return Result.success();
@@ -77,7 +77,7 @@ public class ResponseController {
     @GetMapping("/{responseId}")
     public Result get(@PathVariable Integer responseId) {
         if (!userService.isLoginId(responseService.getUserId(responseId)))
-            throw new CatAuthorizedException("无法获取其它用户的答卷");
+            return Result.validatedFailed("无法获取其它用户的答卷");
 
         return Result.successData(responseService.get(responseId));
     }
@@ -86,7 +86,7 @@ public class ResponseController {
     @GetMapping("/survey/{surveyId}/{responseId}")
     public Result getBySurvey(@PathVariable Integer surveyId, @PathVariable Integer responseId) {
         if (!userService.isLoginId(surveyService.getUserId(surveyId)))
-            throw new CatAuthorizedException("无法获取其它用户的答卷");
+            return Result.validatedFailed("无法获取其它用户的答卷");
 
         return Result.successData(responseService.getBySurvey(surveyId, responseId));
     }
@@ -95,7 +95,7 @@ public class ResponseController {
     @GetMapping("/survey/{surveyId}")
     public Result getAllBySurvey(@PathVariable Integer surveyId) {
         if (!userService.isLoginId(surveyService.getUserId(surveyId)))
-            throw new CatAuthorizedException("无法获取其它用户的答卷");
+            return Result.validatedFailed("无法获取其它用户的答卷");
 
         return Result.successData(responseService.getAllBySurvey(surveyId));
     }

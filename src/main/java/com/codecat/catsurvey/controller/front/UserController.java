@@ -104,14 +104,14 @@ public class UserController {
     @PutMapping("/{userId}")
     public Result modify(@PathVariable Integer userId, @RequestBody JSONObject user) {
         if (!userService.isLoginId(userId))
-            throw new CatAuthorizedException("无法修改其它用户的信息");
+            return Result.validatedFailed("无法修改其它用户的信息");
 
         if (user.get("password") != null) {
             String oldPassword = (String) user.get("oldPassword");
             if (oldPassword == null)
-                throw new CatValidationException("原密码为空");
+                return Result.validatedFailed("原密码为空");
             if (!userService.getPassword(userId).equals(MD5Util.getMD5(oldPassword)))
-                throw new CatValidationException("原密码错误");
+                return Result.validatedFailed("原密码错误");
         }
 
         userService.modify(userId, user);

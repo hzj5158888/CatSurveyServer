@@ -45,7 +45,7 @@ public class SurveyController {
         if (survey.getUserId() == null)
             survey.setUserId(userService.getLoginId());
         if (!userService.isLoginId(survey.getUserId()))
-            return Result.unauthorized("无法添加到其它用户");
+            return Result.validatedFailed("无法添加到其它用户");
 
         surveyService.add(survey);
         return Result.successData(survey.getId());
@@ -65,7 +65,7 @@ public class SurveyController {
     @DeleteMapping("/{surveyId}")
     public Result del(@PathVariable Integer surveyId) {
         if (!userService.isLoginId(surveyService.getUserId(surveyId)))
-            return Result.unauthorized("无法删除其它用户的问卷");
+            return Result.validatedFailed("无法删除其它用户的问卷");
         if (surveyService.isTemplate(surveyId))
             return Result.validatedFailed("无法删除模板");
 
@@ -101,7 +101,7 @@ public class SurveyController {
     public Result delByUser(@PathVariable Integer userId, @PathVariable Integer surveyId) {
         Survey survey = surveyService.get(surveyId);
         if (!userService.isLoginId(survey.getUserId()))
-            throw new CatAuthorizedException("无法删除其它用户问卷");
+            return Result.validatedFailed("无法删除其它用户问卷");
         if (surveyService.isTemplate(surveyId))
             return Result.validatedFailed("无法删除模板");
 
@@ -112,7 +112,7 @@ public class SurveyController {
     @PutMapping("/{surveyId}")
     public Result modify(@PathVariable Integer surveyId, @RequestBody Survey newSurvey) {
         if (!userService.isLoginId(surveyService.getUserId(surveyId)))
-            return Result.unauthorized("无法修改其它用户问卷");
+            return Result.validatedFailed("无法修改其它用户问卷");
         if (surveyService.isTemplate(surveyId))
             return Result.validatedFailed("无法修改模板");
 
@@ -136,7 +136,7 @@ public class SurveyController {
     public Result get(@PathVariable Integer surveyId) {
         if (!userService.isLoginId(surveyService.getUserId(surveyId))
             && !surveyService.getStatus(surveyId).equals(SurveyStatusEnum.CARRYOUT.getName()))
-            return Result.unauthorized("无法获取其它用户的非进行中问卷");
+            return Result.validatedFailed("无法获取其它用户的非进行中问卷");
 
         Survey survey = surveyService.get(surveyId);
         if (!userService.isLoginId(surveyService.getUserId(surveyId))) {
@@ -151,7 +151,7 @@ public class SurveyController {
     @GetMapping("/user/{userId}/{surveyId}")
     public Result getByUser(@PathVariable Integer userId, @PathVariable Integer surveyId) {
         if (!userService.isLoginId(userId))
-            return Result.unauthorized("无法获取其它用户的问卷");
+            return Result.validatedFailed("无法获取其它用户的问卷");
 
         return Result.successData(surveyService.getByUser(userId, surveyId));
     }
@@ -160,7 +160,7 @@ public class SurveyController {
     @GetMapping("/user/{userId}")
     public Result getAllByUser(@PathVariable Integer userId) {
         if (!userService.isLoginId(userId))
-            return Result.unauthorized("无法获取其它用户的问卷");
+            return Result.validatedFailed("无法获取其它用户的问卷");
 
         return Result.successData(surveyService.getAllByUser(userId));
     }

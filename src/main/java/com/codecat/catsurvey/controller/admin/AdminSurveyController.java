@@ -52,7 +52,7 @@ public class AdminSurveyController {
     @DeleteMapping("/{surveyId}")
     public Result del(@PathVariable Integer surveyId) {
         if (surveyService.isTemplate(surveyId))
-            return Result.validatedFailed("无法删除模板, 权限不足");
+            return Result.validatedFailed("无法删除模板");
 
         surveyService.del(surveyId);
         return Result.success();
