@@ -139,7 +139,7 @@ public class SurveyService {
     }
 
     public List<Survey> getAll() {
-        return surveyRepository.findAll();
+        return surveyRepository.findAll(Sort.by(Sort.Direction.DESC, "createDate"));
     }
 
     public List<Survey> getAllByUser(Integer userId) {
