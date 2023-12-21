@@ -3,6 +3,7 @@ package com.codecat.catsurvey.service;
 import cn.dev33.satoken.stp.SaTokenInfo;
 import cn.dev33.satoken.stp.StpUtil;
 import com.alibaba.fastjson2.JSONObject;
+import com.codecat.catsurvey.common.Enum.role.RoleNameEnum;
 import com.codecat.catsurvey.exception.CatValidationException;
 import com.codecat.catsurvey.models.Permission;
 import com.codecat.catsurvey.models.Role;
@@ -294,7 +295,6 @@ public class UserService {
         if (userId == null || !userRepository.existsById(userId))
             throw new CatValidationException("用户不存在");
 
-
         userRoleRepository.deleteAllByUserId(userId);
 
         roleNameList.add("User");
@@ -345,6 +345,15 @@ public class UserService {
         List<String> roleList = getAllRoleName(userId);
         for (String roleName : roleList)
             if (roleName.contains("Admin"))
+                return true;
+
+        return false;
+    }
+
+    public boolean isSuperAdmin(Integer userId) {
+        List<String> roleList = getAllRoleName(userId);
+        for (String roleName : roleList)
+            if (roleName.equals(RoleNameEnum.SUPER_ADMIN.getName()))
                 return true;
 
         return false;
