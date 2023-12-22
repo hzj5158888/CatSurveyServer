@@ -66,9 +66,7 @@ public class TemplateService {
         newSurvey.setUserId(null);
         newSurvey.setStatus(SurveyStatusEnum.DRAFT.getName());
 
-        template.setSurveyId(null);
-        template.setSurvey(newSurvey);
-        return template;
+        return new Template(template.getId(),null, template.getCreateDate(), newSurvey);
     }
 
     public List<Template> filter(List<Template> templateList) {
@@ -76,8 +74,9 @@ public class TemplateService {
             return null;
 
         List<Template> ans = new ArrayList<>();
-        for (Template template : templateList)
+        for (Template template : templateList) {
             ans.add(filter(template));
+        }
 
         return ans;
     }

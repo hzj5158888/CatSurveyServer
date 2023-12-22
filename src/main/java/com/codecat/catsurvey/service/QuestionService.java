@@ -54,6 +54,8 @@ public class QuestionService {
 
         List<Option> optionList = new ArrayList<>(question.getOptionList());
         question.setId(null);
+        question.setOptionList(null);
+        question.setAnswerDetailList(null);
         questionRepository.saveAndFlush(question);
         setIOrder(question.getId(), question.getIOrder());
         if (!question.getOptionList().isEmpty())

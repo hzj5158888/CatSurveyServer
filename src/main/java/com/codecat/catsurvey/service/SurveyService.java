@@ -50,6 +50,8 @@ public class SurveyService {
 
         survey.setId(null);
         List<Question> questions = new ArrayList<>(survey.getQuestionList());
+        survey.setQuestionList(null);
+        survey.setResponseList(null);
         surveyRepository.saveAndFlush(survey);
         if (!questions.isEmpty())
             questionService.addBySurvey(survey.getId(), questions);
