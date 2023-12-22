@@ -34,14 +34,14 @@ public class AdminRoleController {
         if (!userService.existsById(userId))
             return Result.validatedFailed("用户不存在");
         if (userService.isSuperAdmin(userId))
-            return Result.validatedFailed("无法添加超级管理员的角色");
+            return Result.forbidden("无法添加超级管理员的角色");
         if (!(roleNameObj.get("roleNameList") instanceof List<?>))
             return Result.validatedFailed("类型错误或数据为空");
 
         List<String> roleNameList = (List<String>) roleNameObj.get("roleNameList");
         for (String roleName : roleNameList) {
             if (RoleNameEnum.SUPER_ADMIN.getName().equals(roleName))
-                return Result.validatedFailed("无法将超级管理员角色添加给此用户");
+                return Result.forbidden("无法将超级管理员角色添加给此用户");
         }
 
         userService.addRoleAll(userId, roleNameList);
@@ -54,7 +54,7 @@ public class AdminRoleController {
         if (!userService.existsById(userId))
             return Result.validatedFailed("用户不存在");
         if (userService.isSuperAdmin(userId))
-            return Result.validatedFailed("无法删除超级管理员的角色");
+            return Result.forbidden("无法删除超级管理员的角色");
         if (!(roleNameObj.get("roleNameList") instanceof List<?>))
             return Result.validatedFailed("类型错误或数据为空");
 
@@ -69,14 +69,14 @@ public class AdminRoleController {
         if (!userService.existsById(userId))
             return Result.validatedFailed("用户不存在");
         if (userService.isSuperAdmin(userId))
-            return Result.validatedFailed("无法设置超级管理员的角色");
+            return Result.forbidden("无法设置超级管理员的角色");
         if (!(roleNameObj.get("roleNameList") instanceof List<?>))
             return Result.validatedFailed("类型错误或数据为空");
 
         List<String> roleNameList = (List<String>) roleNameObj.get("roleNameList");
         for (String roleName : roleNameList) {
             if (RoleNameEnum.SUPER_ADMIN.getName().equals(roleName))
-                return Result.validatedFailed("无法将该用户设置为超级管理员");
+                return Result.forbidden("无法将该用户设置为超级管理员");
         }
 
         userService.setRoleAll(userId, roleNameList);

@@ -2,6 +2,7 @@ package com.codecat.catsurvey.service;
 
 import com.codecat.catsurvey.common.Enum.question.QuestionTypeEnum;
 import com.codecat.catsurvey.exception.CatAuthorizedException;
+import com.codecat.catsurvey.exception.CatForbiddenException;
 import com.codecat.catsurvey.exception.CatValidationException;
 import com.codecat.catsurvey.models.Option;
 import com.codecat.catsurvey.models.Question;
@@ -219,7 +220,7 @@ public class OptionService {
         );
 
         if (!userService.isLoginId(survey.getUserId()))
-            throw new CatAuthorizedException("无法读取或修改其它用户的选项");
+            throw new CatForbiddenException("无法读取或修改其它用户的选项");
     }
 
     @Transactional

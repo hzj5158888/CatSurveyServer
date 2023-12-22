@@ -28,12 +28,12 @@ public class LoginController {
         String userName = (String) loginInfo.get("userName");
         String password = (String) loginInfo.get("password");
         if (userName == null || password == null)
-            return Result.failedMsg("用户名或密码不能为空");
+            return Result.validatedFailed("用户名或密码不能为空");
 
         password = MD5Util.getMD5(password);
         User user = loginService.login(userName, password);
         if (user == null || !userName.equals(user.getUserName()) || !password.equals(user.getPassword()))
-            return Result.validatedFailed("用户名或密码错误");
+            return Result.forbidden("用户名或密码错误");
 
         // 登陆成功,发放token SaToken
         StpUtil.login(user.getId());

@@ -1,6 +1,7 @@
 package com.codecat.catsurvey.service;
 
 import com.codecat.catsurvey.exception.CatAuthorizedException;
+import com.codecat.catsurvey.exception.CatForbiddenException;
 import com.codecat.catsurvey.exception.CatValidationException;
 import com.codecat.catsurvey.models.Option;
 import com.codecat.catsurvey.models.Question;
@@ -236,7 +237,7 @@ public class QuestionService {
         );
 
         if (!userService.isLoginId(survey.getUserId()))
-            throw new CatAuthorizedException("无法操作其它用户的问题");
+            throw new CatForbiddenException("无法操作其它用户的问题");
     }
 
     public void setIOrder(Integer questionId, Integer iOrder) {

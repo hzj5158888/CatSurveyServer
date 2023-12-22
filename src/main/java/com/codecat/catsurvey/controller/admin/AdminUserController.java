@@ -37,9 +37,9 @@ public class AdminUserController {
         if (userService.isAdmin(userId)) {
             List<String> loginRoleList = userService.getAllRoleName(userService.getLoginId());
             if (!loginRoleList.contains(RoleNameEnum.SUPER_ADMIN.getName()))
-                return Result.validatedFailed("非超级管理员无法删除其它管理员");
+                return Result.forbidden("非超级管理员无法删除其它管理员");
             if (roleList.contains(RoleNameEnum.SUPER_ADMIN.getName()))
-                return Result.validatedFailed("无法删除其它超级管理员");
+                return Result.forbidden("无法删除其它超级管理员");
         }
 
         userService.del(userId);
@@ -52,9 +52,9 @@ public class AdminUserController {
         if (userService.isAdmin(userId) && !userService.isLoginId(userId)) {
             List<String> loginRoleList = userService.getAllRoleName(userService.getLoginId());
             if (!loginRoleList.contains(RoleNameEnum.SUPER_ADMIN.getName()))
-                return Result.validatedFailed("非超级管理员无法修改其它管理员");
+                return Result.forbidden("非超级管理员无法修改其它管理员");
             if (roleList.contains(RoleNameEnum.SUPER_ADMIN.getName()))
-                return Result.validatedFailed("无法修改其它超级管理员");
+                return Result.forbidden("无法修改其它超级管理员");
         }
 
         userService.modify(userId, user);

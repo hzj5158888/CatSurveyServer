@@ -5,6 +5,7 @@ import com.codecat.catsurvey.common.Enum.question.QuestionTypeEnum;
 import com.codecat.catsurvey.common.Enum.survey.SurveyStatusEnum;
 import com.codecat.catsurvey.common.valid.group.validationTime;
 import com.codecat.catsurvey.exception.CatAuthorizedException;
+import com.codecat.catsurvey.exception.CatForbiddenException;
 import com.codecat.catsurvey.exception.CatValidationException;
 import com.codecat.catsurvey.models.*;
 import com.codecat.catsurvey.repository.*;
@@ -164,6 +165,6 @@ public class AnswerDetailService {
                 new CatValidationException("问卷不存在")
         );
         if (!userService.isLoginId(survey.getUserId()))
-            throw new CatValidationException("无法操作其他人的答案");
+            throw new CatForbiddenException("无法操作其他人的答案");
     }
 }

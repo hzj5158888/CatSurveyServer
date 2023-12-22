@@ -43,7 +43,7 @@ public class UserController {
 
         user.setPassword(MD5Util.getMD5(user.getPassword())); // 密码加密
         if (userService.existsByUserName(user.getUserName())) //查询用户是否存在
-            return Result.failedMsg("用户已经存在");
+            return Result.validatedFailed("用户已经存在");
 
         userService.add(user);
         if (user.getId() == null)
@@ -89,7 +89,7 @@ public class UserController {
         User curUser = userService.getById(userService.getLoginId()); // 查询当前用户
 
         if (!curUser.getPassword().equals(MD5Util.getMD5(userPassword.getOldPassword())))
-            return Result.unauthorized("原密码错误");
+            return Result.forbidden("原密码错误");
         if (userPassword.getPassword() == null)
             return Result.validatedFailed("密码不能为空");
 
@@ -104,14 +104,14 @@ public class UserController {
     @PutMapping("/{userId}")
     public Result modify(@PathVariable Integer userId, @RequestBody JSONObject user) {
         if (!userService.isLoginId(userId))
-            return Result.validatedFailed("无法修改其它用户的信息");
+            return Result.forbidden("无法修改其它用户的信息");
 
         if (user.get("password") != null) {
             String oldPassword = (String) user.get("oldPassword");
             if (oldPassword == null)
                 return Result.validatedFailed("原密码为空");
             if (!userService.getPassword(userId).equals(MD5Util.getMD5(oldPassword)))
-                return Result.validatedFailed("原密码错误");
+                return Result.forbidden("原密码错误");
         }
 
         userService.modify(userId, user);
