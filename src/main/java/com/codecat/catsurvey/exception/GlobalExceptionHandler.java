@@ -78,17 +78,22 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ValidationException.class)
-    public Result handleValidationException(ValidationException e) {
+    public Result handleCatValidationException(ValidationException e) {
         return Result.validatedFailed(e.getMessage());
     }
 
     @ExceptionHandler(CatAuthorizedException.class)
-    public Result handleAuthorizedException(CatAuthorizedException e) {
-        return Result.validatedFailed(e.getMessage());
+    public Result handleCatAuthorizedException(CatAuthorizedException e) {
+        return Result.unauthorized(e.getMessage());
+    }
+
+    @ExceptionHandler(CatForbiddenException.class)
+    public Result handleCatForbiddenException(CatForbiddenException e) {
+        return Result.forbidden(e.getMessage());
     }
 
     @ExceptionHandler(NotPermissionException.class)
-    public Result handleNotPermissionException(NotPermissionException e) { return Result.validatedFailed(e.getMessage()); }
+    public Result handleNotPermissionException(NotPermissionException e) { return Result.forbidden(e.getMessage()); }
 
     @ExceptionHandler(NotLoginException.class)
     public Result handleNotLoginException(NotLoginException e) {
@@ -97,6 +102,6 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(NotRoleException.class)
     public Result handleNotRoleException(NotRoleException e) {
-        return Result.validatedFailed(e.getMessage());
+        return Result.forbidden(e.getMessage());
     }
 }
