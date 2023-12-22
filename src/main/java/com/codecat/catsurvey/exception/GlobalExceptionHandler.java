@@ -92,7 +92,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(NotLoginException.class)
     public Result handleNotLoginException(NotLoginException e) {
-        return Result.unauthorized(e.getMessage());
+        return Result.unauthorized("NotLogin");
     }
 
     @ExceptionHandler(NotRoleException.class)
