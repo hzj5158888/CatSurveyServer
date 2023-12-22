@@ -10,7 +10,8 @@ import lombok.NoArgsConstructor;
 public enum SurveyStatusEnum {
     DRAFT("草稿"),
     CARRYOUT("进行中"),
-    CLOSED("已结束");
+    CLOSED("已结束"),
+    TEMPLATE("模板");
 
     private String name;
 }

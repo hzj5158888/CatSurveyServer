@@ -1,6 +1,7 @@
 package com.codecat.catsurvey.models;
 
 import com.alibaba.fastjson2.annotation.JSONField;
+import com.codecat.catsurvey.common.Enum.survey.SurveyStatusEnum;
 import com.codecat.catsurvey.common.valid.function.survey.SurveyStatusExists;
 import com.codecat.catsurvey.common.valid.function.user.UserIdExists;
 import com.codecat.catsurvey.common.valid.group.validationTime;
@@ -56,7 +57,7 @@ public class Survey {
     @NotBlank(message = "状态不能为空")
     @SurveyStatusExists(message = "status非法")
     @Column(name = "status", nullable = false, length = 20)
-    private String status;
+    private String status; // 默认为草稿
 
     @ToString.Exclude
     @JSONField(serialize = false)

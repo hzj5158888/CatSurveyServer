@@ -42,10 +42,11 @@ public class SurveyController {
 
     @PostMapping("")
     public Result add(@RequestBody @Validated(validationTime.FullAdd.class) Survey survey) {
-        if (survey.getUserId() == null)
-            survey.setUserId(userService.getLoginId());
+        survey.setUserId(userService.getLoginId());
         if (!userService.isLoginId(survey.getUserId()))
             return Result.forbidden("无法添加到其它用户");
+        if (SurveyStatusEnum.TEMPLATE.getName().equals(survey.getStatus()))
+            return Result.forbidden("问卷状态不得为模板");
 
         surveyService.add(survey);
         return Result.successData(survey.getId());
@@ -115,6 +116,8 @@ public class SurveyController {
             return Result.forbidden("无法修改其它用户问卷");
         if (surveyService.isTemplate(surveyId))
             return Result.validatedFailed("无法修改模板");
+        if (SurveyStatusEnum.TEMPLATE.getName().equals(newSurvey.getStatus()))
+            return Result.forbidden("无法将状态修改为模板");
 
         surveyService.modify(surveyId, newSurvey);
         return Result.success();

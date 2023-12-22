@@ -64,6 +64,7 @@ public class TemplateService {
         newSurvey.setResponseList(new ArrayList<>());
         newSurvey.setId(null);
         newSurvey.setUserId(null);
+        newSurvey.setStatus(SurveyStatusEnum.DRAFT.getName());
 
         template.setSurveyId(null);
         template.setSurvey(newSurvey);
@@ -91,7 +92,7 @@ public class TemplateService {
             throw new CatValidationException("问卷不能为空");
 
         survey.setId(null);
-        survey.setStatus(SurveyStatusEnum.DRAFT.getName()); // 草稿
+        survey.setStatus(SurveyStatusEnum.TEMPLATE.getName()); // 草稿
         survey.setUserId(userService.getLoginId());
         surveyService.add(survey);
 
