@@ -57,7 +57,7 @@ public class Survey {
     @NotBlank(message = "状态不能为空")
     @SurveyStatusExists(message = "status非法")
     @Column(name = "status", nullable = false, length = 20)
-    private String status; // 默认为草稿
+    private String status;
 
     @ToString.Exclude
     @JSONField(serialize = false)
