@@ -36,9 +36,11 @@ public class Result {
 
     public static Result validatedFailed(String message) { return new Result(400, message, null); }
 
-    public static Result noFound(String message) { return new Result(404, message, null); }
-
     public static Result unauthorized(String message) { return new Result(401, message, null); }
+
+    public static Result forbidden(String message) { return new Result(403, message, null); }
+
+    public static Result noFound(String message) { return new Result(404, message, null); }
 
     public static Result success() {
         return new Result(200, "success", null);
@@ -51,6 +53,8 @@ public class Result {
     public static Result validatedFailed() { return new Result(400, "validatedFailed", null); }
 
     public static Result unauthorized() { return new Result(401, "unauthorized", null); }
+
+    public static Result forbidden() { return new Result(403, "forbidden", null); }
 
     public static Result noFound() { return new Result(404, "noFound", null); }
 }
