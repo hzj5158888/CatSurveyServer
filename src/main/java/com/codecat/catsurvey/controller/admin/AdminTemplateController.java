@@ -24,7 +24,7 @@ public class AdminTemplateController {
     @PostMapping("")
     public Result add(@RequestBody @Validated({validationTime.FullAdd.class}) Template template) {
         templateService.add(template);
-        return Result.success();
+        return Result.successData(template.getId());
     }
 
     @PutMapping("/{templateId}")
