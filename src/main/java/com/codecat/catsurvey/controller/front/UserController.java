@@ -32,9 +32,6 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @Autowired
-    private TemplateService templateService;
-
     @SaIgnore
     @PostMapping("")
     public Result add(@RequestBody @Validated(validationTime.FullAdd.class) User user) {
@@ -131,13 +128,6 @@ public class UserController {
         userMap.put("permission", userService.getAllPermission(user.getId()));
 
         return Result.successData(userMap);
-    }
-
-    @GetMapping("/template")
-    public Result getAllTemplate() {
-        return Result.successData(
-                templateService.filter(templateService.getAll())
-        );
     }
 
     @RequestMapping(value = {"/{userId}/survey", "/{userId}/survey/**"})

@@ -10,6 +10,7 @@ import com.codecat.catsurvey.models.Question;
 import com.codecat.catsurvey.models.Survey;
 import com.codecat.catsurvey.repository.SurveyRepository;
 import com.codecat.catsurvey.repository.UserRepository;
+import com.codecat.catsurvey.service.TemplateService;
 import com.codecat.catsurvey.utils.Result;
 import com.codecat.catsurvey.utils.Util;
 import com.codecat.catsurvey.common.valid.group.validationTime;
@@ -39,6 +40,9 @@ public class SurveyController {
 
     @Autowired
     private SurveyService surveyService;
+
+    @Autowired
+    private TemplateService templateService;
 
     @PostMapping("")
     public Result add(@RequestBody @Validated(validationTime.FullAdd.class) Survey survey) {
@@ -173,6 +177,13 @@ public class SurveyController {
     public Result getAllByLoginUser() {
         return Result.successData(
                 surveyService.getAllByUser(userService.getLoginId())
+        );
+    }
+
+    @GetMapping("/template")
+    public Result getAllTemplate() {
+        return Result.successData(
+                templateService.filter(templateService.getAll())
         );
     }
 
