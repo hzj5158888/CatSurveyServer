@@ -14,7 +14,7 @@ public enum RoleNameEnum {
     TEMPLATE_ADMIN("TemplateAdmin", "模板管理员"),
     SURVEY_ADMIN("SurveyAdmin", "问卷管理员"),
     CUSTOMER_ADMIN("ServiceAdmin", "客服管理员"),
-    DATA_ANALYSE("DataAnalyse", "统计分析员");
+    DATA_ANALYSE("DataAnalysis", "统计分析员");
 
     private String name;
     private String chnName;
