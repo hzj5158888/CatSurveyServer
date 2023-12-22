@@ -119,7 +119,7 @@ public class SurveyController {
         if (!userService.isLoginId(surveyService.getUserId(surveyId)))
             return Result.forbidden("无法修改其它用户问卷");
         if (surveyService.isTemplate(surveyId))
-            return Result.validatedFailed("无法修改模板");
+            return Result.forbidden("无法修改模板");
         if (SurveyStatusEnum.TEMPLATE.getName().equals(newSurvey.getStatus()))
             return Result.forbidden("无法将状态修改为模板");
 

@@ -58,7 +58,7 @@ public class QuestionService {
         question.setAnswerDetailList(null);
         questionRepository.saveAndFlush(question);
         setIOrder(question.getId(), question.getIOrder());
-        if (!question.getOptionList().isEmpty())
+        if (!optionList.isEmpty())
             optionService.setByQuestion(question.getId(), optionList);
     }
 

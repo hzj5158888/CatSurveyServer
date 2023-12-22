@@ -62,11 +62,10 @@ public class TemplateService {
         Survey newSurvey = Util.clone(survey, Survey.class);
         newSurvey.setQuestionList(questionRes);
         newSurvey.setResponseList(new ArrayList<>());
-        newSurvey.setId(null);
         newSurvey.setUserId(null);
         newSurvey.setStatus(SurveyStatusEnum.DRAFT.getName());
 
-        return new Template(template.getId(),null, template.getCreateDate(), newSurvey);
+        return new Template(template.getId(), template.getSurveyId(), template.getCreateDate(), newSurvey);
     }
 
     public List<Template> filter(List<Template> templateList) {
