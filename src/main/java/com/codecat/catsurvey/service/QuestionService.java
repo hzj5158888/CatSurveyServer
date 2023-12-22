@@ -159,21 +159,17 @@ public class QuestionService {
                 new CatValidationException("问题不存在")
         );
 
-        Set<String> notAllow = new HashSet<>() {{
-            add("surveyId");
-            add("survey");
-        }};
         Set<String> continueItem = new HashSet<>() {{
             add("id");
             add("optionList");
+            add("surveyId");
+            add("survey");
         }};
         Map<String, Object> questionMap = Util.objectToMap(question);
         Map<String, Object> newQuestionMap = Util.objectToMap(newQuestion);
         for (Map.Entry<String, Object> entry : newQuestionMap.entrySet()) {
             if (entry.getValue() == null || continueItem.contains(entry.getKey()))
                 continue;
-            if (notAllow.contains(entry.getKey()))
-                throw new CatValidationException("问题信息修改失败, 属性" + entry.getKey() + "为只读");
 
             questionMap.put(entry.getKey(), entry.getValue());
         }

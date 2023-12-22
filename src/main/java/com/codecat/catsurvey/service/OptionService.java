@@ -117,20 +117,16 @@ public class OptionService {
                 new CatValidationException("选项不存在")
         );
 
-        Set<String> notAllow = new HashSet<>(){{
-            add("questionId");
-            add("question");
-        }};
         Set<String> continueItem = new HashSet<>() {{
             add("id");
+            add("questionId");
+            add("question");
         }};
         Map<String, Object> optionMap = Util.objectToMap(option);
         Map<String, Object> newOptionMap = Util.objectToMap(newOption);
         for (Map.Entry<String, Object> entry : newOptionMap.entrySet()) {
             if (entry.getValue() == null || continueItem.contains(entry.getKey()))
                 continue;
-            if (notAllow.contains(entry.getKey()))
-                throw new CatValidationException("修改失败, 属性" + entry.getKey() + "为只读");
 
             optionMap.put(entry.getKey(), entry.getValue());
         }
