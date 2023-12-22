@@ -121,4 +121,8 @@ public class ResponseService {
     public boolean existsByIdAndSurveyId(Integer responseId, Integer surveyId) {
         return responseRepository.existsByIdAndSurveyId(responseId, surveyId);
     }
+
+    public List<Response> getAll() {
+        return responseRepository.findAll();
+    }
 }
